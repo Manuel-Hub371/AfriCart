@@ -153,14 +153,14 @@ export function Navbar() {
                     My Profile
                   </Link>
                   <Link
-                    href="/orders"
+                    href="/profile/orders"
                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     <ShoppingCart className="h-4 w-4" />
                     My Orders
                   </Link>
                   <Link
-                    href="/wishlist"
+                    href="/profile/wishlist"
                     className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
                   >
                     <Bell className="h-4 w-4" />
