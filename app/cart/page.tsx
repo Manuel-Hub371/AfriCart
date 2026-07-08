@@ -197,13 +197,15 @@ export default function CartPage() {
 
           {/* Order Summary */}
           <div>
-            <CartSummary
-              subtotal={subtotal}
-              shipping={shipping}
-              discount={discount}
-              tax={tax}
-              total={total}
-            />
+            <div className="lg:sticky lg:top-24">
+              <CartSummary
+                subtotal={subtotal}
+                shipping={shipping}
+                discount={discount}
+                tax={tax}
+                total={total}
+              />
+            </div>
           </div>
         </div>
 
@@ -221,10 +223,12 @@ export default function CartPage() {
             ${total.toFixed(2)}
           </span>
         </div>
-        <Button size="lg" className="w-full gap-2">
-          <ShoppingBag className="h-5 w-5" />
-          Proceed to Checkout
-        </Button>
+        <Link href="/checkout">
+          <Button size="lg" className="w-full gap-2">
+            <ShoppingBag className="h-5 w-5" />
+            Proceed to Checkout
+          </Button>
+        </Link>
       </div>
 
       {/* Add padding for mobile sticky bar */}

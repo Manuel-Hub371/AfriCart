@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Tag } from "lucide-react";
+import Link from "next/link";
 
 interface CartSummaryProps {
   subtotal: number;
@@ -66,14 +67,18 @@ export function CartSummary({
         </div>
       </div>
 
-      <Button size="lg" className="w-full gap-2 mb-3">
-        <ShoppingBag className="h-5 w-5" />
-        Proceed to Checkout
-      </Button>
+      <Link href="/checkout">
+        <Button size="lg" className="w-full gap-2 mb-3">
+          <ShoppingBag className="h-5 w-5" />
+          Proceed to Checkout
+        </Button>
+      </Link>
 
-      <Button size="lg" variant="outline" className="w-full">
-        Continue Shopping
-      </Button>
+      <Link href="/products">
+        <Button size="lg" variant="outline" className="w-full">
+          Continue Shopping
+        </Button>
+      </Link>
 
       {/* Savings Badge */}
       {discount > 0 && (
