@@ -1,3 +1,5 @@
+"use client";
+
 import { ProductCard } from "./product-card";
 
 // Sample product data

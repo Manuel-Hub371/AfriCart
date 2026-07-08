@@ -1,3 +1,5 @@
+"use client";
+
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +19,6 @@ interface ProductCardProps {
   image: string;
   inStock?: boolean;
   images?: number;
-  onQuickView?: () => void;
 }
 
 export function ProductCard({
@@ -33,8 +34,24 @@ export function ProductCard({
   image,
   inStock = true,
   images = 1,
-  onQuickView,
 }: ProductCardProps) {
+  const handleQuickView = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Quick view functionality can be added here
+    console.log("Quick view for product:", id);
+  };
+
+  const handleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Wishlist functionality can be added here
+    console.log("Add to wishlist:", id);
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    // Add to cart functionality can be added here
+    console.log("Add to cart:", id);
+  };
   return (
     <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300">
       <Link href={`/product/${id}`}>
@@ -61,14 +78,14 @@ export function ProductCard({
 
           {/* Action Buttons */}
           <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button className="p-2 bg-white rounded-full shadow-md hover:bg-primary hover:text-white transition-colors">
+            <button 
+              onClick={handleWishlist}
+              className="p-2 bg-white rounded-full shadow-md hover:bg-primary hover:text-white transition-colors"
+            >
               <Heart className="h-4 w-4" />
             </button>
             <button 
-              onClick={(e) => {
-                e.preventDefault();
-                onQuickView?.();
-              }}
+              onClick={handleQuickView}
               className="p-2 bg-white rounded-full shadow-md hover:bg-primary hover:text-white transition-colors"
             >
               <Eye className="h-4 w-4" />
@@ -112,7 +129,11 @@ export function ProductCard({
         </div>
 
         {inStock ? (
-          <Button className="w-full gap-2" size="sm">
+          <Button 
+            className="w-full gap-2" 
+            size="sm"
+            onClick={handleAddToCart}
+          >
             <ShoppingCart className="h-4 w-4" />
             Add to Cart
           </Button>
