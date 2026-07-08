@@ -23,14 +23,14 @@ interface DashboardSidebarProps {
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: ShoppingBag, label: "My Orders", href: "/dashboard/orders" },
-  { icon: Heart, label: "Wishlist", href: "/dashboard/wishlist" },
-  { icon: Star, label: "Reviews", href: "/dashboard/reviews" },
-  { icon: MapPin, label: "Addresses", href: "/dashboard/addresses" },
-  { icon: CreditCard, label: "Payment Methods", href: "/dashboard/payments" },
-  { icon: Bell, label: "Notifications", href: "/dashboard/notifications" },
-  { icon: Settings, label: "Settings", href: "/dashboard/settings" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/profile" },
+  { icon: ShoppingBag, label: "My Orders", href: "/profile/orders" },
+  { icon: Heart, label: "Wishlist", href: "/profile/wishlist" },
+  { icon: Star, label: "Reviews", href: "/profile/reviews" },
+  { icon: MapPin, label: "Addresses", href: "/profile/addresses" },
+  { icon: CreditCard, label: "Payment Methods", href: "/profile/payments" },
+  { icon: Bell, label: "Notifications", href: "/profile/notifications" },
+  { icon: Settings, label: "Settings", href: "/profile/settings" },
 ];
 
 export default function DashboardSidebar({

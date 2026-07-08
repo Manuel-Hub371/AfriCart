@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
-import DashboardHeader from "@/components/dashboard/dashboard-header";
+import DashboardSidebar from "@/components/profile/dashboard-sidebar";
+import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, Smartphone, Trash2, Plus } from "lucide-react";

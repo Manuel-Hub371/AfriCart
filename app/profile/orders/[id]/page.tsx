@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
-import DashboardHeader from "@/components/dashboard/dashboard-header";
+import DashboardSidebar from "@/components/profile/dashboard-sidebar";
+import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -109,7 +109,7 @@ export default function OrderDetailsPage() {
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <Link href="/dashboard/orders">
+          <Link href="/profile/orders">
             <Button variant="ghost" className="gap-2 mb-6">
               <ArrowLeft className="h-4 w-4" />
               Back to Orders

@@ -78,7 +78,7 @@ export default function OrderCard({ order }: OrderCardProps) {
       </div>
 
       <div className="flex gap-3">
-        <Link href={`/dashboard/orders/${order.orderId}`} className="flex-1">
+        <Link href={`/profile/orders/${order.orderId}`} className="flex-1">
           <Button variant="outline" className="w-full gap-2">
             <Eye className="h-4 w-4" />
             View Details

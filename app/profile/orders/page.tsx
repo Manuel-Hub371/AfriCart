@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
-import DashboardHeader from "@/components/dashboard/dashboard-header";
-import OrderCard from "@/components/dashboard/order-card";
+import DashboardSidebar from "@/components/profile/dashboard-sidebar";
+import DashboardHeader from "@/components/profile/dashboard-header";
+import OrderCard from "@/components/profile/order-card";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 

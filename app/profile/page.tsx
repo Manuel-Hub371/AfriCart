@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import DashboardSidebar from "@/components/dashboard/dashboard-sidebar";
-import DashboardHeader from "@/components/dashboard/dashboard-header";
-import StatCard from "@/components/dashboard/stat-card";
-import OrderCard from "@/components/dashboard/order-card";
+import DashboardSidebar from "@/components/profile/dashboard-sidebar";
+import DashboardHeader from "@/components/profile/dashboard-header";
+import StatCard from "@/components/profile/stat-card";
+import OrderCard from "@/components/profile/order-card";
 import { ShoppingBag, Heart, Star, Award, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -157,7 +157,7 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-bold text-gray-900">
                 Recent Orders
               </h2>
-              <Link href="/dashboard/orders">
+              <Link href="/profile/orders">
                 <Button variant="outline" className="gap-2">
                   View All
                   <ArrowRight className="h-4 w-4" />
