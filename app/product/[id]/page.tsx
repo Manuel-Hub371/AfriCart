@@ -148,7 +148,16 @@ What's in the box:
 
         {/* Seller & Shipping Cards */}
         <div className="grid lg:grid-cols-2 gap-6 mb-12">
-          <SellerCard {...product.seller} storeId={product.seller.id} />
+          <SellerCard
+            storeId={product.seller.id}
+            storeName={product.seller.name}
+            storeRating={product.seller.rating}
+            products={product.seller.products}
+            followers={product.seller.followers}
+            responseRate={product.seller.responseRate}
+            verified={product.seller.verified}
+            logo={product.seller.logo}
+          />
           <ShippingCard {...product.shipping} />
         </div>
 

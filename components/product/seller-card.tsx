@@ -33,7 +33,7 @@ export function SellerCard({
       <div className="flex items-start gap-4 mb-6">
         <Avatar className="h-16 w-16">
           <div className={`w-full h-full ${logo} flex items-center justify-center text-white text-2xl font-bold`}>
-            {storeName.charAt(0)}
+            {storeName?.charAt(0) || "S"}
           </div>
         </Avatar>
 
