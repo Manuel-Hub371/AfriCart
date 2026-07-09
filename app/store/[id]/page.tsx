@@ -23,7 +23,7 @@ export default function StorePage() {
 
   // Mock store data
   const storeData = {
-    storeName: "Tech World",
+    storeName: "EMG Virus Tech",
     verified: true,
     rating: 4.8,
     followers: 12500,
@@ -33,7 +33,7 @@ export default function StorePage() {
     logoColor: "bg-gradient-to-br from-blue-500 to-blue-600",
     description:
       "Tech World provides premium electronics and accessories from trusted brands. We specialize in the latest smartphones, laptops, cameras, and smart home devices. Our commitment is to deliver authentic products with exceptional customer service and competitive prices.",
-    location: "New York, USA",
+    location: "Agona Swedru, Ghana",
     businessType: "Authorized Retailer",
     yearsActive: 4,
   };

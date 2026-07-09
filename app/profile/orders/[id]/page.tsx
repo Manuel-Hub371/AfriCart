@@ -58,11 +58,11 @@ export default function OrderDetailsPage() {
       },
     ],
     shippingAddress: {
-      name: "John Doe",
+      name: "Manuel Darko",
       phone: "+233 XX XXX XXXX",
-      address: "123 Oxford Street, Osu",
-      city: "Accra",
-      region: "Greater Accra",
+      address: "Supi WY Eudful Street",
+      city: "Agona Swedru",
+      region: "Central Region",
       country: "Ghana",
     },
     timeline: [

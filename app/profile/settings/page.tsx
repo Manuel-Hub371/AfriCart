@@ -11,11 +11,11 @@ import { Camera, Save } from "lucide-react";
 export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+233 XX XXX XXXX",
+    fullName: "Manuel Darko",
+    email: "manueldarko@gmail.com",
+    phone: "+233 54 982 0094",
     language: "English",
-    currency: "USD",
+    currency: "GHS",
     emailNotifications: true,
     orderUpdates: true,
     promotions: false,
@@ -59,7 +59,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-4">
                 <Avatar className="h-24 w-24">
                   <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-3xl font-bold">
-                    JD
+                    MD
                   </div>
                 </Avatar>
                 <Button variant="outline" className="gap-2">

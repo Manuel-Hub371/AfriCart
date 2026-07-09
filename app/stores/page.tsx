@@ -30,7 +30,7 @@ export default function StoresPage() {
   const featuredStores = [
     {
       id: "1",
-      name: "Tech World",
+      name: "EMG Virus Tech",
       banner: "bg-gradient-to-r from-blue-100 to-blue-200",
       logo: "bg-gradient-to-br from-blue-500 to-blue-600",
       verified: true,
@@ -41,7 +41,7 @@ export default function StoresPage() {
     },
     {
       id: "2",
-      name: "Fashion House",
+      name: "Fashion Week",
       banner: "bg-gradient-to-r from-pink-100 to-pink-200",
       logo: "bg-gradient-to-br from-pink-500 to-pink-600",
       verified: true,
@@ -52,7 +52,7 @@ export default function StoresPage() {
     },
     {
       id: "3",
-      name: "Gadget Pro",
+      name: "SM Biggie Phones",
       banner: "bg-gradient-to-r from-purple-100 to-purple-200",
       logo: "bg-gradient-to-br from-purple-500 to-purple-600",
       verified: true,
@@ -63,7 +63,7 @@ export default function StoresPage() {
     },
     {
       id: "4",
-      name: "Home Comfort",
+      name: "Home Sweet Home",
       banner: "bg-gradient-to-r from-orange-100 to-orange-200",
       logo: "bg-gradient-to-br from-orange-500 to-orange-600",
       verified: true,

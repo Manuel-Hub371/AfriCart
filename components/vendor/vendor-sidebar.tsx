@@ -5,38 +5,45 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
+  Package,
   ShoppingBag,
-  Heart,
-  Star,
-  MapPin,
-  CreditCard,
-  Bell,
+  Users,
+  BarChart3,
+  Tag,
+  DollarSign,
+  Store,
+  Truck,
   Settings,
-  LogOut,
+  HelpCircle,
   X,
+  Boxes,
+  MessageSquare,
 } from "lucide-react";
-import { Avatar } from "@/components/ui/avatar";
 
-interface DashboardSidebarProps {
+interface VendorSidebarProps {
   isOpen?: boolean;
   onClose?: () => void;
 }
 
 const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/profile" },
-  { icon: ShoppingBag, label: "My Orders", href: "/profile/orders" },
-  { icon: Heart, label: "Wishlist", href: "/profile/wishlist" },
-  { icon: Star, label: "Reviews", href: "/profile/reviews" },
-  { icon: MapPin, label: "Addresses", href: "/profile/addresses" },
-  { icon: CreditCard, label: "Payment Methods", href: "/profile/payments" },
-  { icon: Bell, label: "Notifications", href: "/profile/notifications" },
-  { icon: Settings, label: "Settings", href: "/profile/settings" },
+  { icon: LayoutDashboard, label: "Dashboard", href: "/vendor" },
+  { icon: Package, label: "Products", href: "/vendor/products" },
+  { icon: ShoppingBag, label: "Orders", href: "/vendor/orders" },
+  { icon: Users, label: "Customers", href: "/vendor/customers" },
+  { icon: Boxes, label: "Inventory", href: "/vendor/inventory" },
+  { icon: MessageSquare, label: "Reviews", href: "/vendor/reviews" },
+  { icon: BarChart3, label: "Analytics", href: "/vendor/analytics" },
+  { icon: Tag, label: "Marketing", href: "/vendor/marketing" },
+  { icon: DollarSign, label: "Finance", href: "/vendor/finance" },
+  { icon: Truck, label: "Shipping", href: "/vendor/shipping" },
+  { icon: Store, label: "Store Settings", href: "/vendor/store" },
+  { icon: HelpCircle, label: "Support", href: "/vendor/support" },
 ];
 
-export default function DashboardSidebar({
+export default function VendorSidebar({
   isOpen = true,
   onClose,
-}: DashboardSidebarProps) {
+}: VendorSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -65,19 +72,17 @@ export default function DashboardSidebar({
           </button>
         )}
 
-        {/* Profile Section */}
+        {/* Logo */}
         <div className="p-6 border-b">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12">
-              <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-lg font-bold">
-                MD
-              </div>
-            </Avatar>
-            <div>
-              <h3 className="font-semibold text-gray-900">Manuel Darko</h3>
-              <p className="text-sm text-gray-600">manueldarko@gmail.com</p>
+          <Link href="/vendor" className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center">
+              <Store className="h-6 w-6 text-white" />
             </div>
-          </div>
+            <div>
+              <h2 className="font-bold text-gray-900">Tech World</h2>
+              <p className="text-xs text-gray-600">Vendor Dashboard</p>
+            </div>
+          </Link>
         </div>
 
         {/* Navigation */}
@@ -105,12 +110,19 @@ export default function DashboardSidebar({
           </ul>
         </nav>
 
-        {/* Logout */}
+        {/* Settings at bottom */}
         <div className="p-4 border-t">
-          <button className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 w-full transition-colors">
-            <LogOut className="h-5 w-5" />
-            <span>Logout</span>
-          </button>
+          <Link
+            href="/vendor/settings"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+              pathname === "/vendor/settings"
+                ? "bg-emerald-50 text-emerald-600 font-medium"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            <Settings className="h-5 w-5" />
+            <span>Settings</span>
+          </Link>
         </div>
       </aside>
     </>
