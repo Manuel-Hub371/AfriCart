@@ -112,7 +112,7 @@ export default function PaymentMethods({
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Card Holder Name
             </label>
-            <Input placeholder="John Doe" />
+            <Input placeholder="e.g. Manuel Darko" />
           </div>
           <label className="flex items-center gap-2 cursor-pointer">
             <input
