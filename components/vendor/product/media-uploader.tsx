@@ -20,7 +20,7 @@ export default function MediaUploader() {
     },
     {
       id: "2",
-      url: "bg-gradient-to-br from-purple-400 to-purple-500",
+      url: "bg-gradient-to-br from-green-400 to-green-500",
       isCover: false,
     },
   ]);

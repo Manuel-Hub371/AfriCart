@@ -40,8 +40,8 @@ export function StoreStats({
       icon: TrendingUp,
       value: positiveReviews,
       label: "Positive Reviews",
-      color: "text-purple-600",
-      bgColor: "bg-purple-50",
+      color: "text-green-600",
+      bgColor: "bg-green-50",
     },
   ];
 

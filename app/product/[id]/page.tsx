@@ -30,8 +30,8 @@ export default function ProductDetailsPage() {
       "bg-gradient-to-br from-blue-100 to-blue-200",
       "bg-gradient-to-br from-blue-200 to-blue-300",
       "bg-gradient-to-br from-blue-300 to-blue-400",
-      "bg-gradient-to-br from-blue-100 to-purple-200",
-      "bg-gradient-to-br from-purple-100 to-blue-200",
+      "bg-gradient-to-br from-blue-100 to-green-200",
+      "bg-gradient-to-br from-green-100 to-blue-200",
     ],
     variants: [
       {

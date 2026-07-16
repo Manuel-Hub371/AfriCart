@@ -18,7 +18,11 @@ import {
   X,
   Boxes,
   MessageSquare,
+  Mail,
+  Bell,
+  LogOut,
 } from "lucide-react";
+import { useAuth } from "@/lib/auth/context";
 
 interface VendorSidebarProps {
   isOpen?: boolean;
@@ -36,6 +40,8 @@ const menuItems = [
   { icon: Tag, label: "Marketing", href: "/vendor/marketing" },
   { icon: DollarSign, label: "Finance", href: "/vendor/finance" },
   { icon: Truck, label: "Shipping", href: "/vendor/shipping" },
+  { icon: Mail, label: "Messages", href: "/vendor/messages", badge: 5 },
+  { icon: Bell, label: "Notifications", href: "/vendor/notifications", badge: 12 },
   { icon: Store, label: "Store Settings", href: "/vendor/store" },
   { icon: HelpCircle, label: "Support", href: "/vendor/support" },
 ];
@@ -45,6 +51,18 @@ export default function VendorSidebar({
   onClose,
 }: VendorSidebarProps) {
   const pathname = usePathname();
+  const { logout, user } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+      setIsLoggingOut(false);
+    }
+  };
 
   return (
     <>
@@ -79,7 +97,9 @@ export default function VendorSidebar({
               <Store className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900">Tech World</h2>
+              <h2 className="font-bold text-gray-900">
+                {user?.storeName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "My Store"}
+              </h2>
               <p className="text-xs text-gray-600">Vendor Dashboard</p>
             </div>
           </Link>
@@ -95,14 +115,19 @@ export default function VendorSidebar({
                   <Link
                     href={item.href}
                     onClick={onClose}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors relative ${
                       isActive
                         ? "bg-emerald-50 text-emerald-600 font-medium"
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
                   >
                     <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.badge && item.badge > 0 && (
+                      <span className="min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
+                        {item.badge > 99 ? '99+' : item.badge}
+                      </span>
+                    )}
                   </Link>
                 </li>
               );
@@ -111,7 +136,7 @@ export default function VendorSidebar({
         </nav>
 
         {/* Settings at bottom */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-1">
           <Link
             href="/vendor/settings"
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
@@ -123,6 +148,15 @@ export default function VendorSidebar({
             <Settings className="h-5 w-5" />
             <span>Settings</span>
           </Link>
+          
+          <button
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+          </button>
         </div>
       </aside>
     </>

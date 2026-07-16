@@ -32,7 +32,7 @@ const products = [
     rating: 4.9,
     reviews: 412,
     price: 149.99,
-    image: "bg-gradient-to-br from-purple-100 to-purple-200",
+    image: "bg-gradient-to-br from-green-100 to-green-200",
   },
   {
     id: "4",
@@ -89,14 +89,19 @@ const products = [
 
 export function FeaturedProducts() {
   return (
-    <section className="py-16 bg-gray-50">
+    <section className="section-padding bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Featured Products
+        <div className="text-center mb-16">
+          <div className="inline-block mb-4">
+            <span className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+              ⭐ Trending Now
+            </span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+            Featured <span className="text-gradient">Products</span>
           </h2>
-          <p className="text-lg text-gray-600">
-            Discover our handpicked selection of amazing products
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Discover our handpicked selection of amazing products from verified sellers
           </p>
         </div>
 

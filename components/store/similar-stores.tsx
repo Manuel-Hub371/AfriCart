@@ -36,7 +36,7 @@ const similarStores = [
     category: "Beauty & Health",
     rating: 4.8,
     verified: false,
-    logoColor: "bg-gradient-to-br from-purple-500 to-purple-600",
+    logoColor: "bg-gradient-to-br from-green-500 to-green-600",
   },
 ];
 

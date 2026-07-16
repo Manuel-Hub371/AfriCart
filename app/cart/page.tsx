@@ -45,7 +45,7 @@ export default function CartPage() {
           id: "item-2",
           productId: "2",
           name: "Smart Watch with Fitness Tracker",
-          image: "bg-gradient-to-br from-purple-100 to-purple-200",
+          image: "bg-gradient-to-br from-green-100 to-green-200",
           price: 149.99,
           quantity: 2,
           maxQuantity: 5,

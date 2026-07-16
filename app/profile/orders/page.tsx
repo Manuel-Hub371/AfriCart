@@ -20,7 +20,7 @@ const allOrders = [
       },
       {
         name: "Smart Watch Pro",
-        image: "bg-gradient-to-br from-purple-400 to-purple-500",
+        image: "bg-gradient-to-br from-green-400 to-green-500",
         quantity: 1,
       },
     ],

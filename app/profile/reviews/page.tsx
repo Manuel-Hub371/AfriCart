@@ -20,7 +20,7 @@ const pendingReviews = [
     id: "2",
     productId: "p2",
     productName: "Smart Watch Pro",
-    productImage: "bg-gradient-to-br from-purple-400 to-purple-500",
+    productImage: "bg-gradient-to-br from-green-400 to-green-500",
     purchaseDate: "July 3, 2026",
     vendor: "Fashion Hub",
   },

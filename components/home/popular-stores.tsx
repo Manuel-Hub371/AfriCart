@@ -25,8 +25,8 @@ const stores = [
   {
     id: "3",
     name: "Gadget World",
-    logo: "bg-gradient-to-br from-purple-500 to-purple-600",
-    banner: "bg-gradient-to-r from-purple-100 to-purple-200",
+    logo: "bg-gradient-to-br from-green-500 to-green-600",
+    banner: "bg-gradient-to-r from-green-100 to-green-200",
     rating: 4.8,
     followers: "156K",
     products: 987,

@@ -22,7 +22,7 @@ const wishlistItems = [
   {
     id: "2",
     name: "Smart Watch Pro",
-    image: "bg-gradient-to-br from-purple-400 to-purple-500",
+    image: "bg-gradient-to-br from-green-400 to-green-500",
     price: 200,
     originalPrice: 250,
     rating: 4.6,

@@ -41,8 +41,8 @@ const stores = [
   {
     id: "4",
     name: "Beauty Plus",
-    banner: "bg-gradient-to-r from-purple-100 to-purple-200",
-    logo: "bg-gradient-to-br from-purple-500 to-purple-600",
+    banner: "bg-gradient-to-r from-green-100 to-green-200",
+    logo: "bg-gradient-to-br from-green-500 to-green-600",
     verified: false,
     rating: 4.6,
     products: 234,

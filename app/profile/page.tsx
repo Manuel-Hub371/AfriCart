@@ -23,7 +23,7 @@ const recentOrders = [
       },
       {
         name: "Smart Watch Pro",
-        image: "bg-gradient-to-br from-purple-400 to-purple-500",
+        image: "bg-gradient-to-br from-green-400 to-green-500",
         quantity: 1,
       },
     ],
@@ -78,7 +78,7 @@ const recommendedProducts = [
   {
     id: "3",
     name: "Phone Stand",
-    image: "bg-gradient-to-br from-purple-400 to-pink-400",
+    image: "bg-gradient-to-br from-green-400 to-pink-400",
     price: 19.99,
     rating: 4.6,
   },

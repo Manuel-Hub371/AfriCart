@@ -60,8 +60,8 @@ export function ShippingCard({
         </div>
 
         <div className="flex items-start gap-3">
-          <div className="p-2 bg-purple-50 rounded-lg">
-            <Shield className="h-5 w-5 text-purple-600" />
+          <div className="p-2 bg-green-50 rounded-lg">
+            <Shield className="h-5 w-5 text-green-600" />
           </div>
           <div className="flex-1">
             <h4 className="font-semibold text-gray-900 mb-1">

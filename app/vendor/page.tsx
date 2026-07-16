@@ -61,7 +61,7 @@ const lowStockProducts = [
 const statusColors: Record<string, string> = {
   Pending: "bg-yellow-100 text-yellow-700",
   Processing: "bg-blue-100 text-blue-700",
-  Shipped: "bg-purple-100 text-purple-700",
+  Shipped: "bg-green-100 text-green-700",
   Delivered: "bg-green-100 text-green-700",
 };
 
@@ -114,8 +114,8 @@ export default function VendorDashboardPage() {
               icon={Package}
               label="Products"
               value={156}
-              iconColor="text-purple-600"
-              iconBg="bg-purple-100"
+              iconColor="text-green-600"
+              iconBg="bg-green-100"
             />
             <DashboardCard
               icon={Users}
@@ -215,7 +215,7 @@ export default function VendorDashboardPage() {
                     <span className="text-sm text-gray-600">
                       Shipped Today
                     </span>
-                    <span className="text-lg font-bold text-purple-600">
+                    <span className="text-lg font-bold text-green-600">
                       15
                     </span>
                   </div>

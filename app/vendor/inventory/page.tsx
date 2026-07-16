@@ -3,62 +3,141 @@
 import { useState } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Filter, Download, Plus, Minus } from "lucide-react";
+import { InventoryStatistics } from "@/components/vendor/inventory-statistics";
+import { InventoryToolbar } from "@/components/vendor/inventory-toolbar";
+import { InventoryTable, InventoryItem } from "@/components/vendor/inventory-table";
+import { InventoryPagination } from "@/components/vendor/inventory-pagination";
+import { BulkInventoryActions } from "@/components/vendor/bulk-inventory-actions";
+import { InventoryEmptyState } from "@/components/vendor/inventory-empty-state";
+import { Plus } from "lucide-react";
+import type { InventoryStatus } from "@/components/vendor/inventory-status-badge";
 
-const inventory = [
-  {
-    id: "1",
-    name: "Premium Wireless Headphones",
-    sku: "WH-001",
-    stock: 45,
-    reserved: 5,
-    available: 40,
-    lowStockAlert: 10,
-    status: "In Stock",
-  },
-  {
-    id: "2",
-    name: "Smart Watch Pro",
-    sku: "SW-002",
-    stock: 28,
-    reserved: 3,
-    available: 25,
-    lowStockAlert: 10,
-    status: "In Stock",
-  },
-  {
-    id: "3",
-    name: "Wireless Mouse",
-    sku: "WM-003",
-    stock: 5,
-    reserved: 0,
-    available: 5,
-    lowStockAlert: 10,
-    status: "Low Stock",
-  },
-  {
-    id: "4",
-    name: "USB-C Cable",
-    sku: "UC-004",
-    stock: 0,
-    reserved: 0,
-    available: 0,
-    lowStockAlert: 10,
-    status: "Out of Stock",
-  },
-];
-
-const statusColors: Record<string, string> = {
-  "In Stock": "bg-green-100 text-green-700",
-  "Low Stock": "bg-yellow-100 text-yellow-700",
-  "Out of Stock": "bg-red-100 text-red-700",
-};
-
-export default function VendorInventoryPage() {
+export default function InventoryPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [sortBy, setSortBy] = useState("name-asc");
+
+  // Mock data - replace with actual API call
+  const mockInventory: InventoryItem[] = Array.from({ length: 100 }, (_, i) => {
+    const products = [
+      "Wireless Headphones",
+      "Smart Watch",
+      "Laptop Bag",
+      "USB-C Cable",
+      "Power Bank",
+      "Ceramic Mug",
+      "Yoga Mat",
+      "LED Lamp",
+      "Water Bottle",
+      "Phone Case",
+    ];
+    
+    const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"];
+    const warehouses = ["Main Warehouse", "East Warehouse", "West Warehouse"];
+    const variants = ["Black", "White", "Blue", "Red", ""];
+    
+    const availableStock = ((i * 13 + 7) % 200);
+    const reservedStock = ((i * 5 + 3) % 30);
+    const incomingStock = ((i * 7 + 11) % 100);
+    const reorderLevel = 20;
+    const unitPrice = ((i * 17 + 23) % 200) + 20;
+    
+    const getStatus = (): InventoryStatus => {
+      if (availableStock === 0) return "out-of-stock";
+      if (availableStock <= reorderLevel) return "low-stock";
+      if (availableStock > 150) return "overstocked";
+      if (incomingStock > 50) return "incoming";
+      return "in-stock";
+    };
+
+    return {
+      id: `inv-${i + 1}`,
+      productName: products[i % 10],
+      sku: `SKU-${String(10000 + i).padStart(5, "0")}`,
+      variant: variants[i % 5],
+      category: categories[i % 5],
+      warehouse: warehouses[i % 3],
+      availableStock,
+      reservedStock,
+      incomingStock,
+      reorderLevel,
+      inventoryValue: availableStock * unitPrice,
+      status: getStatus(),
+      lastUpdated: new Date(Date.now() - (i * 2 * 86400000)).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      image: `https://images.unsplash.com/photo-${1500000000000 + i * 1000}?w=100&h=100&fit=crop`,
+    };
+  });
+
+  const totalItems = mockInventory.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const currentItems = mockInventory.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(currentItems.map((i) => i.id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const handleClearSelection = () => {
+    setSelectedIds([]);
+  };
+
+  const handleBulkAction = (action: string) => {
+    console.log(`Bulk action: ${action} on ${selectedIds.length} items`);
+    setTimeout(() => {
+      setSelectedIds([]);
+    }, 1000);
+  };
+
+  const handleViewItem = (item: InventoryItem) => {
+    console.log("View item:", item);
+    // Open drawer with item details
+  };
+
+  const handleAddStock = () => {
+    console.log("Add stock...");
+  };
+
+  const handleExport = () => {
+    console.log("Exporting inventory...");
+  };
+
+  const handleImport = () => {
+    console.log("Import inventory...");
+  };
+
+  const handleAdjustment = () => {
+    console.log("Stock adjustment...");
+  };
+
+  const handleRefresh = () => {
+    console.log("Refreshing inventory...");
+  };
+
+  const handleAddProduct = () => {
+    console.log("Add product...");
+  };
+
+  const showEmptyState = false; // Change based on actual filter results
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -76,138 +155,92 @@ export default function VendorInventoryPage() {
           ]}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Inventory</h1>
-            <p className="text-gray-600">Manage your stock levels</p>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-white rounded-lg border p-4">
-              <p className="text-sm text-gray-600">Total Stock</p>
-              <p className="text-2xl font-bold text-gray-900">1,245</p>
-            </div>
-            <div className="bg-white rounded-lg border p-4">
-              <p className="text-sm text-gray-600">Low Stock Items</p>
-              <p className="text-2xl font-bold text-yellow-600">8</p>
-            </div>
-            <div className="bg-white rounded-lg border p-4">
-              <p className="text-sm text-gray-600">Out of Stock</p>
-              <p className="text-2xl font-bold text-red-600">6</p>
-            </div>
-            <div className="bg-white rounded-lg border p-4">
-              <p className="text-sm text-gray-600">Reserved</p>
-              <p className="text-2xl font-bold text-blue-600">42</p>
-            </div>
-          </div>
-
-          {/* Actions Bar */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-              <Input placeholder="Search inventory..." className="pl-10" />
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" className="gap-2">
-                <Filter className="h-4 w-4" />
-                Filter
-              </Button>
-              <Button variant="outline" className="gap-2">
-                <Download className="h-4 w-4" />
-                Export
-              </Button>
-            </div>
-          </div>
-
-          {/* Inventory Table */}
-          <div className="bg-white rounded-lg border overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                      Product
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                      SKU
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                      Stock
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                      Reserved
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                      Available
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                      Status
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {inventory.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b last:border-0 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-4 font-medium text-gray-900">
-                        {item.name}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
-                        {item.sku}
-                      </td>
-                      <td className="py-3 px-4 text-sm font-medium text-gray-900">
-                        {item.stock}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-gray-600">
-                        {item.reserved}
-                      </td>
-                      <td className="py-3 px-4 text-sm font-medium text-emerald-600">
-                        {item.available}
-                      </td>
-                      <td className="py-3 px-4">
-                        <Badge className={statusColors[item.status]}>
-                          {item.status}
-                        </Badge>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-2">
-                          <button className="p-2 hover:bg-green-50 rounded">
-                            <Plus className="h-4 w-4 text-green-600" />
-                          </button>
-                          <button className="p-2 hover:bg-red-50 rounded">
-                            <Minus className="h-4 w-4 text-red-600" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center justify-between px-4 py-3 border-t">
-              <p className="text-sm text-gray-600">
-                Showing 1 to {inventory.length} of 156 products
-              </p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm">
-                  Previous
-                </Button>
-                <Button variant="outline" size="sm">
-                  Next
+        <main className="flex-1 overflow-auto">
+          <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Inventory Management
+                </h1>
+                <p className="text-gray-600">
+                  Monitor stock levels, manage inventory, track movements, and prevent shortages
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  onClick={handleAddStock}
+                  className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Stock
                 </Button>
               </div>
             </div>
+
+            {/* Statistics */}
+            <InventoryStatistics />
+
+            {/* Toolbar */}
+            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+              <InventoryToolbar
+                onSearch={setSearchQuery}
+                onFilterChange={setFilters}
+                onAddStock={handleAddStock}
+                onExport={handleExport}
+                onImport={handleImport}
+                onAdjustment={handleAdjustment}
+                onRefresh={handleRefresh}
+                onSort={setSortBy}
+              />
+            </div>
+
+            {showEmptyState ? (
+              <InventoryEmptyState
+                onRefresh={handleRefresh}
+                onAddProduct={handleAddProduct}
+                onImport={handleImport}
+              />
+            ) : (
+              <>
+                {/* Inventory Table */}
+                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+                  <InventoryTable
+                    items={currentItems}
+                    selectedIds={selectedIds}
+                    onSelectAll={handleSelectAll}
+                    onSelect={handleSelect}
+                    onViewItem={handleViewItem}
+                    onSort={(column) => console.log("Sort by:", column)}
+                  />
+                </div>
+
+                {/* Pagination */}
+                <div className="bg-white rounded-xl border border-gray-200 px-6 py-4">
+                  <InventoryPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalItems}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={(items) => {
+                      setItemsPerPage(items);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+              </>
+            )}
           </div>
         </main>
       </div>
+
+      {/* Bulk Action Bar */}
+      <BulkInventoryActions
+        selectedCount={selectedIds.length}
+        onClearSelection={handleClearSelection}
+        onAction={handleBulkAction}
+      />
     </div>
   );
 }

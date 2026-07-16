@@ -25,7 +25,7 @@ const relatedProducts = [
     rating: 4.9,
     reviews: 412,
     price: 149.99,
-    image: "bg-gradient-to-br from-purple-100 to-purple-200",
+    image: "bg-gradient-to-br from-green-100 to-green-200",
     inStock: true,
     images: 5,
   },

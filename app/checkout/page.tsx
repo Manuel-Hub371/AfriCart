@@ -53,7 +53,7 @@ const vendorOrders = [
       {
         id: "1",
         name: "Premium Wireless Headphones",
-        image: "bg-gradient-to-br from-purple-400 to-pink-400",
+        image: "bg-gradient-to-br from-green-400 to-pink-400",
         variant: "Color: Black, Storage: 256GB",
         quantity: 1,
         price: 120,

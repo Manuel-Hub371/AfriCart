@@ -3,11 +3,42 @@
 import { useState } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
-import DashboardCard from "@/components/vendor/dashboard-card";
-import { DollarSign, ShoppingBag, Users, TrendingUp, Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DateRangePicker, DateRange } from "@/components/vendor/date-range-picker";
+import { AnalyticsKpiCard } from "@/components/vendor/analytics-kpi-card";
+import { RevenueChart } from "@/components/vendor/revenue-chart";
+import { SalesChart } from "@/components/vendor/sales-chart";
+import { CustomerChart } from "@/components/vendor/customer-chart";
+import { TrafficChart } from "@/components/vendor/traffic-chart";
+import { TopProductsTable } from "@/components/vendor/top-products-table";
+import { FinancialSummary } from "@/components/vendor/financial-summary";
+import { 
+  Download, 
+  RefreshCw, 
+  DollarSign, 
+  ShoppingCart, 
+  Package, 
+  TrendingUp,
+  Users,
+  Percent
+} from "lucide-react";
 
-export default function VendorAnalyticsPage() {
+export default function AnalyticsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dateRange, setDateRange] = useState<DateRange>("last-30-days");
+
+  // Mock sparkline data
+  const sparklineData = Array.from({ length: 30 }, (_, i) => ({
+    value: ((i * 13 + 45) % 100) + 50,
+  }));
+
+  const handleExport = () => {
+    console.log("Export analytics...");
+  };
+
+  const handleRefresh = () => {
+    console.log("Refresh data...");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -25,113 +56,137 @@ export default function VendorAnalyticsPage() {
           ]}
         />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
-            <p className="text-gray-600">Track your store performance</p>
-          </div>
-
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <DashboardCard
-              icon={DollarSign}
-              label="Total Revenue"
-              value="$45,230"
-              change={{ value: 12.5, type: "increase" }}
-              iconColor="text-emerald-600"
-              iconBg="bg-emerald-100"
-            />
-            <DashboardCard
-              icon={ShoppingBag}
-              label="Total Orders"
-              value={342}
-              change={{ value: 8.2, type: "increase" }}
-              iconColor="text-blue-600"
-              iconBg="bg-blue-100"
-            />
-            <DashboardCard
-              icon={Users}
-              label="Total Customers"
-              value={842}
-              change={{ value: 3.1, type: "increase" }}
-              iconColor="text-purple-600"
-              iconBg="bg-purple-100"
-            />
-            <DashboardCard
-              icon={Eye}
-              label="Store Visits"
-              value="12.5K"
-              change={{ value: 15.8, type: "increase" }}
-              iconColor="text-orange-600"
-              iconBg="bg-orange-100"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Revenue Chart Placeholder */}
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-xl font-semibold mb-6">Revenue Overview</h2>
-              <div className="h-64 bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-600">Chart will be displayed here</p>
+        <main className="flex-1 overflow-auto">
+          <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
+            {/* Page Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                  Analytics Dashboard
+                </h1>
+                <p className="text-gray-600">
+                  Track business performance, monitor trends, and make data-driven decisions
+                </p>
+              </div>
+              <div className="flex items-center gap-3">
+                <DateRangePicker value={dateRange} onChange={setDateRange} />
+                <Button
+                  variant="outline"
+                  onClick={handleRefresh}
+                  className="h-10 w-10 p-0 border-gray-200 hover:bg-gray-50"
+                >
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleExport}
+                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
               </div>
             </div>
 
-            {/* Orders Chart Placeholder */}
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-xl font-semibold mb-6">Orders by Day</h2>
-              <div className="h-64 bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg flex items-center justify-center">
-                <p className="text-gray-600">Chart will be displayed here</p>
-              </div>
+            {/* KPI Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <AnalyticsKpiCard
+                title="Total Revenue"
+                value="148K"
+                prefix="$"
+                previousValue={132000}
+                change={12.1}
+                icon={DollarSign}
+                trend="up"
+                sparklineData={sparklineData}
+              />
+              <AnalyticsKpiCard
+                title="Orders"
+                value={1847}
+                previousValue={1654}
+                change={11.7}
+                icon={ShoppingCart}
+                trend="up"
+                sparklineData={sparklineData}
+              />
+              <AnalyticsKpiCard
+                title="Units Sold"
+                value={8234}
+                previousValue={7456}
+                change={10.4}
+                icon={Package}
+                trend="up"
+                sparklineData={sparklineData}
+              />
+              <AnalyticsKpiCard
+                title="Avg Order Value"
+                value="80"
+                prefix="$"
+                previousValue={75}
+                change={6.7}
+                icon={TrendingUp}
+                trend="up"
+                sparklineData={sparklineData}
+              />
+              <AnalyticsKpiCard
+                title="Conversion Rate"
+                value="4.2"
+                suffix="%"
+                previousValue={3.8}
+                change={10.5}
+                icon={Percent}
+                trend="up"
+                sparklineData={sparklineData}
+              />
+              <AnalyticsKpiCard
+                title="Returning Customers"
+                value={2234}
+                previousValue={1998}
+                change={11.8}
+                icon={Users}
+                trend="up"
+                sparklineData={sparklineData}
+              />
+              <AnalyticsKpiCard
+                title="New Customers"
+                value={156}
+                previousValue={134}
+                change={16.4}
+                icon={Users}
+                trend="up"
+                sparklineData={sparklineData}
+              />
+              <AnalyticsKpiCard
+                title="Refund Rate"
+                value="2.3"
+                suffix="%"
+                previousValue={2.8}
+                change={-17.9}
+                icon={Percent}
+                trend="down"
+                sparklineData={sparklineData}
+              />
             </div>
 
-            {/* Top Products */}
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-xl font-semibold mb-6">Top Products</h2>
-              <div className="space-y-4">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-gray-200 to-gray-300 rounded" />
-                      <div>
-                        <p className="font-medium text-gray-900">Product {i}</p>
-                        <p className="text-sm text-gray-600">{45 - i * 5} sales</p>
-                      </div>
-                    </div>
-                    <span className="font-bold text-emerald-600">
-                      ${(120 - i * 10).toFixed(2)}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            {/* Revenue Chart */}
+            <div className="mb-8">
+              <RevenueChart />
             </div>
 
-            {/* Traffic Sources */}
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-xl font-semibold mb-6">Traffic Sources</h2>
-              <div className="space-y-4">
-                {[
-                  { name: "Direct", percentage: 45, color: "bg-blue-600" },
-                  { name: "Search", percentage: 30, color: "bg-emerald-600" },
-                  { name: "Social", percentage: 15, color: "bg-purple-600" },
-                  { name: "Referral", percentage: 10, color: "bg-orange-600" },
-                ].map((source) => (
-                  <div key={source.name}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm text-gray-700">{source.name}</span>
-                      <span className="text-sm font-medium text-gray-900">
-                        {source.percentage}%
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`${source.color} h-2 rounded-full`}
-                        style={{ width: `${source.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+            {/* Sales & Customer Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <SalesChart />
+              <CustomerChart />
             </div>
+
+            {/* Traffic & Financial */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+              <TrafficChart />
+              <FinancialSummary />
+            </div>
+
+            {/* Top Products Table */}
+            <TopProductsTable />
           </div>
         </main>
       </div>

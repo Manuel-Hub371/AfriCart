@@ -53,8 +53,8 @@ export default function StoresPage() {
     {
       id: "3",
       name: "SM Biggie Phones",
-      banner: "bg-gradient-to-r from-purple-100 to-purple-200",
-      logo: "bg-gradient-to-br from-purple-500 to-purple-600",
+      banner: "bg-gradient-to-r from-green-100 to-green-200",
+      logo: "bg-gradient-to-br from-green-500 to-green-600",
       verified: true,
       rating: 4.9,
       products: 890,
@@ -93,7 +93,7 @@ export default function StoresPage() {
       name: "Beauty Stores",
       icon: Sparkles,
       storeCount: 320,
-      color: "text-purple-600",
+      color: "text-green-600",
       href: "/stores?category=beauty",
     },
     {
