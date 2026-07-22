@@ -14,6 +14,7 @@ import {
   Settings,
   LogOut,
   X,
+  Store,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth/context";
@@ -41,6 +42,11 @@ export default function DashboardSidebar({
   const pathname = usePathname();
   const { logout, user } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const userMenuItems = [...menuItems];
+  if (user && !user.roles?.includes("VENDOR") && !user.roles?.includes("ADMIN")) {
+    userMenuItems.push({ icon: Store, label: "Become a Vendor", href: "/profile/become-vendor" });
+  }
 
   const handleLogout = async () => {
     try {
@@ -96,7 +102,7 @@ export default function DashboardSidebar({
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4">
           <ul className="space-y-1">
-            {menuItems.map((item) => {
+            {userMenuItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <li key={item.href}>

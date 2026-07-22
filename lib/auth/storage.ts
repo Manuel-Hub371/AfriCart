@@ -1,43 +1,35 @@
-// Secure storage utilities for authentication tokens
+// Session storage utility (token local storage disabled for HttpOnly cookie safety)
 
-const ACCESS_TOKEN_KEY = "afriCart_accessToken";
-const REFRESH_TOKEN_KEY = "afriCart_refreshToken";
 const USER_KEY = "afriCart_user";
 
 export const storage = {
-  // Access Token
+  // Access Token (Deprecated - Cookies are used instead)
   getAccessToken: (): string | null => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(ACCESS_TOKEN_KEY);
+    return null;
   },
 
   setAccessToken: (token: string): void => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(ACCESS_TOKEN_KEY, token);
+    // No-op for cookie security
   },
 
   removeAccessToken: (): void => {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    // No-op
   },
 
-  // Refresh Token
+  // Refresh Token (Deprecated - Cookies are used instead)
   getRefreshToken: (): string | null => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem(REFRESH_TOKEN_KEY);
+    return null;
   },
 
   setRefreshToken: (token: string): void => {
-    if (typeof window === "undefined") return;
-    localStorage.setItem(REFRESH_TOKEN_KEY, token);
+    // No-op for cookie security
   },
 
   removeRefreshToken: (): void => {
-    if (typeof window === "undefined") return;
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    // No-op
   },
 
-  // User Data
+  // User Data (Cached locally for immediate page rendering before API checks load)
   getUser: (): any | null => {
     if (typeof window === "undefined") return null;
     const userData = localStorage.getItem(USER_KEY);
@@ -54,11 +46,9 @@ export const storage = {
     localStorage.removeItem(USER_KEY);
   },
 
-  // Clear all auth data
+  // Clear all auth cache
   clearAll: (): void => {
     if (typeof window === "undefined") return;
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
   },
 };

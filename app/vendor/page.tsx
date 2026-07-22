@@ -15,6 +15,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth/context";
 
 // Mock data
 const recentOrders = [
@@ -67,6 +68,7 @@ const statusColors: Record<string, string> = {
 
 export default function VendorDashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -85,7 +87,7 @@ export default function VendorDashboardPage() {
           {/* Welcome Section */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back, Tech World 👋
+              Welcome back, {user?.storeName || user?.firstName || "Vendor"} 👋
             </h1>
             <p className="text-gray-600">
               Here's what's happening with your store today

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AuthLayout } from "@/components/auth/auth-layout";
+import { useAuth } from "@/lib/auth/context";
 import { 
   Store, 
   Building2, 
@@ -22,8 +23,20 @@ import {
 
 export default function VendorRegistrationPage() {
   const router = useRouter();
+  const { registerVendor } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [vendorRegData, setVendorRegData] = useState<any>(null);
+
+  useEffect(() => {
+    const data = sessionStorage.getItem("vendorRegData");
+    if (data) {
+      setVendorRegData(JSON.parse(data));
+    } else {
+      router.push("/auth/register?type=vendor");
+    }
+  }, [router]);
 
   const [formData, setFormData] = useState({
     // Store Information
@@ -80,13 +93,45 @@ export default function VendorRegistrationPage() {
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true);
+    if (!vendorRegData) return;
     
-    // Simulate API call
-    setTimeout(() => {
-      router.push("/auth/pending-approval");
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      await registerVendor({
+        firstName: vendorRegData.firstName,
+        lastName: vendorRegData.lastName,
+        email: vendorRegData.email,
+        phone: vendorRegData.phone,
+        password: vendorRegData.password,
+        confirmPassword: vendorRegData.confirmPassword,
+        
+        storeName: formData.storeName,
+        storeDescription: formData.storeDescription,
+        storeCategory: formData.storeCategory,
+        businessType: formData.businessType,
+        businessName: formData.businessName,
+        registrationNumber: formData.registrationNumber,
+        taxId: formData.taxId,
+        businessEmail: formData.businessEmail,
+        businessPhone: formData.businessPhone,
+        country: formData.country,
+        region: formData.region,
+        city: formData.city,
+        streetAddress: formData.streetAddress,
+        postalCode: formData.postalCode,
+        payoutMethod: formData.payoutMethod,
+        acceptTerms: formData.acceptTerms,
+        acceptVendorPolicy: formData.acceptSellerAgreement,
+      });
+      sessionStorage.removeItem("vendorRegData");
+      // Redirect handled by context
+    } catch (err: any) {
+      setError(err.message || "Vendor registration failed. Please try again.");
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const steps = [
@@ -174,6 +219,13 @@ export default function VendorRegistrationPage() {
               Step {currentStep} of {totalSteps}
             </p>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600">{error}</p>
+            </div>
+          )}
 
           {/* Step Content */}
           <div className="space-y-6">

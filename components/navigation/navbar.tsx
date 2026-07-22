@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, Bell, User, Menu, X, Heart, Package } from "lucide-react";
+import { Search, ShoppingCart, Bell, User, Menu, X, Heart, Package, Store } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -216,6 +216,15 @@ export function Navbar() {
                           <User className="h-4 w-4" />
                           My Profile
                         </Link>
+                        {user?.roles?.includes("VENDOR") && (
+                          <Link
+                            href="/vendor"
+                            className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-green-50 transition-colors"
+                          >
+                            <Store className="h-4 w-4" />
+                            Vendor Dashboard
+                          </Link>
+                        )}
                         <Link
                           href="/profile/orders"
                           className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-green-50 transition-colors"
@@ -254,7 +263,7 @@ export function Navbar() {
                   Login
                 </Link>
                 <Link
-                  href="/auth/register"
+                  href="/auth/welcome"
                   className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-lg transition-all shadow-md hover:shadow-lg"
                 >
                   Sign Up
@@ -323,7 +332,7 @@ export function Navbar() {
                     Login
                   </Link>
                   <Link
-                    href="/auth/register"
+                    href="/auth/welcome"
                     className="block px-4 py-3 text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl font-medium transition-all duration-200 text-center shadow-md hover:shadow-lg mx-2"
                   >
                     Sign Up

@@ -8,6 +8,7 @@ import OrderCard from "@/components/profile/order-card";
 import { ShoppingBag, Heart, Star, Award, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useAuth } from "@/lib/auth/context";
 
 // Mock data
 const recentOrders = [
@@ -93,6 +94,7 @@ const recommendedProducts = [
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -112,7 +114,7 @@ export default function DashboardPage() {
           {/* Welcome Section */}
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back, Manuel 
+              Welcome back, {user?.firstName || "User"} 
             </h1>
             <p className="text-gray-600">
               Manage your orders and account information

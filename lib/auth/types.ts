@@ -8,10 +8,12 @@ export interface User {
   firstName: string;
   lastName: string;
   phone: string;
-  role: UserRole;
+  roles: string[]; // Scalable multi-role system
+  role: UserRole; // Backward-compatibility fallback
   avatar?: string;
   emailVerified: boolean;
   createdAt: string;
+  permissions?: string[]; // Dynamic permissions list
   
   // Vendor-specific
   storeName?: string;
@@ -42,12 +44,20 @@ export interface RegisterCustomerData {
 
 export interface RegisterVendorData extends RegisterCustomerData {
   storeName: string;
+  storeDescription: string;
+  storeCategory: string;
+  businessType: string;
   businessName: string;
-  businessCategory: string;
+  registrationNumber?: string;
+  taxId?: string;
+  businessEmail: string;
+  businessPhone: string;
   country: string;
   region: string;
   city: string;
-  businessAddress: string;
+  streetAddress: string;
+  postalCode?: string;
+  payoutMethod: string;
   acceptTerms: boolean;
   acceptVendorPolicy: boolean;
 }

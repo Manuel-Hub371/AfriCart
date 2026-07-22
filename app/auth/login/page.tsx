@@ -66,12 +66,7 @@ export default function LoginPage() {
               <p className="text-gray-600">Sign in to continue to your account</p>
             </div>
 
-            {/* Demo Credentials */}
-            <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm font-semibold text-blue-900 mb-2">Demo Credentials:</p>
-              <p className="text-xs text-blue-700">Customer: customer@test.com / Password123</p>
-              <p className="text-xs text-blue-700">Vendor: vendor@test.com / Password123</p>
-            </div>
+
 
             {/* Error Message */}
             {error && (

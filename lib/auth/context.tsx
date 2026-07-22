@@ -17,6 +17,7 @@ interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   registerCustomer: (data: RegisterCustomerData) => Promise<void>;
   registerVendor: (data: RegisterVendorData) => Promise<void>;
+  upgradeToVendor: (data: any) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -34,29 +35,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const token = storage.getAccessToken();
-        const storedUser = storage.getUser();
-
-        if (token && storedUser) {
-          // Verify token is still valid
-          const user = await authService.getCurrentUser();
-          setState({
-            user,
-            isAuthenticated: true,
-            isLoading: false,
-            accessToken: token,
-          });
-        } else {
-          setState({
-            user: null,
-            isAuthenticated: false,
-            isLoading: false,
-            accessToken: null,
-          });
-        }
+        // Fetch current user from /api/auth/me (handles cookies & session rotation)
+        const user = await authService.getCurrentUser();
+        storage.setUser(user);
+        
+        setState({
+          user,
+          isAuthenticated: true,
+          isLoading: false,
+          accessToken: null, // Token hidden inside HttpOnly cookie
+        });
       } catch (error) {
-        console.error("Auth initialization error:", error);
-        storage.clearAll();
+        // If not authenticated, check if cached user exists for immediate layout rendering
+        const cachedUser = storage.getUser();
+        
+        if (cachedUser) {
+          // If we had cache, we might still be loading or unauthorized. Set loading false
+          storage.clearAll();
+        }
+        
         setState({
           user: null,
           isAuthenticated: false,
@@ -74,9 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response = await authService.login(credentials);
       
-      // Store tokens
-      storage.setAccessToken(response.accessToken);
-      storage.setRefreshToken(response.refreshToken);
+      // Cache user object for UI speed
       storage.setUser(response.user);
 
       // Update state
@@ -84,14 +79,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user: response.user,
         isAuthenticated: true,
         isLoading: false,
-        accessToken: response.accessToken,
+        accessToken: null,
       });
 
-      // Redirect based on role
-      const redirectPath = getRedirectPath(response.user.role);
-      router.push(redirectPath);
+      // Redirect based on role / query params
+      const storedRedirect = sessionStorage.getItem("redirectAfterLogin");
+      if (storedRedirect) {
+        sessionStorage.removeItem("redirectAfterLogin");
+        router.push(storedRedirect);
+      } else {
+        const redirectPath = getRedirectPath(response.user.roles);
+        router.push(redirectPath);
+      }
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("Login error in context:", error);
       throw error;
     }
   }, [router]);
@@ -100,23 +101,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(async () => {
     try {
       await authService.logout();
-      
-      // Clear storage
-      storage.clearAll();
-
-      // Update state
-      setState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        accessToken: null,
-      });
-
-      // Redirect to home
-      router.push("/");
     } catch (error) {
-      console.error("Logout error:", error);
-      // Clear state anyway
+      console.error("Logout error in context:", error);
+    } finally {
+      // Always reset state on logout
       storage.clearAll();
       setState({
         user: null,
@@ -132,24 +120,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const registerCustomer = useCallback(async (data: RegisterCustomerData) => {
     try {
       const response = await authService.registerCustomer(data);
-      
-      // Store tokens
-      storage.setAccessToken(response.accessToken);
-      storage.setRefreshToken(response.refreshToken);
       storage.setUser(response.user);
 
-      // Update state
       setState({
         user: response.user,
         isAuthenticated: true,
         isLoading: false,
-        accessToken: response.accessToken,
+        accessToken: null,
       });
 
-      // Redirect to welcome or dashboard
+      // Redirect to welcome
       router.push("/auth/welcome");
     } catch (error) {
-      console.error("Registration error:", error);
+      console.error("Registration error in context:", error);
       throw error;
     }
   }, [router]);
@@ -158,24 +141,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const registerVendor = useCallback(async (data: RegisterVendorData) => {
     try {
       const response = await authService.registerVendor(data);
-      
-      // Store tokens
-      storage.setAccessToken(response.accessToken);
-      storage.setRefreshToken(response.refreshToken);
       storage.setUser(response.user);
 
-      // Update state
       setState({
         user: response.user,
         isAuthenticated: true,
         isLoading: false,
-        accessToken: response.accessToken,
+        accessToken: null,
       });
 
       // Redirect to pending approval page
       router.push("/auth/pending-approval");
     } catch (error) {
-      console.error("Vendor registration error:", error);
+      console.error("Vendor registration error in context:", error);
+      throw error;
+    }
+  }, [router]);
+
+  // Upgrade customer to vendor
+  const upgradeToVendor = useCallback(async (data: any) => {
+    try {
+      const updatedUser = await authService.upgradeToVendor(data);
+      storage.setUser(updatedUser);
+
+      setState({
+        user: updatedUser,
+        isAuthenticated: true,
+        isLoading: false,
+        accessToken: null,
+      });
+
+      // Redirect directly to vendor dashboard on success
+      router.push("/vendor");
+    } catch (error) {
+      console.error("Upgrade error in context:", error);
       throw error;
     }
   }, [router]);
@@ -186,23 +185,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     registerCustomer,
     registerVendor,
+    upgradeToVendor,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-// Helper function to determine redirect path based on role
-function getRedirectPath(role: string): string {
-  switch (role) {
-    case "customer":
-      return "/"; // Or /customer/dashboard when implemented
-    case "vendor":
-      return "/vendor";
-    case "admin":
-      return "/admin"; // Or /admin/dashboard when implemented
-    default:
-      return "/";
+// Helper function to determine redirect path based on roles
+function getRedirectPath(roles: string[]): string {
+  if (roles.includes("ADMIN")) {
+    return "/admin";
   }
+  if (roles.includes("VENDOR")) {
+    return "/vendor";
+  }
+  return "/profile";
 }
 
 // Custom hook to use auth context

@@ -1,0 +1,277 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum AccountStatus {
+  ACTIVE
+  PENDING
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum VerificationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model User {
+  id                      String         @id @default(uuid())
+  email                   String         @unique
+  phone                   String?        @unique
+  passwordHash            String
+  firstName               String
+  lastName                String
+  status                  AccountStatus  @default(PENDING)
+  createdAt               DateTime       @default(now())
+  updatedAt               DateTime       @updatedAt
+  deletedAt               DateTime?
+
+  // Email verification
+  emailVerified           Boolean        @default(false)
+  emailVerificationStatus VerificationStatus @default(UNVERIFIED)
+  verificationToken       String?
+  verificationTokenExpires DateTime?
+
+  // Phone verification
+  phoneVerified           Boolean        @default(false)
+  phoneVerificationStatus  VerificationStatus @default(UNVERIFIED)
+
+  // Password reset
+  resetToken              String?        @unique
+  resetTokenExpires       DateTime?
+
+  // Relations
+  accounts                Account[]
+  userRoles               UserRole[]
+  customerProfile         CustomerProfile?
+  vendorProfile           VendorProfile?
+  loginHistories          LoginHistory[]
+  auditLogs               AuditLog[]
+}
+
+model Account {
+  id                String   @id @default(uuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  provider          String   // "credentials", "google", "apple", etc.
+  providerAccountId String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+}
+
+model Role {
+  id              String           @id @default(uuid())
+  name            String           @unique // "CUSTOMER", "VENDOR", "ADMIN"
+  description     String?
+  rolePermissions RolePermission[]
+  userRoles       UserRole[]
+}
+
+model Permission {
+  id              String           @id @default(uuid())
+  name            String           @unique // e.g. "BUY_PRODUCTS", "MANAGE_PRODUCTS", etc.
+  description     String?
+  rolePermissions RolePermission[]
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model UserRole {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roleId String
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+}
+
+model CustomerProfile {
+  id             String          @id @default(uuid())
+  userId         String          @unique
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  
+  // Normalized relations
+  addresses      Address[]
+  wishlistItems  WishlistItem[]
+  cartItems      CartItem[]
+  paymentMethods PaymentMethod[]
+  orders         Order[]
+}
+
+model Address {
+  id                String          @id @default(uuid())
+  customerProfileId String
+  customerProfile   CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  type              String          // "shipping" | "billing"
+  firstName         String
+  lastName          String
+  phone             String
+  streetAddress     String
+  city              String
+  region            String
+  country           String
+  postalCode        String?
+  isDefault         Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+}
+
+model WishlistItem {
+  id                String          @id @default(uuid())
+  customerProfileId String
+  customerProfile   CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  productId         String
+  createdAt         DateTime        @default(now())
+
+  @@unique([customerProfileId, productId])
+}
+
+model CartItem {
+  id                String          @id @default(uuid())
+  customerProfileId String
+  customerProfile   CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  productId         String
+  quantity          Int             @default(1)
+  variantInfo       Json?           // Selected variants like color, size
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([customerProfileId, productId])
+}
+
+model PaymentMethod {
+  id                String          @id @default(uuid())
+  customerProfileId String
+  customerProfile   CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  provider          String          // "stripe", "paypal", "momo"
+  type              String          // "card", "mobile_money"
+  last4             String?
+  expiryDate        String?
+  isDefault         Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+}
+
+model VendorProfile {
+  id                       String             @id @default(uuid())
+  userId                   String             @unique
+  user                     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName             String
+  businessCategory         String
+  country                  String
+  region                   String
+  city                     String
+  businessAddress          String
+  createdAt                DateTime           @default(now())
+  updatedAt                DateTime           @updatedAt
+  deletedAt                DateTime?
+
+  // Staged verification states
+  identityVerified         Boolean            @default(false)
+  identityVerificationStatus VerificationStatus @default(UNVERIFIED)
+  
+  businessVerified         Boolean            @default(false)
+  businessVerificationStatus VerificationStatus @default(UNVERIFIED)
+
+  // Relations
+  stores                   Store[]
+}
+
+model Store {
+  id              String        @id @default(uuid())
+  vendorProfileId String
+  vendorProfile   VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  name            String
+  slug            String        @unique
+  description     String?
+  logo            String?
+  banner          String?
+  category        String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
+
+  products        Product[]
+  orderItems      OrderItem[]
+}
+
+model Product {
+  id        String    @id @default(uuid())
+  storeId   String
+  store     Store     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  name      String
+  price     Float
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+}
+
+model Order {
+  id                String          @id @default(uuid())
+  customerProfileId String
+  customerProfile   CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+  orderItems        OrderItem[]
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  quantity  Int
+  price     Float
+  storeId   String
+  store     Store   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+}
+
+model LoginHistory {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+  browser   String?
+  os        String?
+  deviceType String?
+  country   String?
+  success   Boolean
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  actorId        String?
+  user           User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action         String   // e.g. "USER_REGISTER", "ROLE_UPGRADE", "PASSWORD_RESET"
+  targetResource String?  // e.g. "Store:123"
+  metadata       Json?
+  ipAddress      String?
+  createdAt      DateTime @default(now())
+}
