@@ -6,6 +6,7 @@ import { OrderSearch } from "./order-search";
 import { OrderFilters } from "./order-filters";
 
 interface OrderToolbarProps {
+  orders?: any[];
   onSearch: (query: string) => void;
   onFilterChange: (filters: Record<string, string[]>) => void;
   onExport: () => void;
@@ -15,6 +16,7 @@ interface OrderToolbarProps {
 }
 
 export function OrderToolbar({
+  orders = [],
   onSearch,
   onFilterChange,
   onExport,
@@ -34,28 +36,17 @@ export function OrderToolbar({
         {/* Right: Actions */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Filters */}
-          <OrderFilters onFilterChange={onFilterChange} onSort={onSort} />
+          <OrderFilters orders={orders} onFilterChange={onFilterChange} onSort={onSort} />
 
           {/* Export */}
           <Button
             variant="outline"
             size="sm"
             onClick={onExport}
-            className="h-9 px-3 border-gray-200 hover:bg-gray-50"
+            className="h-9 px-3 border-gray-200 hover:bg-gray-50 rounded-xl"
           >
             <Download className="h-4 w-4 mr-2" />
             Export
-          </Button>
-
-          {/* Print */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onPrint}
-            className="h-9 px-3 border-gray-200 hover:bg-gray-50"
-          >
-            <Printer className="h-4 w-4 mr-2" />
-            Print
           </Button>
 
           {/* Refresh */}
@@ -63,7 +54,7 @@ export function OrderToolbar({
             variant="outline"
             size="sm"
             onClick={onRefresh}
-            className="h-9 w-9 p-0 border-gray-200 hover:bg-gray-50"
+            className="h-9 w-9 p-0 border-gray-200 hover:bg-gray-50 rounded-xl"
           >
             <RefreshCw className="h-4 w-4" />
           </Button>

@@ -1,17 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { Button } from "@/components/ui/button";
-import { DateRangePicker, DateRange } from "@/components/vendor/date-range-picker";
-import { AnalyticsKpiCard } from "@/components/vendor/analytics-kpi-card";
 import { RevenueChart } from "@/components/vendor/revenue-chart";
 import { SalesChart } from "@/components/vendor/sales-chart";
 import { CustomerChart } from "@/components/vendor/customer-chart";
 import { TrafficChart } from "@/components/vendor/traffic-chart";
 import { TopProductsTable } from "@/components/vendor/top-products-table";
-import { FinancialSummary } from "@/components/vendor/financial-summary";
 import { 
   Download, 
   RefreshCw, 
@@ -19,26 +16,67 @@ import {
   ShoppingCart, 
   Package, 
   TrendingUp,
-  Users,
-  Percent
+  Loader2
 } from "lucide-react";
 
 export default function AnalyticsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [dateRange, setDateRange] = useState<DateRange>("last-30-days");
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Mock sparkline data
-  const sparklineData = Array.from({ length: 30 }, (_, i) => ({
-    value: ((i * 13 + 45) % 100) + 50,
-  }));
+  const fetchAnalytics = async () => {
+    try {
+      setIsLoading(true);
+      const [analyticsRes, productsRes] = await Promise.all([
+        fetch("/api/vendor/analytics"),
+        fetch("/api/vendor/products"),
+      ]);
+
+      if (analyticsRes.ok) {
+        const data = await analyticsRes.json();
+        setAnalyticsData(data);
+      }
+      if (productsRes.ok) {
+        const data = await productsRes.json();
+        setProducts(data.products || []);
+      }
+    } catch (err) {
+      console.error("Failed to load vendor analytics:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
 
   const handleExport = () => {
-    console.log("Export analytics...");
+    if (!analyticsData) return;
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      ["Metric,Value"]
+        .concat([
+          `"Gross Revenue",${analyticsData.totalRevenue || 0}`,
+          `"Total Orders",${analyticsData.totalOrders || 0}`,
+          `"Units Sold",${analyticsData.unitsSold || 0}`,
+          `"Average Order Value",${analyticsData.averageOrderValue || 0}`,
+        ])
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `vendor_analytics_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const handleRefresh = () => {
-    console.log("Refresh data...");
-  };
+  const revenue = analyticsData?.totalRevenue ?? 0;
+  const orders = analyticsData?.totalOrders ?? 0;
+  const unitsSold = analyticsData?.unitsSold ?? 0;
+  const aov = analyticsData?.averageOrderValue ?? 0;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -61,132 +99,102 @@ export default function AnalyticsPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Analytics Dashboard
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
+                  Analytics &amp; Performance
                 </h1>
-                <p className="text-gray-600">
-                  Track business performance, monitor trends, and make data-driven decisions
+                <p className="text-gray-600 text-sm">
+                  Real-time sales velocity, order volumes, revenue metrics, and best-selling product performance.
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <DateRangePicker value={dateRange} onChange={setDateRange} />
                 <Button
                   variant="outline"
-                  onClick={handleRefresh}
-                  className="h-10 w-10 p-0 border-gray-200 hover:bg-gray-50"
+                  onClick={fetchAnalytics}
+                  className="h-10 w-10 p-0 border-gray-200 hover:bg-gray-50 rounded-xl"
                 >
-                  <RefreshCw className="h-4 w-4" />
+                  <RefreshCw className="h-4 w-4 text-gray-600" />
                 </Button>
                 <Button
                   variant="outline"
                   onClick={handleExport}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
+                  disabled={!analyticsData}
+                  className="h-10 px-4 border-gray-200 hover:bg-gray-50 rounded-xl"
                 >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
+                  <Download className="h-4 w-4 mr-2 text-gray-600" />
+                  Export CSV
                 </Button>
               </div>
             </div>
 
-            {/* KPI Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <AnalyticsKpiCard
-                title="Total Revenue"
-                value="148K"
-                prefix="$"
-                previousValue={132000}
-                change={12.1}
-                icon={DollarSign}
-                trend="up"
-                sparklineData={sparklineData}
-              />
-              <AnalyticsKpiCard
-                title="Orders"
-                value={1847}
-                previousValue={1654}
-                change={11.7}
-                icon={ShoppingCart}
-                trend="up"
-                sparklineData={sparklineData}
-              />
-              <AnalyticsKpiCard
-                title="Units Sold"
-                value={8234}
-                previousValue={7456}
-                change={10.4}
-                icon={Package}
-                trend="up"
-                sparklineData={sparklineData}
-              />
-              <AnalyticsKpiCard
-                title="Avg Order Value"
-                value="80"
-                prefix="$"
-                previousValue={75}
-                change={6.7}
-                icon={TrendingUp}
-                trend="up"
-                sparklineData={sparklineData}
-              />
-              <AnalyticsKpiCard
-                title="Conversion Rate"
-                value="4.2"
-                suffix="%"
-                previousValue={3.8}
-                change={10.5}
-                icon={Percent}
-                trend="up"
-                sparklineData={sparklineData}
-              />
-              <AnalyticsKpiCard
-                title="Returning Customers"
-                value={2234}
-                previousValue={1998}
-                change={11.8}
-                icon={Users}
-                trend="up"
-                sparklineData={sparklineData}
-              />
-              <AnalyticsKpiCard
-                title="New Customers"
-                value={156}
-                previousValue={134}
-                change={16.4}
-                icon={Users}
-                trend="up"
-                sparklineData={sparklineData}
-              />
-              <AnalyticsKpiCard
-                title="Refund Rate"
-                value="2.3"
-                suffix="%"
-                previousValue={2.8}
-                change={-17.9}
-                icon={Percent}
-                trend="down"
-                sparklineData={sparklineData}
-              />
-            </div>
+            {isLoading ? (
+              <div className="py-24 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <Loader2 className="h-10 w-10 text-emerald-600 animate-spin mx-auto mb-3" />
+                <p className="text-gray-500 font-medium text-sm">Loading analytics parameters...</p>
+              </div>
+            ) : (
+              <>
+                {/* KPI Metrics */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500">Gross Sales Revenue</span>
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                        <DollarSign className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-extrabold text-gray-900">${revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                    <p className="text-xs text-gray-400 mt-1">Total completed checkout sales</p>
+                  </div>
 
-            {/* Revenue Chart */}
-            <div className="mb-8">
-              <RevenueChart />
-            </div>
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500">Total Customer Orders</span>
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                        <ShoppingCart className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-extrabold text-blue-600">{orders}</h3>
+                    <p className="text-xs text-gray-400 mt-1">Processed orders count</p>
+                  </div>
 
-            {/* Sales & Customer Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              <SalesChart />
-              <CustomerChart />
-            </div>
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500">Total Merchandise Units Sold</span>
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                        <Package className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-extrabold text-amber-600">{unitsSold}</h3>
+                    <p className="text-xs text-gray-400 mt-1">Individual items fulfilled</p>
+                  </div>
 
-            {/* Traffic & Financial */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-              <TrafficChart />
-              <FinancialSummary />
-            </div>
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500">Average Order Value (AOV)</span>
+                      <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+                        <TrendingUp className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-extrabold text-purple-600">${aov.toFixed(2)}</h3>
+                    <p className="text-xs text-gray-400 mt-1">Revenue per completed order</p>
+                  </div>
+                </div>
 
-            {/* Top Products Table */}
-            <TopProductsTable />
+                {/* Charts Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                  <RevenueChart />
+                  <SalesChart />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                  <CustomerChart />
+                  <TrafficChart />
+                </div>
+
+                {/* Best Selling Products Table */}
+                <TopProductsTable products={products} />
+              </>
+            )}
           </div>
         </main>
       </div>

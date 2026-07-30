@@ -1,64 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardSidebar from "@/components/profile/dashboard-sidebar";
 import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Trash2, ShoppingCart, Star } from "lucide-react";
 import Link from "next/link";
 
-const wishlistItems = [
-  {
-    id: "1",
-    name: "Premium Wireless Headphones",
-    image: "bg-gradient-to-br from-blue-400 to-blue-500",
-    price: 120,
-    originalPrice: 150,
-    rating: 4.8,
-    reviews: 245,
-    vendor: "Tech World",
-    inStock: true,
-  },
-  {
-    id: "2",
-    name: "Smart Watch Pro",
-    image: "bg-gradient-to-br from-green-400 to-green-500",
-    price: 200,
-    originalPrice: 250,
-    rating: 4.6,
-    reviews: 189,
-    vendor: "Fashion Hub",
-    inStock: true,
-  },
-  {
-    id: "3",
-    name: "Designer Sneakers",
-    image: "bg-gradient-to-br from-pink-400 to-pink-500",
-    price: 100,
-    originalPrice: 120,
-    rating: 4.9,
-    reviews: 532,
-    vendor: "Shoe Palace",
-    inStock: false,
-  },
-  {
-    id: "4",
-    name: "Leather Backpack",
-    image: "bg-gradient-to-br from-orange-400 to-orange-500",
-    price: 85,
-    rating: 4.7,
-    reviews: 324,
-    vendor: "Bag Store",
-    inStock: true,
-  },
-];
-
 export default function WishlistPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [items, setItems] = useState(wishlistItems);
+  const [items, setItems] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleRemove = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
+  async function loadWishlist() {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/wishlist");
+      if (res.ok) {
+        const data = await res.json();
+        setItems(data);
+      }
+    } catch (err) {
+      console.error("Failed to load wishlist:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadWishlist();
+  }, []);
+
+  const handleRemove = async (itemIdOrProductId: string) => {
+    try {
+      const res = await fetch(`/api/wishlist/${itemIdOrProductId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setItems(updated);
+      }
+    } catch (err) {
+      console.error("Failed to remove item from wishlist:", err);
+    }
+  };
+
+  const handleAddToCart = async (productId: string) => {
+    try {
+      await fetch("/api/cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId, quantity: 1 }),
+      });
+      // Optionally remove from wishlist after adding to cart
+      await handleRemove(productId);
+    } catch (err) {
+      console.error("Failed to add wishlist item to cart:", err);
+    }
   };
 
   return (
@@ -79,45 +77,50 @@ export default function WishlistPage() {
             <p className="text-gray-600">{items.length} items saved</p>
           </div>
 
-          {items.length > 0 ? (
+          {isLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-64 bg-white rounded-lg border p-4 animate-pulse"></div>
+              ))}
+            </div>
+          ) : items.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {items.map((item) => (
                 <div
                   key={item.id}
                   className="bg-white rounded-lg border overflow-hidden hover:shadow-lg transition-shadow"
                 >
-                  <Link href={`/product/${item.id}`}>
-                    <div className={`h-56 ${item.image} cursor-pointer`} />
+                  <Link href={`/product/${item.product.id}`}>
+                    <div className="h-48 bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center font-bold text-emerald-800 text-2xl cursor-pointer">
+                      {item.product.name[0]}
+                    </div>
                   </Link>
                   <div className="p-4">
-                    <Link href={`/product/${item.id}`}>
+                    <Link href={`/product/${item.product.id}`}>
                       <h3 className="font-semibold text-gray-900 mb-2 hover:text-emerald-600 cursor-pointer line-clamp-2">
-                        {item.name}
+                        {item.product.name}
                       </h3>
                     </Link>
-                    <p className="text-sm text-gray-600 mb-2">{item.vendor}</p>
+                    <p className="text-xs text-gray-500 mb-2">Store: {item.product.storeName}</p>
 
                     <div className="flex items-center gap-1 mb-3">
                       <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                      <span className="text-sm font-medium">{item.rating}</span>
-                      <span className="text-sm text-gray-600">
-                        ({item.reviews})
-                      </span>
+                      <span className="text-sm font-medium">{item.product.rating || 4.8}</span>
                     </div>
 
                     <div className="flex items-baseline gap-2 mb-3">
                       <span className="text-xl font-bold text-emerald-600">
-                        ${item.price}
+                        ${item.product.price}
                       </span>
-                      {item.originalPrice && (
+                      {item.product.compareAtPrice && (
                         <span className="text-sm text-gray-400 line-through">
-                          ${item.originalPrice}
+                          ${item.product.compareAtPrice}
                         </span>
                       )}
                     </div>
 
-                    {!item.inStock && (
-                      <p className="text-sm text-red-600 mb-3 font-medium">
+                    {item.product.stock <= 0 && (
+                      <p className="text-xs text-red-600 mb-3 font-medium">
                         Out of Stock
                       </p>
                     )}
@@ -126,7 +129,8 @@ export default function WishlistPage() {
                       <Button
                         size="sm"
                         className="flex-1 gap-2"
-                        disabled={!item.inStock}
+                        disabled={item.product.stock <= 0}
+                        onClick={() => handleAddToCart(item.product.id)}
                       >
                         <ShoppingCart className="h-4 w-4" />
                         Add to Cart
@@ -144,18 +148,18 @@ export default function WishlistPage() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-4">
-                <Star className="h-10 w-10 text-gray-400" />
+            <div className="text-center py-16 bg-white rounded-2xl border">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-emerald-50 rounded-full mb-4">
+                <Star className="h-10 w-10 text-emerald-600" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 Your wishlist is empty
               </h3>
               <p className="text-gray-600 mb-6">
-                Save items you love for easy access later
+                Save items you love while shopping to easily find them later.
               </p>
               <Link href="/products">
-                <Button>Browse Products</Button>
+                <Button className="gradient-primary text-white">Browse Products</Button>
               </Link>
             </div>
           )}

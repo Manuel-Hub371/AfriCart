@@ -21,52 +21,59 @@ interface FilterOption {
 }
 
 interface OrderFiltersProps {
+  orders?: any[];
   onFilterChange: (filters: Record<string, string[]>) => void;
   onSort: (sortBy: string) => void;
 }
 
-export function OrderFilters({ onFilterChange, onSort }: OrderFiltersProps) {
+export function OrderFilters({ orders = [], onFilterChange, onSort }: OrderFiltersProps) {
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({
     status: [],
     payment: [],
     shipping: [],
   });
 
+  const getStatusCount = (val: string) => {
+    if (!orders || orders.length === 0) return undefined;
+    return orders.filter((o) => {
+      const s = (o.orderStatus || o.status || "").toLowerCase();
+      if (val === "processing") return s === "processing" || s === "confirmed" || s === "packed";
+      if (val === "shipped") return s === "shipped" || s === "ready-to-ship" || s === "in-transit";
+      if (val === "delivered") return s === "delivered" || s === "completed";
+      if (val === "cancelled") return s === "cancelled";
+      return s === val;
+    }).length;
+  };
+
+  const getPaymentCount = (val: string) => {
+    if (!orders || orders.length === 0) return undefined;
+    return orders.filter((o) => {
+      const p = (o.paymentStatus || "").toLowerCase();
+      return p === val;
+    }).length;
+  };
+
   const statusOptions: FilterOption[] = [
-    { label: "New", value: "pending", count: 47 },
-    { label: "Confirmed", value: "confirmed", count: 89 },
-    { label: "Processing", value: "processing", count: 123 },
-    { label: "Packed", value: "packed", count: 67 },
-    { label: "Ready to Ship", value: "ready-to-ship", count: 89 },
-    { label: "Shipped", value: "shipped", count: 234 },
-    { label: "Delivered", value: "delivered", count: 1289 },
-    { label: "Cancelled", value: "cancelled", count: 34 },
+    { label: "Processing", value: "processing", count: getStatusCount("processing") },
+    { label: "Shipped", value: "shipped", count: getStatusCount("shipped") },
+    { label: "Delivered", value: "delivered", count: getStatusCount("delivered") },
+    { label: "Cancelled", value: "cancelled", count: getStatusCount("cancelled") },
   ];
 
   const paymentOptions: FilterOption[] = [
-    { label: "Paid", value: "paid", count: 1567 },
-    { label: "Pending", value: "pending", count: 178 },
-    { label: "Failed", value: "failed", count: 23 },
-    { label: "Refunded", value: "refunded", count: 79 },
-  ];
-
-  const shippingOptions: FilterOption[] = [
-    { label: "Standard", value: "standard", count: 1234 },
-    { label: "Express", value: "express", count: 456 },
-    { label: "Next Day", value: "next-day", count: 157 },
+    { label: "Paid", value: "paid", count: getPaymentCount("paid") },
+    { label: "Pending", value: "pending", count: getPaymentCount("pending") },
   ];
 
   const toggleFilter = (filterType: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const current = prev[filterType] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      
-      const newFilters = { ...prev, [filterType]: updated };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    const current = selectedFilters[filterType] || [];
+    const updated = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    
+    const newFilters = { ...selectedFilters, [filterType]: updated };
+    setSelectedFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
   const clearAllFilters = () => {
@@ -87,7 +94,7 @@ export function OrderFilters({ onFilterChange, onSort }: OrderFiltersProps) {
           <Filter className="h-4 w-4" />
           Status
           {selectedFilters.status?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.status.length}
             </Badge>
           )}
@@ -102,8 +109,8 @@ export function OrderFilters({ onFilterChange, onSort }: OrderFiltersProps) {
               onCheckedChange={() => toggleFilter("status", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
+              {typeof option.count === "number" && (
+                <span className="text-xs font-semibold text-gray-500 ml-2">({option.count})</span>
               )}
             </DropdownMenuCheckboxItem>
           ))}
@@ -115,7 +122,7 @@ export function OrderFilters({ onFilterChange, onSort }: OrderFiltersProps) {
         <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
           Payment
           {selectedFilters.payment?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.payment.length}
             </Badge>
           )}
@@ -130,8 +137,8 @@ export function OrderFilters({ onFilterChange, onSort }: OrderFiltersProps) {
               onCheckedChange={() => toggleFilter("payment", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
+              {typeof option.count === "number" && (
+                <span className="text-xs font-semibold text-gray-500 ml-2">({option.count})</span>
               )}
             </DropdownMenuCheckboxItem>
           ))}

@@ -22,28 +22,28 @@ export default function OrderSummary({
       <div className="space-y-3">
         <div className="flex items-center justify-between text-gray-600">
           <span>Subtotal</span>
-          <span className="font-medium">${subtotal}</span>
+          <span className="font-medium">GH₵{subtotal}</span>
         </div>
         <div className="flex items-center justify-between text-gray-600">
           <span>Shipping</span>
-          <span className="font-medium">${shipping}</span>
+          <span className="font-medium">GH₵{shipping}</span>
         </div>
         {discount > 0 && (
           <div className="flex items-center justify-between text-emerald-600">
             <span>Discount</span>
-            <span className="font-medium">-${discount}</span>
+            <span className="font-medium">-GH₵{discount}</span>
           </div>
         )}
         <div className="flex items-center justify-between text-gray-600">
           <span>Tax (2.5%)</span>
-          <span className="font-medium">${tax}</span>
+          <span className="font-medium">GH₵{tax}</span>
         </div>
 
         <div className="border-t pt-3">
           <div className="flex items-center justify-between">
             <span className="text-lg font-semibold text-gray-900">Total</span>
             <span className="text-2xl font-bold text-emerald-600">
-              ${total}
+              GH₵{total}
             </span>
           </div>
         </div>

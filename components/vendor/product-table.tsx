@@ -103,6 +103,8 @@ export function ProductTable({
                 </Button>
               </TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Featured</TableHead>
+              <TableHead>Best Seller</TableHead>
               <TableHead>Rating</TableHead>
               <TableHead>
                 <Button
@@ -137,7 +139,10 @@ export function ProductTable({
                   />
                 </TableCell>
                 <TableCell>
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100">
+                  <div 
+                    className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => onAction("view", product.id)}
+                  >
                     <Image
                       src={product.image}
                       alt={product.name}
@@ -147,7 +152,12 @@ export function ProductTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="font-medium text-gray-900">{product.name}</div>
+                  <div 
+                    className="font-bold text-gray-900 cursor-pointer hover:text-emerald-600 transition-colors"
+                    onClick={() => onAction("view", product.id)}
+                  >
+                    {product.name}
+                  </div>
                 </TableCell>
                 <TableCell>
                   <span className="text-sm text-gray-600 font-mono">{product.sku}</span>
@@ -168,6 +178,31 @@ export function ProductTable({
                 </TableCell>
                 <TableCell>
                   <ProductStatusBadge status={product.status} />
+                </TableCell>
+                <TableCell>
+                  <button
+                    type="button"
+                    onClick={() => onAction("toggle-featured", product.id)}
+                    className={`inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-full transition-all border ${
+                      product.isFeatured
+                        ? "bg-amber-500 text-white border-amber-500 hover:bg-amber-600"
+                        : "bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200 hover:text-gray-700"
+                    }`}
+                  >
+                    <span>★ {product.isFeatured ? "Featured" : "Regular"}</span>
+                  </button>
+                </TableCell>
+                <TableCell>
+                  {product.isBestSeller ? (
+                    <span
+                      title={`Best Seller Score: ${product.bestSellerScore || 0}`}
+                      className="inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-xs cursor-default"
+                    >
+                      🔥 Best Seller
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-400 font-medium px-2">—</span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">

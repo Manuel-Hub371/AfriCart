@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,7 @@ import { CustomersTable, Customer } from "@/components/vendor/customers-table";
 import { CustomerPagination } from "@/components/vendor/customer-pagination";
 import { CustomerProfileDrawer } from "@/components/vendor/customer-profile-drawer";
 import { CustomerEmptyState } from "@/components/vendor/customer-empty-state";
-import { Download, Send } from "lucide-react";
-import type { CustomerStatus } from "@/components/vendor/customer-status-badge";
+import { Download, Loader2 } from "lucide-react";
 
 export default function CustomersPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,52 +21,44 @@ export default function CustomersPage() {
   const [sortBy, setSortBy] = useState("newest");
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
 
-  // Mock data - replace with actual API call
-  const mockCustomers: Customer[] = Array.from({ length: 100 }, (_, i) => {
-    const firstNames = [
-      "John", "Sarah", "Michael", "Emily", "David",
-      "Jessica", "Daniel", "Ashley", "Christopher", "Amanda"
-    ];
-    const lastNames = [
-      "Smith", "Johnson", "Brown", "Davis", "Wilson",
-      "Martinez", "Garcia", "Rodriguez", "Lee", "Taylor"
-    ];
-    
-    const firstName = firstNames[i % 10];
-    const lastName = lastNames[(i * 3) % 10];
-    const name = `${firstName} ${lastName}`;
-    
-    const totalOrders = ((i * 7 + 3) % 20) + 1;
-    const lifetimeSpend = ((i * 123 + 456) % 2000) + 100;
-    
-    return {
-      id: `customer-${i + 1}`,
-      name,
-      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@email.com`,
-      phone: `+1 (555) ${String((i * 123) % 900 + 100).padStart(3, '0')}-${String((i * 456) % 10000).padStart(4, '0')}`,
-      country: ["USA", "Canada", "UK", "Australia", "Germany"][i % 5],
-      city: ["New York", "Toronto", "London", "Sydney", "Berlin"][i % 5],
-      totalOrders,
-      lifetimeSpend,
-      averageOrderValue: lifetimeSpend / totalOrders,
-      lastPurchase: new Date(Date.now() - (i * 3 * 86400000)).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      }),
-      status: (["new", "returning", "vip", "inactive"] as const)[
-        totalOrders === 1 ? 0 : totalOrders > 10 ? 2 : totalOrders > 5 ? 1 : 3
-      ] as CustomerStatus,
-      registrationDate: new Date(Date.now() - (i * 30 * 86400000)).toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      }),
-    };
-  });
+  const [customers, setCustomers] = useState<Customer[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const totalCustomers = mockCustomers.length;
-  const totalPages = Math.ceil(totalCustomers / itemsPerPage);
-  const currentCustomers = mockCustomers.slice(
+  const loadCustomers = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/vendor/customers");
+      if (res.ok) {
+        const data = await res.json();
+        setCustomers(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error("Failed to load customers:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCustomers();
+  }, []);
+
+  const filteredCustomers = useMemo(() => {
+    return customers.filter((c) => {
+      if (searchQuery.trim()) {
+        const query = searchQuery.toLowerCase();
+        const matchName = c.name?.toLowerCase().includes(query);
+        const matchEmail = c.email?.toLowerCase().includes(query);
+        const matchPhone = c.phone?.toLowerCase().includes(query);
+        if (!matchName && !matchEmail && !matchPhone) return false;
+      }
+      return true;
+    });
+  }, [customers, searchQuery]);
+
+  const totalCustomers = filteredCustomers.length;
+  const totalPages = Math.max(1, Math.ceil(totalCustomers / itemsPerPage));
+  const currentCustomers = filteredCustomers.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -77,23 +68,29 @@ export default function CustomersPage() {
   };
 
   const handleExport = () => {
-    console.log("Exporting customers...");
-  };
-
-  const handleRefresh = () => {
-    console.log("Refreshing customers...");
-  };
-
-  const handleSendPromotion = () => {
-    console.log("Send promotion...");
+    if (customers.length === 0) return;
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      ["Name,Email,Phone,Total Orders,Lifetime Spend,Last Purchase"]
+        .concat(
+          customers.map(
+            (c) => `"${c.name}","${c.email}","${c.phone}",${c.totalOrders},${c.lifetimeSpend},"${c.lastPurchase}"`
+          )
+        )
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `vendor_customers_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleClearFilters = () => {
     setFilters({});
     setSearchQuery("");
   };
-
-  const showEmptyState = false; // Change based on actual filter results
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -116,49 +113,52 @@ export default function CustomersPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Customers
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
+                  Store Customers
                 </h1>
-                <p className="text-gray-600">
-                  Manage customers who have purchased from your store and strengthen relationships
+                <p className="text-gray-600 text-sm">
+                  Track and manage buyers who have purchased products from your store.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   onClick={handleExport}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
+                  disabled={customers.length === 0}
+                  className="h-10 px-4 border-gray-200 hover:bg-gray-50 rounded-xl"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Export
+                  Export CSV
                 </Button>
               </div>
             </div>
 
-            {/* Statistics */}
-            <CustomerStatistics />
-
             {/* Toolbar */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
+            <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-6 shadow-sm">
               <CustomerToolbar
                 onSearch={setSearchQuery}
                 onFilterChange={setFilters}
                 onExport={handleExport}
-                onRefresh={handleRefresh}
+                onRefresh={loadCustomers}
                 onSort={setSortBy}
-                onSendPromotion={handleSendPromotion}
+                onSendPromotion={() => {}}
               />
             </div>
 
-            {showEmptyState ? (
+            {isLoading ? (
+              <div className="py-24 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <Loader2 className="h-10 w-10 text-emerald-600 animate-spin mx-auto mb-3" />
+                <p className="text-gray-500 font-medium text-sm">Loading customer accounts...</p>
+              </div>
+            ) : filteredCustomers.length === 0 ? (
               <CustomerEmptyState
-                onRefresh={handleRefresh}
+                onRefresh={loadCustomers}
                 onClearFilters={handleClearFilters}
               />
             ) : (
               <>
                 {/* Customers Table */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6 shadow-sm">
                   <CustomersTable
                     customers={currentCustomers}
                     onViewCustomer={handleViewCustomer}
@@ -167,7 +167,7 @@ export default function CustomersPage() {
                 </div>
 
                 {/* Pagination */}
-                <div className="bg-white rounded-xl border border-gray-200 px-6 py-4">
+                <div className="bg-white rounded-2xl border border-gray-200 px-6 py-4 shadow-sm">
                   <CustomerPagination
                     currentPage={currentPage}
                     totalPages={totalPages}

@@ -4,15 +4,20 @@ import { useState } from "react";
 import DashboardSidebar from "@/components/profile/dashboard-sidebar";
 import DashboardHeader from "@/components/profile/dashboard-header";
 import { useAuth } from "@/lib/auth/context";
+import { useUpload } from "@/lib/hooks/use-upload";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Upload, Loader2, Image as ImageIcon, X } from "lucide-react";
 
 export default function BecomeVendorPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { upgradeToVendor } = useAuth();
+  const { uploadFile } = useUpload();
   
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [storeLogoUrl, setStoreLogoUrl] = useState<string>("");
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   const [formData, setFormData] = useState({
     storeName: "",
@@ -29,13 +34,30 @@ export default function BecomeVendorPage() {
     postalCode: "",
   });
 
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setUploadingLogo(true);
+      const url = await uploadFile(file);
+      if (url) setStoreLogoUrl(url);
+    } catch (err) {
+      console.error("Failed to upload store logo:", err);
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
     
     try {
-      await upgradeToVendor(formData);
+      await upgradeToVendor({
+        ...formData,
+        storeLogo: storeLogoUrl || undefined,
+      });
       // Context handles redirection to /vendor
     } catch (err: any) {
       setError(err.message || "Failed to upgrade account. Please try again.");
@@ -119,6 +141,53 @@ export default function BecomeVendorPage() {
                         required
                         className="w-full h-24 px-4 py-3 rounded-md border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 resize-none"
                       />
+                    </div>
+
+                    {/* Store Logo */}
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Store Logo
+                      </label>
+                      <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center hover:border-emerald-500 transition-colors">
+                        {uploadingLogo ? (
+                          <div className="flex items-center justify-center gap-2 text-sm text-gray-600 py-2">
+                            <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+                            <span>Uploading store logo...</span>
+                          </div>
+                        ) : storeLogoUrl ? (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <img src={storeLogoUrl} alt="Store Logo" className="w-12 h-12 rounded-lg object-cover border" />
+                              <span className="text-xs text-emerald-600 font-semibold">✓ Store logo uploaded</span>
+                            </div>
+                            <Button type="button" variant="ghost" size="sm" onClick={() => setStoreLogoUrl("")} className="text-red-600 hover:bg-red-50">
+                              <X className="h-4 w-4 mr-1" /> Remove
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3 text-left">
+                              <ImageIcon className="h-8 w-8 text-gray-400" />
+                              <div>
+                                <p className="text-sm font-medium text-gray-900">Upload Store Logo</p>
+                                <p className="text-xs text-gray-500">PNG, JPG, WEBP up to 10MB</p>
+                              </div>
+                            </div>
+                            <label htmlFor="become-vendor-logo">
+                              <input
+                                id="become-vendor-logo"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleLogoUpload}
+                                className="sr-only"
+                              />
+                              <Button type="button" variant="outline" size="sm" onClick={() => document.getElementById("become-vendor-logo")?.click()}>
+                                <Upload className="h-4 w-4 mr-2" /> Upload
+                              </Button>
+                            </label>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

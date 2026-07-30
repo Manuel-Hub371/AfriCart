@@ -1,112 +1,144 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Users, Package } from "lucide-react";
+import { Star, Package, CheckCircle, MapPin } from "lucide-react";
 import Link from "next/link";
 
-const stores = [
-  {
-    id: "1",
-    name: "TechStore",
-    logo: "bg-gradient-to-br from-blue-500 to-blue-600",
-    banner: "bg-gradient-to-r from-blue-100 to-blue-200",
-    rating: 4.9,
-    followers: "125K",
-    products: 1543,
-  },
-  {
-    id: "2",
-    name: "Fashion Hub",
-    logo: "bg-gradient-to-br from-pink-500 to-pink-600",
-    banner: "bg-gradient-to-r from-pink-100 to-pink-200",
-    rating: 4.7,
-    followers: "98K",
-    products: 2341,
-  },
-  {
-    id: "3",
-    name: "Gadget World",
-    logo: "bg-gradient-to-br from-green-500 to-green-600",
-    banner: "bg-gradient-to-r from-green-100 to-green-200",
-    rating: 4.8,
-    followers: "156K",
-    products: 987,
-  },
-  {
-    id: "4",
-    name: "Beauty Plus",
-    logo: "bg-gradient-to-br from-green-500 to-green-600",
-    banner: "bg-gradient-to-r from-green-100 to-green-200",
-    rating: 4.6,
-    followers: "78K",
-    products: 654,
-  },
-];
-
 export function PopularStores() {
+  const [stores, setStores] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadStores() {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/stores");
+        if (res.ok) {
+          const data = await res.json();
+          setStores(data.slice(0, 4));
+        }
+      } catch (err) {
+        console.error("Failed to load popular stores:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadStores();
+  }, []);
+
   return (
     <section className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
             Popular Stores
           </h2>
           <p className="text-lg text-gray-600">
-            Shop from our trusted and verified sellers
+            Shop directly from trusted and verified sellers on AfriCart
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {stores.map((store) => (
-            <Card
-              key={store.id}
-              className="overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              {/* Banner */}
-              <div className={`h-24 ${store.banner}`}></div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-44 bg-gray-100 rounded-2xl animate-pulse"></div>
+            ))}
+          </div>
+        ) : stores.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {stores.map((store) => {
+              const isLogoUrl = Boolean(
+                store.logo && (store.logo.startsWith("http") || store.logo.startsWith("/"))
+              );
+              const isBannerUrl = Boolean(
+                store.banner && (store.banner.startsWith("http") || store.banner.startsWith("/"))
+              );
+              const storeHref = `/stores/${store.slug || store.id}`;
 
-              {/* Content */}
-              <div className="p-6">
-                <div className="flex items-start gap-4">
-                  {/* Logo */}
-                  <div
-                    className={`w-16 h-16 ${store.logo} rounded-lg flex items-center justify-center text-white font-bold text-2xl -mt-12 border-4 border-white shadow-md`}
-                  >
-                    {store.name.charAt(0)}
+              return (
+                <Card
+                  key={store.id}
+                  className="overflow-hidden border border-gray-200 rounded-3xl hover:shadow-xl transition-all group bg-white flex flex-col justify-between"
+                >
+                  {/* Store Banner */}
+                  <div className="h-28 relative bg-gradient-to-r from-emerald-500 via-teal-600 to-green-600 overflow-hidden">
+                    {isBannerUrl ? (
+                      <img
+                        src={store.banner}
+                        alt={`${store.name} Banner`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-r from-emerald-600 to-teal-700 opacity-90"></div>
+                    )}
                   </div>
 
-                  <div className="flex-1">
-                    <Link href={`/store/${store.id}`}>
-                      <h3 className="text-xl font-bold text-gray-900 hover:text-primary transition-colors">
-                        {store.name}
-                      </h3>
-                    </Link>
+                  <div className="p-6 relative">
+                    <div className="flex items-start gap-4">
+                      {/* Store Logo Avatar */}
+                      <div className="w-16 h-16 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden -mt-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-black text-2xl z-10">
+                        {isLogoUrl ? (
+                          <img
+                            src={store.logo}
+                            alt={`${store.name} Logo`}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span>{store.name.charAt(0).toUpperCase()}</span>
+                        )}
+                      </div>
 
-                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                        <span className="font-medium">{store.rating}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        <span>{store.followers} followers</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Package className="h-4 w-4" />
-                        <span>{store.products} products</span>
+                      <div className="flex-1 min-w-0">
+                        <Link href={storeHref}>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <h3 className="text-xl font-extrabold text-gray-900 group-hover:text-emerald-600 transition-colors truncate">
+                              {store.name}
+                            </h3>
+                            <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                          </div>
+                        </Link>
+
+                        <div className="flex items-center gap-3 text-xs text-gray-600 flex-wrap">
+                          <div className="flex items-center gap-1 font-bold text-gray-900">
+                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                            <span>4.9</span>
+                          </div>
+                          <span>•</span>
+                          <div className="flex items-center gap-1">
+                            <Package className="h-3.5 w-3.5 text-gray-400" />
+                            <span className="font-semibold text-gray-700">{store.productCount || 0} products</span>
+                          </div>
+                          {store.category && (
+                            <>
+                              <span>•</span>
+                              <span className="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-100">
+                                {store.category}
+                              </span>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                <Link href={`/store/${store.id}`}>
-                  <Button className="w-full mt-4" variant="outline">
-                    Visit Store
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          ))}
-        </div>
+                    <p className="text-xs text-gray-500 mt-3 line-clamp-2">
+                      {store.description || "Verified regional seller offering high quality products on AfriCart."}
+                    </p>
+
+                    <Link href={storeHref} className="block mt-5">
+                      <Button className="w-full h-11 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white">
+                        Visit Store →
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">No stores found.</div>
+        )}
       </div>
     </section>
   );

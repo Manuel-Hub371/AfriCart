@@ -98,7 +98,7 @@ export default function VerifyEmailPage() {
               Verify Your Email
             </h1>
             <p className="text-gray-600">
-              We've sent a verification code to<br />
+              We&apos;ve sent a verification code to<br />
               <span className="font-semibold text-gray-900">john@example.com</span>
             </p>
           </div>
@@ -114,7 +114,7 @@ export default function VerifyEmailPage() {
                 {code.map((digit, index) => (
                   <Input
                     key={index}
-                    ref={(el) => (inputRefs.current[index] = el)}
+                    ref={(el) => { inputRefs.current[index] = el; }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
@@ -166,7 +166,7 @@ export default function VerifyEmailPage() {
           {/* Help Text */}
           <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
             <p className="text-sm text-gray-700 text-center">
-              Didn't receive the code? Check your spam folder or{" "}
+              Didn&apos;t receive the code? Check your spam folder or{" "}
               <Link href="/auth/register" className="font-semibold text-green-600 hover:underline">
                 use a different email
               </Link>

@@ -4,113 +4,77 @@ import {
   Package, 
   AlertTriangle, 
   XCircle, 
-  Clock,
-  Lock,
-  TrendingUp,
-  TrendingDown,
   DollarSign
 } from "lucide-react";
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  change: number;
-  icon: React.ReactNode;
-  trend: "up" | "down";
-  prefix?: string;
-  suffix?: string;
+interface InventoryStatsProps {
+  totalProducts?: number;
+  totalStockUnits?: number;
+  lowStockCount?: number;
+  outOfStockCount?: number;
+  totalValue?: number;
 }
 
-function StatCard({ title, value, change, icon, trend, prefix = "", suffix = "" }: StatCardProps) {
-  const isPositive = trend === "up";
-  
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
-          <h3 className="text-3xl font-bold text-gray-900 mb-2">
-            {prefix}{typeof value === 'number' ? value.toLocaleString() : value}{suffix}
-          </h3>
-          <div className="flex items-center gap-1 text-sm">
-            {isPositive ? (
-              <TrendingUp className="h-4 w-4 text-emerald-600" />
-            ) : (
-              <TrendingDown className="h-4 w-4 text-red-600" />
-            )}
-            <span className={isPositive ? "text-emerald-600" : "text-red-600"}>
-              {Math.abs(change)}%
-            </span>
-            <span className="text-gray-500">vs last month</span>
-          </div>
-        </div>
-        <div className="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export function InventoryStatistics() {
-  const stats = [
-    { 
-      title: "Total Products", 
-      value: 1245, 
-      change: 8.2, 
-      icon: <Package className="h-6 w-6" />, 
-      trend: "up" as const 
-    },
-    { 
-      title: "Total Stock Units", 
-      value: 45678, 
-      change: 12.5, 
-      icon: <Package className="h-6 w-6" />, 
-      trend: "up" as const 
-    },
-    { 
-      title: "Low Stock Products", 
-      value: 46, 
-      change: -15.3, 
-      icon: <AlertTriangle className="h-6 w-6" />, 
-      trend: "down" as const 
-    },
-    { 
-      title: "Out of Stock", 
-      value: 23, 
-      change: -22.1, 
-      icon: <XCircle className="h-6 w-6" />, 
-      trend: "down" as const 
-    },
-    { 
-      title: "Reserved Stock", 
-      value: 1234, 
-      change: 5.7, 
-      icon: <Lock className="h-6 w-6" />, 
-      trend: "up" as const 
-    },
-    { 
-      title: "Incoming Stock", 
-      value: 2890, 
-      change: 18.9, 
-      icon: <Clock className="h-6 w-6" />, 
-      trend: "up" as const 
-    },
-    { 
-      title: "Inventory Value", 
-      value: "567K", 
-      change: 14.3, 
-      icon: <DollarSign className="h-6 w-6" />, 
-      trend: "up" as const,
-      prefix: "$"
-    },
-  ];
-
+export function InventoryStatistics({
+  totalProducts = 0,
+  totalStockUnits = 0,
+  lowStockCount = 0,
+  outOfStockCount = 0,
+  totalValue = 0,
+}: InventoryStatsProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {stats.map((stat) => (
-        <StatCard key={stat.title} {...stat} />
-      ))}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Total Products</p>
+            <h3 className="text-3xl font-extrabold text-gray-900">{totalProducts}</h3>
+            <p className="text-xs text-gray-400 mt-1">Catalog items</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <Package className="h-6 w-6" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Total Stock Units</p>
+            <h3 className="text-3xl font-extrabold text-gray-900">{totalStockUnits.toLocaleString()}</h3>
+            <p className="text-xs text-gray-400 mt-1">Available inventory</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <Package className="h-6 w-6" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Low Stock Items</p>
+            <h3 className="text-3xl font-extrabold text-amber-600">{lowStockCount}</h3>
+            <p className="text-xs text-gray-400 mt-1">Stock ≤ 10 units</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <AlertTriangle className="h-6 w-6" />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="text-sm font-medium text-gray-500 mb-1">Inventory Valuation</p>
+            <h3 className="text-3xl font-extrabold text-emerald-600">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+            <p className="text-xs text-gray-400 mt-1">Total asset value</p>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <DollarSign className="h-6 w-6" />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
@@ -43,15 +43,15 @@ export default function ResetPasswordPage() {
     if (/[^a-zA-Z\d]/.test(password)) score++;
 
     const strengthMap = [
-      { label: "", color: "" },
-      { label: "Very Weak", color: "bg-red-500" },
-      { label: "Weak", color: "bg-orange-500" },
-      { label: "Fair", color: "bg-yellow-500" },
-      { label: "Good", color: "bg-green-500" },
-      { label: "Strong", color: "bg-emerald-600" },
+      { score: 0, label: "", color: "" },
+      { score: 1, label: "Very Weak", color: "bg-red-500" },
+      { score: 2, label: "Weak", color: "bg-orange-500" },
+      { score: 3, label: "Fair", color: "bg-yellow-500" },
+      { score: 4, label: "Good", color: "bg-green-500" },
+      { score: 5, label: "Strong", color: "bg-emerald-600" },
     ];
 
-    setPasswordStrength(strengthMap[score]);
+    setPasswordStrength(strengthMap[score] || strengthMap[0]);
   }, [formData.password]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,5 +203,13 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </AuthLayout>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }

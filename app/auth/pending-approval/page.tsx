@@ -111,8 +111,8 @@ export default function PendingApprovalPage() {
               <div>
                 <p className="text-sm font-semibold text-gray-900 mb-1">What happens next?</p>
                 <ul className="text-sm text-gray-700 space-y-1">
-                  <li>• We'll review your application within 1-3 business days</li>
-                  <li>• You'll receive an email notification about your application status</li>
+                  <li>• We&apos;ll review your application within 1-3 business days</li>
+                  <li>• You&apos;ll receive an email notification about your application status</li>
                   <li>• Once approved, you can start listing products immediately</li>
                   <li>• Our support team may contact you if additional information is needed</li>
                 </ul>

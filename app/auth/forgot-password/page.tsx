@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
               Forgot Password?
             </h1>
             <p className="text-gray-600">
-              No worries! Enter your email and we'll send you a reset link.
+              No worries! Enter your email and we&apos;ll send you a reset link.
             </p>
           </div>
 
@@ -91,7 +91,7 @@ export default function ForgotPasswordPage() {
           {/* Info Box */}
           <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-xl">
             <p className="text-sm text-gray-700">
-              <span className="font-semibold">Note:</span> The password reset link will be valid for 1 hour. Check your spam folder if you don't see the email.
+              <span className="font-semibold">Note:</span> The password reset link will be valid for 1 hour. Check your spam folder if you don&apos;t see the email.
             </p>
           </div>
 

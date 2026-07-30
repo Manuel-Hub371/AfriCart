@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       // Personal
       firstName, lastName, email, phone, password,
       // Store Info
-      storeName, storeDescription, storeCategory,
+      storeName, storeDescription, storeCategory, storeLogo, storeBanner,
       // Business Info
       businessType, businessName, registrationNumber, taxId,
       // Contact
@@ -142,6 +142,8 @@ export async function POST(req: Request) {
           name: storeName,
           slug,
           description: storeDescription || null,
+          logo: storeLogo || null,
+          banner: storeBanner || null,
           category: storeCategory
         }
       });

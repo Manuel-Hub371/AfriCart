@@ -1,8 +1,32 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Store, Sparkles, TrendingUp, Zap } from "lucide-react";
 import Link from "next/link";
 
 export function HeroSection() {
+  const [stats, setStats] = useState<{ totalProducts: number; totalStores: number; totalCustomers: number }>({
+    totalProducts: 0,
+    totalStores: 0,
+    totalCustomers: 0,
+  });
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const res = await fetch("/api/marketplace/stats");
+        if (res.ok) {
+          const data = await res.json();
+          setStats(data);
+        }
+      } catch {
+        // ignore
+      }
+    }
+    loadStats();
+  }, []);
+
   return (
     <section className="relative bg-gradient-to-br from-green-50 via-white to-emerald-50 overflow-hidden">
       {/* Animated Background Elements */}
@@ -19,7 +43,9 @@ export function HeroSection() {
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 border border-green-200 shadow-sm">
               <Sparkles className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-semibold text-green-700">Trusted by 10,000+ shoppers</span>
+              <span className="text-sm font-semibold text-green-700">
+                {stats.totalCustomers > 0 ? `Trusted by ${stats.totalCustomers}+ registered shoppers` : "Multi-Vendor Marketplace"}
+              </span>
             </div>
 
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-tight">
@@ -29,7 +55,7 @@ export function HeroSection() {
             </h1>
             
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-xl">
-              Shop from trusted sellers, explore thousands of products, and enjoy a seamless shopping experience with exclusive deals.
+              Shop from verified regional sellers, explore thousands of products, and enjoy a seamless shopping experience with fast delivery.
             </p>
 
             {/* Stats */}
@@ -37,14 +63,14 @@ export function HeroSection() {
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp className="h-5 w-5 text-green-600" />
-                  <span className="text-3xl font-bold text-gray-900">50K+</span>
+                  <span className="text-3xl font-bold text-gray-900">{stats.totalProducts}</span>
                 </div>
-                <p className="text-sm text-gray-600">Products</p>
+                <p className="text-sm text-gray-600">Active Products</p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <Store className="h-5 w-5 text-green-600" />
-                  <span className="text-3xl font-bold text-gray-900">500+</span>
+                  <span className="text-3xl font-bold text-gray-900">{stats.totalStores}</span>
                 </div>
                 <p className="text-sm text-gray-600">Verified Stores</p>
               </div>
@@ -53,7 +79,7 @@ export function HeroSection() {
                   <Zap className="h-5 w-5 text-green-600" />
                   <span className="text-3xl font-bold text-gray-900">24/7</span>
                 </div>
-                <p className="text-sm text-gray-600">Support</p>
+                <p className="text-sm text-gray-600">Fulfillment</p>
               </div>
             </div>
 
@@ -73,7 +99,7 @@ export function HeroSection() {
             </div>
           </div>
 
-          {/* Right: Product Cards Grid */}
+          {/* Right: Product Showcase Visual */}
           <div className="relative lg:pl-8">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-4 animate-slide-up">
@@ -84,12 +110,6 @@ export function HeroSection() {
                   <div className="space-y-2">
                     <div className="h-2 bg-gray-200 rounded-full w-3/4"></div>
                     <div className="h-2 bg-gray-200 rounded-full w-1/2"></div>
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="h-3 bg-green-200 rounded-full w-1/3"></div>
-                      <div className="w-8 h-8 rounded-full bg-green-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ShoppingBag className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
                   </div>
                 </div>
                 <div className="group bg-white p-5 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 card-hover cursor-pointer">
@@ -99,12 +119,6 @@ export function HeroSection() {
                   <div className="space-y-2">
                     <div className="h-2 bg-gray-200 rounded-full w-3/4"></div>
                     <div className="h-2 bg-gray-200 rounded-full w-1/2"></div>
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="h-3 bg-indigo-200 rounded-full w-1/3"></div>
-                      <div className="w-8 h-8 rounded-full bg-emerald-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ShoppingBag className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -116,12 +130,6 @@ export function HeroSection() {
                   <div className="space-y-2">
                     <div className="h-2 bg-gray-200 rounded-full w-3/4"></div>
                     <div className="h-2 bg-gray-200 rounded-full w-1/2"></div>
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="h-3 bg-pink-200 rounded-full w-1/3"></div>
-                      <div className="w-8 h-8 rounded-full bg-pink-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ShoppingBag className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
                   </div>
                 </div>
                 <div className="group bg-white p-5 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-300 card-hover cursor-pointer">
@@ -131,21 +139,9 @@ export function HeroSection() {
                   <div className="space-y-2">
                     <div className="h-2 bg-gray-200 rounded-full w-3/4"></div>
                     <div className="h-2 bg-gray-200 rounded-full w-1/2"></div>
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="h-3 bg-amber-200 rounded-full w-1/3"></div>
-                      <div className="w-8 h-8 rounded-full bg-amber-600 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ShoppingBag className="h-4 w-4 text-white" />
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Floating Badge */}
-            <div className="absolute -top-4 -right-4 bg-gradient-to-br from-orange-400 to-red-500 text-white px-6 py-3 rounded-2xl shadow-xl transform rotate-3 animate-float">
-              <p className="text-sm font-bold">50% OFF</p>
-              <p className="text-xs">This Week!</p>
             </div>
           </div>
         </div>

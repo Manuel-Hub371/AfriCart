@@ -11,12 +11,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Filter, X, ChevronDown } from "lucide-react";
+import { Filter, X } from "lucide-react";
 
 interface FilterOption {
   label: string;
   value: string;
-  count?: number;
 }
 
 interface ProductFiltersProps {
@@ -31,34 +30,30 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
   });
 
   const statusOptions: FilterOption[] = [
-    { label: "Published", value: "published", count: 1089 },
-    { label: "Draft", value: "draft", count: 87 },
-    { label: "Archived", value: "archived", count: 69 },
-    { label: "Low Stock", value: "low-stock", count: 46 },
-    { label: "Out of Stock", value: "out-of-stock", count: 23 },
-    { label: "Featured", value: "featured", count: 156 },
-    { label: "On Sale", value: "on-sale", count: 234 },
+    { label: "Published", value: "published" },
+    { label: "Draft", value: "draft" },
+    { label: "Archived", value: "archived" },
+    { label: "Low Stock", value: "low-stock" },
+    { label: "Out of Stock", value: "out-of-stock" },
   ];
 
   const categoryOptions: FilterOption[] = [
-    { label: "Electronics", value: "electronics", count: 345 },
-    { label: "Fashion", value: "fashion", count: 456 },
-    { label: "Home & Living", value: "home", count: 234 },
-    { label: "Beauty", value: "beauty", count: 123 },
-    { label: "Sports", value: "sports", count: 87 },
+    { label: "Electronics", value: "electronics" },
+    { label: "Fashion", value: "fashion" },
+    { label: "Home & Living", value: "home" },
+    { label: "Beauty", value: "beauty" },
+    { label: "Sports", value: "sports" },
   ];
 
   const toggleFilter = (filterType: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const current = prev[filterType] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      
-      const newFilters = { ...prev, [filterType]: updated };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    const current = selectedFilters[filterType] || [];
+    const updated = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    
+    const newFilters = { ...selectedFilters, [filterType]: updated };
+    setSelectedFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
   const clearAllFilters = () => {
@@ -79,7 +74,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
           <Filter className="h-4 w-4" />
           Status
           {selectedFilters.status?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.status.length}
             </Badge>
           )}
@@ -94,9 +89,6 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
               onCheckedChange={() => toggleFilter("status", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
@@ -107,7 +99,7 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
         <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
           Category
           {selectedFilters.category?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.category.length}
             </Badge>
           )}
@@ -122,11 +114,37 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
               onCheckedChange={() => toggleFilter("category", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
             </DropdownMenuCheckboxItem>
           ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      {/* Featured Filter */}
+      <DropdownMenu>
+        <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
+          <Filter className="h-4 w-4 text-amber-500" />
+          Featured Status
+          {selectedFilters.featured?.length > 0 && (
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-amber-100 text-amber-800 font-bold">
+              {selectedFilters.featured.length}
+            </Badge>
+          )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-56">
+          <DropdownMenuLabel>Filter by Featured Status</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuCheckboxItem
+            checked={selectedFilters.featured?.includes("featured")}
+            onCheckedChange={() => toggleFilter("featured", "featured")}
+          >
+            <span className="flex-1 font-semibold text-amber-700">★ Featured Products</span>
+          </DropdownMenuCheckboxItem>
+          <DropdownMenuCheckboxItem
+            checked={selectedFilters.featured?.includes("not-featured")}
+            onCheckedChange={() => toggleFilter("featured", "not-featured")}
+          >
+            <span className="flex-1">Not Featured</span>
+          </DropdownMenuCheckboxItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

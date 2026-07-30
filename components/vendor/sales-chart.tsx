@@ -11,25 +11,25 @@ import {
   Legend,
 } from "recharts";
 
-const mockData = [
-  { category: "Electronics", sales: 45678, orders: 234 },
-  { category: "Fashion", sales: 38920, orders: 456 },
-  { category: "Home", sales: 29450, orders: 178 },
-  { category: "Beauty", sales: 18765, orders: 289 },
-  { category: "Sports", sales: 15432, orders: 123 },
-];
+interface SalesChartProps {
+  data?: Array<{ category: string; sales: number; orders: number }>;
+}
 
-export function SalesChart() {
+export function SalesChart({ data }: SalesChartProps) {
+  const chartData = data && data.length > 0 ? data : [
+    { category: "General", sales: 0, orders: 0 },
+  ];
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6">
       <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-1">Sales by Category</h3>
-        <p className="text-sm text-gray-600">Revenue distribution across product categories</p>
+        <h3 className="text-lg font-bold text-gray-900 mb-1">Sales by Category</h3>
+        <p className="text-xs text-gray-500 font-medium">Revenue distribution across store categories from live database records</p>
       </div>
       
       <div className="h-80">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={mockData}>
+          <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
             <XAxis
               dataKey="category"
@@ -41,17 +41,17 @@ export function SalesChart() {
               stroke="#6b7280"
               fontSize={12}
               tickLine={false}
-              tickFormatter={(value) => `$${value / 1000}k`}
+              tickFormatter={(value) => `$${value}`}
             />
             <Tooltip
               contentStyle={{
                 backgroundColor: "#fff",
                 border: "1px solid #e5e7eb",
-                borderRadius: "8px",
+                borderRadius: "12px",
               }}
-              formatter={(value: number, name: string) => [
-                name === "sales" ? `$${value.toLocaleString()}` : value,
-                name === "sales" ? "Sales" : "Orders"
+              formatter={(value: any, name: any) => [
+                name === "sales" || name === "Sales" ? `$${Number(value || 0).toFixed(2)}` : value,
+                name === "sales" || name === "Sales" ? "Sales" : "Orders"
               ]}
             />
             <Legend />

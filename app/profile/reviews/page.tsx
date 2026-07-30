@@ -1,69 +1,62 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardSidebar from "@/components/profile/dashboard-sidebar";
 import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
-import { Star, Edit } from "lucide-react";
+import { Star, Trash2 } from "lucide-react";
 import Link from "next/link";
 
-const pendingReviews = [
-  {
-    id: "1",
-    productId: "p1",
-    productName: "Premium Wireless Headphones",
-    productImage: "bg-gradient-to-br from-blue-400 to-blue-500",
-    purchaseDate: "July 5, 2026",
-    vendor: "Tech World",
-  },
-  {
-    id: "2",
-    productId: "p2",
-    productName: "Smart Watch Pro",
-    productImage: "bg-gradient-to-br from-green-400 to-green-500",
-    purchaseDate: "July 3, 2026",
-    vendor: "Fashion Hub",
-  },
-];
-
-const submittedReviews = [
-  {
-    id: "1",
-    productId: "p3",
-    productName: "Designer Sneakers",
-    productImage: "bg-gradient-to-br from-pink-400 to-pink-500",
-    rating: 5,
-    review:
-      "Absolutely love these sneakers! The quality is amazing and they're so comfortable. Highly recommend!",
-    date: "June 28, 2026",
-    vendor: "Shoe Palace",
-  },
-  {
-    id: "2",
-    productId: "p4",
-    productName: "Leather Backpack",
-    productImage: "bg-gradient-to-br from-orange-400 to-orange-500",
-    rating: 4,
-    review:
-      "Great backpack with plenty of storage. The leather quality is good but could be better for the price.",
-    date: "June 20, 2026",
-    vendor: "Bag Store",
-  },
-  {
-    id: "3",
-    productId: "p5",
-    productName: "Wireless Mouse",
-    productImage: "bg-gradient-to-br from-gray-400 to-gray-500",
-    rating: 5,
-    review:
-      "Perfect mouse for work. Very responsive and the battery lasts forever. Worth every penny!",
-    date: "June 15, 2026",
-    vendor: "Tech Accessories",
-  },
-];
+interface CustomerReview {
+  id: string;
+  productId: string;
+  productName?: string;
+  productImage?: string;
+  rating: number;
+  comment?: string;
+  createdAt: string;
+}
 
 export default function ReviewsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [reviews, setReviews] = useState<CustomerReview[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchMyReviews() {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/profile/reviews");
+        if (res.ok) {
+          const data = await res.json();
+          setReviews(data);
+        }
+      } catch (err) {
+        console.error("Failed to load customer reviews:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchMyReviews();
+  }, []);
+
+  const handleDeleteReview = async (reviewId: string) => {
+    if (!confirm("Are you sure you want to delete this review?")) return;
+    try {
+      setDeletingId(reviewId);
+      const res = await fetch(`/api/profile/reviews?id=${reviewId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setReviews((prev) => prev.filter((r) => r.id !== reviewId));
+      }
+    } catch (err) {
+      console.error("Failed to delete review:", err);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const renderStars = (rating: number) => {
     return (
@@ -96,86 +89,77 @@ export default function ReviewsPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">My Reviews</h1>
             <p className="text-gray-600">
-              Review your purchases and see your feedback
+              Review your purchases and manage your feedback
             </p>
           </div>
 
-          {/* Pending Reviews */}
-          {pendingReviews.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold mb-4">
-                Pending Reviews ({pendingReviews.length})
-              </h2>
-              <div className="space-y-4">
-                {pendingReviews.map((item) => (
-                  <div
-                    key={item.id}
-                    className="bg-white rounded-lg border p-6"
-                  >
-                    <div className="flex gap-4">
-                      <div
-                        className={`w-24 h-24 ${item.productImage} rounded-lg flex-shrink-0`}
-                      />
-                      <div className="flex-1">
-                        <Link
-                          href={`/product/${item.productId}`}
-                          className="font-semibold text-gray-900 hover:text-emerald-600"
-                        >
-                          {item.productName}
-                        </Link>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {item.vendor}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Purchased on {item.purchaseDate}
-                        </p>
-                        <Button className="mt-4" size="sm">
-                          Write Review
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Submitted Reviews */}
           <div>
             <h2 className="text-xl font-semibold mb-4">
-              Your Reviews ({submittedReviews.length})
+              Your Submitted Reviews ({reviews.length})
             </h2>
-            <div className="space-y-4">
-              {submittedReviews.map((review) => (
-                <div key={review.id} className="bg-white rounded-lg border p-6">
-                  <div className="flex gap-4">
-                    <div
-                      className={`w-24 h-24 ${review.productImage} rounded-lg flex-shrink-0`}
-                    />
-                    <div className="flex-1">
-                      <Link
-                        href={`/product/${review.productId}`}
-                        className="font-semibold text-gray-900 hover:text-emerald-600"
-                      >
-                        {review.productName}
-                      </Link>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {review.vendor}
-                      </p>
-                      <div className="mt-2">{renderStars(review.rating)}</div>
-                      <p className="text-gray-700 mt-3">{review.review}</p>
-                      <div className="flex items-center gap-4 mt-4">
-                        <p className="text-sm text-gray-500">{review.date}</p>
-                        <Button variant="ghost" size="sm" className="gap-2">
-                          <Edit className="h-4 w-4" />
-                          Edit Review
-                        </Button>
+
+            {isLoading ? (
+              <div className="py-12 text-center text-gray-500">
+                Loading your reviews...
+              </div>
+            ) : reviews.length === 0 ? (
+              <div className="bg-white rounded-lg border p-8 text-center text-gray-500">
+                You haven&apos;t submitted any reviews yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {reviews.map((review) => {
+                  const formattedDate = new Date(review.createdAt).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  });
+
+                  return (
+                    <div key={review.id} className="bg-white rounded-lg border p-6">
+                      <div className="flex gap-4">
+                        {review.productImage ? (
+                          <img
+                            src={review.productImage}
+                            alt={review.productName || "Product"}
+                            className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                          />
+                        ) : (
+                          <div className="w-20 h-20 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 text-emerald-700 font-bold text-lg">
+                            {review.productName ? review.productName[0] : "P"}
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <Link
+                            href={`/product/${review.productId}`}
+                            className="font-semibold text-gray-900 hover:text-emerald-600"
+                          >
+                            {review.productName || "Product"}
+                          </Link>
+                          <div className="mt-2">{renderStars(review.rating)}</div>
+                          {review.comment && (
+                            <p className="text-gray-700 mt-3 text-sm">{review.comment}</p>
+                          )}
+                          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
+                            <p className="text-xs text-gray-500">{formattedDate}</p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={deletingId === review.id}
+                              onClick={() => handleDeleteReview(review.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete
+                            </Button>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </main>
       </div>

@@ -40,7 +40,7 @@ export function RevenueOverviewChart() {
               borderRadius: "8px",
               fontSize: "12px",
             }}
-            formatter={(value: number) => `$${value.toLocaleString()}`}
+            formatter={(value: any) => `$${Number(value || 0).toLocaleString()}`}
           />
           <Legend 
             wrapperStyle={{ fontSize: "12px" }}

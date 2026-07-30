@@ -28,6 +28,8 @@ export interface Order {
     name: string;
     image: string;
     quantity: number;
+    sku?: string;
+    price?: number;
   }>;
   totalAmount: number;
   paymentStatus: "paid" | "pending" | "failed" | "refunded";

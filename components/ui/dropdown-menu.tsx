@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface DropdownContextValue {
   open: boolean;
   setOpen: (open: boolean) => void;
-  containerRef?: React.RefObject<HTMLDivElement>;
+  containerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 const DropdownContext = React.createContext<DropdownContextValue>({

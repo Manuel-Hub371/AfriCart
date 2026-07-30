@@ -15,6 +15,7 @@ import {
   LogOut,
   X,
   Store,
+  MessageSquare,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/lib/auth/context";
@@ -27,6 +28,7 @@ interface DashboardSidebarProps {
 const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/profile" },
   { icon: ShoppingBag, label: "My Orders", href: "/profile/orders" },
+  { icon: MessageSquare, label: "Messages", href: "/profile/messages" },
   { icon: Heart, label: "Wishlist", href: "/profile/wishlist" },
   { icon: Star, label: "Reviews", href: "/profile/reviews" },
   { icon: MapPin, label: "Addresses", href: "/profile/addresses" },
@@ -87,10 +89,14 @@ export default function DashboardSidebar({
         {/* Profile Section */}
         <div className="p-6 border-b">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12">
-              <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-lg font-bold">
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
-              </div>
+            <Avatar className="h-12 w-12 overflow-hidden">
+              {user?.avatar ? (
+                <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-lg font-bold">
+                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                </div>
+              )}
             </Avatar>
             <div>
               <h3 className="font-semibold text-gray-900">{user?.firstName} {user?.lastName}</h3>

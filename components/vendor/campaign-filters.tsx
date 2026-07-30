@@ -10,14 +10,12 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { Filter, X, ArrowUpDown } from "lucide-react";
+import { Filter, X } from "lucide-react";
 
 interface FilterOption {
   label: string;
   value: string;
-  count?: number;
 }
 
 interface CampaignFiltersProps {
@@ -32,31 +30,21 @@ export function CampaignFilters({ onFilterChange, onSort }: CampaignFiltersProps
   });
 
   const statusOptions: FilterOption[] = [
-    { label: "Active", value: "active", count: 8 },
-    { label: "Scheduled", value: "scheduled", count: 3 },
-    { label: "Paused", value: "paused", count: 1 },
-    { label: "Ended", value: "ended", count: 15 },
-  ];
-
-  const typeOptions: FilterOption[] = [
-    { label: "Percentage Off", value: "percentage-discount", count: 12 },
-    { label: "Fixed Amount", value: "fixed-discount", count: 6 },
-    { label: "Buy One Get One", value: "bogo", count: 4 },
-    { label: "Bundle Discount", value: "bundle", count: 3 },
-    { label: "Free Shipping", value: "free-shipping", count: 2 },
+    { label: "Active", value: "active" },
+    { label: "Scheduled", value: "scheduled" },
+    { label: "Paused", value: "paused" },
+    { label: "Ended", value: "ended" },
   ];
 
   const toggleFilter = (filterType: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const current = prev[filterType] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      
-      const newFilters = { ...prev, [filterType]: updated };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    const current = selectedFilters[filterType] || [];
+    const updated = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    
+    const newFilters = { ...selectedFilters, [filterType]: updated };
+    setSelectedFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
   const clearAllFilters = () => {
@@ -71,13 +59,13 @@ export function CampaignFilters({ onFilterChange, onSort }: CampaignFiltersProps
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {/* Status Filter */}
+      {/* Campaign Status Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
           <Filter className="h-4 w-4" />
           Status
           {selectedFilters.status?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.status.length}
             </Badge>
           )}
@@ -92,63 +80,8 @@ export function CampaignFilters({ onFilterChange, onSort }: CampaignFiltersProps
               onCheckedChange={() => toggleFilter("status", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
             </DropdownMenuCheckboxItem>
           ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Type Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
-          Campaign Type
-          {selectedFilters.type?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
-              {selectedFilters.type.length}
-            </Badge>
-          )}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {typeOptions.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option.value}
-              checked={selectedFilters.type?.includes(option.value)}
-              onCheckedChange={() => toggleFilter("type", option.value)}
-            >
-              <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Sort */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
-          <ArrowUpDown className="h-4 w-4" />
-          Sort
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuLabel>Sort By</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => onSort("newest")}>
-            Newest First
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSort("highest-revenue")}>
-            Highest Revenue
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSort("most-orders")}>
-            Most Orders
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSort("best-conversion")}>
-            Best Conversion
-          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

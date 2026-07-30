@@ -35,7 +35,7 @@ export async function generateAccessToken(payload: JWTPayload): Promise<string> 
 /**
  * Generate refresh token
  */
-export async function generateRefreshToken(payload: { userId: string }): Promise<string> {
+export async function generateRefreshToken(payload: Partial<JWTPayload> & { userId: string }): Promise<string> {
   return jwtGenerateRefreshToken(payload);
 }
 
@@ -53,7 +53,7 @@ export async function setAuthCookies(payload: JWTPayload) {
   const cookieStore = await cookies();
   
   const accessToken = await generateAccessToken(payload);
-  const refreshToken = await generateRefreshToken({ userId: payload.userId });
+  const refreshToken = await generateRefreshToken(payload);
 
   const isProd = process.env.NODE_ENV === "production";
 
@@ -119,19 +119,28 @@ export function setResponseCookies(response: NextResponse, accessToken: string, 
 /**
  * Format user database record to API response structure (includes legacy role compatibility)
  */
-export function formatUserResponse(user: any, roles: string[], permissions: string[]) {
-  const legacyRole = roles.includes("ADMIN") 
-    ? "admin" 
-    : (roles.includes("VENDOR") ? "vendor" : "customer");
-  
+export function formatUserResponse(user: any, rawRoles: string[], permissions: string[]) {
   const hasVendorProfile = !!user.vendorProfile;
   const store = user.vendorProfile?.stores?.[0];
+
+  const roles = [...new Set([
+    ...rawRoles,
+    ...(hasVendorProfile ? ["VENDOR"] : [])
+  ])];
+
+  const isAdmin = roles.some((r) => r.toUpperCase() === "ADMIN");
+  const isVendor = roles.some((r) => r.toUpperCase() === "VENDOR") || hasVendorProfile;
+
+  const legacyRole = isAdmin 
+    ? "admin" 
+    : (isVendor ? "vendor" : "customer");
 
   return {
     id: user.id,
     email: user.email,
     firstName: user.firstName,
     lastName: user.lastName,
+    avatar: user.avatar || null,
     phone: user.phone || "",
     roles,
     role: legacyRole,
@@ -142,4 +151,29 @@ export function formatUserResponse(user: any, roles: string[], permissions: stri
       : undefined,
     createdAt: user.createdAt.toISOString()
   };
+}
+
+/**
+ * Get authenticated user ID from session cookies in API route handlers
+ */
+export async function getAuthenticatedUserId(): Promise<string | null> {
+  try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("afriCart_accessToken")?.value;
+    const refreshToken = cookieStore.get("afriCart_refreshToken")?.value;
+
+    if (accessToken) {
+      const decodedAccess = await verifyToken(accessToken);
+      if (decodedAccess?.userId) return decodedAccess.userId;
+    }
+
+    if (refreshToken) {
+      const decodedRefresh = await verifyToken(refreshToken);
+      if (decodedRefresh?.userId) return decodedRefresh.userId;
+    }
+
+    return null;
+  } catch (err) {
+    return null;
+  }
 }

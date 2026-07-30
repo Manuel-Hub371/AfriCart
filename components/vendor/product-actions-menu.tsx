@@ -16,6 +16,7 @@ import {
   TrendingUp,
   Archive,
   Trash2,
+  Sparkles,
 } from "lucide-react";
 
 interface ProductActionsMenuProps {
@@ -37,6 +38,10 @@ export function ProductActionsMenu({ productId, onAction }: ProductActionsMenuPr
         <DropdownMenuItem onClick={() => onAction("edit", productId)}>
           <Edit className="h-4 w-4 mr-2" />
           Edit Product
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => onAction("toggle-featured", productId)}>
+          <Sparkles className="h-4 w-4 mr-2 text-amber-500" />
+          Toggle Featured
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAction("duplicate", productId)}>
           <Copy className="h-4 w-4 mr-2" />

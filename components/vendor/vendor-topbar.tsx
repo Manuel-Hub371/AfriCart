@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth/context";
 
 interface VendorTopbarProps {
@@ -17,10 +18,27 @@ export default function VendorTopbar({
   onMenuClick,
   breadcrumbs = [{ label: "Dashboard" }],
 }: VendorTopbarProps) {
+  const router = useRouter();
   const { user, logout } = useAuth();
   const [profileOpen, setProfileOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function fetchNotificationCount() {
+      try {
+        const res = await fetch("/api/vendor/notifications");
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadNotifications(data.unreadCount || (data.notifications || []).filter((n: any) => !n.isRead).length || 0);
+        }
+      } catch {
+        // ignore fetch failures
+      }
+    }
+    fetchNotificationCount();
+  }, []);
   
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -86,12 +104,12 @@ export default function VendorTopbar({
                 {crumb.href ? (
                   <Link
                     href={crumb.href}
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-gray-600 hover:text-gray-900 font-medium"
                   >
                     {crumb.label}
                   </Link>
                 ) : (
-                  <span className="text-gray-900 font-medium">
+                  <span className="text-gray-900 font-bold">
                     {crumb.label}
                   </span>
                 )}
@@ -107,7 +125,7 @@ export default function VendorTopbar({
             <Input
               type="text"
               placeholder="Search products, orders, customers..."
-              className="pl-10 pr-4 w-full"
+              className="pl-10 pr-4 w-full rounded-xl"
             />
           </div>
         </div>
@@ -115,37 +133,42 @@ export default function VendorTopbar({
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
           {/* Notifications */}
-          <button className="relative p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <button
+            onClick={() => router.push("/vendor/notifications")}
+            className="relative p-2 hover:bg-gray-100 rounded-xl transition-colors"
+          >
             <Bell className="h-5 w-5 text-gray-700" />
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs bg-red-600">
-              3
-            </Badge>
+            {unreadNotifications > 0 && (
+              <Badge className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 flex items-center justify-center text-[10px] font-bold bg-red-600 text-white rounded-full">
+                {unreadNotifications > 99 ? "99+" : unreadNotifications}
+              </Badge>
+            )}
           </button>
 
           {/* Profile Dropdown */}
           <div className="relative" ref={profileRef}>
             <button
               onClick={() => setProfileOpen(!profileOpen)}
-              className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded-xl transition-colors"
             >
               <div className="w-8 h-8 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
                 {getVendorInitials()}
               </div>
               <div className="hidden sm:block text-left">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-bold text-gray-900 line-clamp-1">
                   {user?.storeName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Vendor"}
                 </p>
-                <p className="text-xs text-gray-600">Vendor</p>
+                <p className="text-xs text-gray-500">Vendor Store</p>
               </div>
             </button>
 
             {profileOpen && (
               <div className="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 overflow-hidden animate-slide-up z-50">
-                <div className="px-5 py-4 border-b bg-gradient-to-r from-green-50 to-emerald-50">
+                <div className="px-5 py-4 border-b bg-gradient-to-r from-emerald-50 to-teal-50">
                   <p className="text-sm font-bold text-gray-900">
                     {user ? `${user.firstName} ${user.lastName}` : "Vendor"}
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 mt-0.5 truncate">
                     {user ? user.email : ""}
                   </p>
                 </div>
@@ -153,32 +176,24 @@ export default function VendorTopbar({
                   <Link
                     href="/profile"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-green-50 transition-colors"
+                    className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition-colors"
                   >
                     <User className="h-4 w-4" />
                     My Profile
                   </Link>
                   <Link
-                    href="/profile/orders"
+                    href="/vendor/orders"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-green-50 transition-colors"
+                    className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-emerald-50 transition-colors"
                   >
                     <Package className="h-4 w-4" />
-                    My Orders
-                  </Link>
-                  <Link
-                    href="/profile/wishlist"
-                    onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-2.5 text-sm text-gray-700 hover:bg-green-50 transition-colors"
-                  >
-                    <Heart className="h-4 w-4" />
-                    Wishlist
+                    Vendor Orders
                   </Link>
                   <div className="border-t my-1"></div>
                   <Link
                     href="/vendor"
                     onClick={() => setProfileOpen(false)}
-                    className="flex items-center gap-3 px-5 py-2.5 text-sm text-emerald-600 font-medium hover:bg-emerald-50 transition-colors"
+                    className="flex items-center gap-3 px-5 py-2.5 text-sm text-emerald-600 font-bold hover:bg-emerald-50 transition-colors"
                   >
                     <Store className="h-4 w-4" />
                     Vendor Dashboard
@@ -188,7 +203,7 @@ export default function VendorTopbar({
                   <button 
                     onClick={handleLogout}
                     disabled={isLoggingOut}
-                    className="flex items-center gap-3 w-full px-5 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-3 w-full px-5 py-3 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <LogOut className="h-4 w-4" />
                     {isLoggingOut ? "Logging out..." : "Logout"}

@@ -1,172 +1,199 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardSidebar from "@/components/profile/dashboard-sidebar";
 import DashboardHeader from "@/components/profile/dashboard-header";
 import OrderCard from "@/components/profile/order-card";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Loader2, Package } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-const allOrders = [
-  {
-    orderId: "MK12345",
-    date: "July 8, 2026",
-    vendor: { name: "Tech World", verified: true },
-    products: [
-      {
-        name: "Premium Wireless Headphones",
-        image: "bg-gradient-to-br from-blue-400 to-blue-500",
-        quantity: 1,
-      },
-      {
-        name: "Smart Watch Pro",
-        image: "bg-gradient-to-br from-green-400 to-green-500",
-        quantity: 1,
-      },
-    ],
-    total: 320,
-    status: "Delivered" as const,
-  },
-  {
-    orderId: "MK12344",
-    date: "July 5, 2026",
-    vendor: { name: "Fashion House", verified: true },
-    products: [
-      {
-        name: "Designer Sneakers",
-        image: "bg-gradient-to-br from-pink-400 to-pink-500",
-        quantity: 2,
-      },
-    ],
-    total: 200,
-    status: "Shipped" as const,
-  },
-  {
-    orderId: "MK12343",
-    date: "July 2, 2026",
-    vendor: { name: "Home Essentials", verified: false },
-    products: [
-      {
-        name: "Kitchen Appliance Set",
-        image: "bg-gradient-to-br from-orange-400 to-orange-500",
-        quantity: 1,
-      },
-    ],
-    total: 150,
-    status: "Processing" as const,
-  },
-  {
-    orderId: "MK12342",
-    date: "June 28, 2026",
-    vendor: { name: "Book Store", verified: true },
-    products: [
-      {
-        name: "Programming Books Bundle",
-        image: "bg-gradient-to-br from-indigo-400 to-indigo-500",
-        quantity: 5,
-      },
-    ],
-    total: 89,
-    status: "Delivered" as const,
-  },
-  {
-    orderId: "MK12341",
-    date: "June 25, 2026",
-    vendor: { name: "Sports Shop", verified: true },
-    products: [
-      {
-        name: "Running Shoes",
-        image: "bg-gradient-to-br from-red-400 to-red-500",
-        quantity: 1,
-      },
-    ],
-    total: 120,
-    status: "Cancelled" as const,
-  },
-];
+// Map API OrderDTO -> OrderCard expected prop structure
+function toUIOrder(order: any) {
+  const firstItem = order.orderItems?.[0];
+  const vendorName = firstItem?.storeName || "AfriCart Store";
 
-const filterOptions = [
-  { label: "All Orders", value: "all" },
-  { label: "Processing", value: "Processing" },
-  { label: "Shipped", value: "Shipped" },
-  { label: "Delivered", value: "Delivered" },
-  { label: "Cancelled", value: "Cancelled" },
-];
+  let status: "Delivered" | "Shipped" | "Processing" | "Cancelled" = "Processing";
+  if (order.status === "DELIVERED") status = "Delivered";
+  else if (order.status === "SHIPPED") status = "Shipped";
+  else if (order.status === "CANCELLED") status = "Cancelled";
+  else status = "Processing";
+
+  return {
+    orderId: order.id.slice(0, 8).toUpperCase(),
+    fullId: order.id,
+    date: new Date(order.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    vendor: { name: vendorName, verified: true },
+    products: (order.orderItems || []).map((item: any) => ({
+      name: item.productName,
+      image: item.productImage || "",
+      quantity: item.quantity,
+    })),
+    total: Number(order.totalAmount || 0),
+    status,
+  };
+}
 
 export default function OrdersPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredOrders = allOrders.filter((order) => {
-    const matchesFilter =
-      activeFilter === "all" || order.status === activeFilter;
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/orders");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to load orders");
+      }
+      const data = await res.json();
+      setOrders((data.orders || []).map(toUIOrder));
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const filteredOrders = orders.filter((order) => {
+    const matchesTab =
+      activeTab === "all" ||
+      order.status.toLowerCase() === activeTab.toLowerCase();
+
     const matchesSearch =
       order.orderId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.vendor.name.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch;
+      order.products.some((p: any) =>
+        p.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+    return matchesTab && matchesSearch;
   });
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
       <DashboardSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
+      {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-            <p className="text-gray-600">
-              View and manage your order history
-            </p>
-          </div>
+          {/* Header & Search */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                My Orders
+              </h1>
+              <p className="text-gray-600">
+                Track and manage your order history
+              </p>
+            </div>
 
-          {/* Search */}
-          <div className="mb-6">
-            <div className="relative max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input
+                type="text"
+                placeholder="Search orders..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by order ID or vendor..."
-                className="pl-10"
+                className="pl-9 w-full sm:w-64 bg-white"
               />
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {filterOptions.map((option) => (
+          {/* Status Filter Tabs */}
+          <div className="flex gap-2 border-b border-gray-200 overflow-x-auto pb-2 mb-6">
+            {[
+              { id: "all", label: "All Orders" },
+              { id: "processing", label: "Processing" },
+              { id: "shipped", label: "Shipped" },
+              { id: "delivered", label: "Delivered" },
+              { id: "cancelled", label: "Cancelled" },
+            ].map((tab) => (
               <button
-                key={option.value}
-                onClick={() => setActiveFilter(option.value)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  activeFilter === option.value
-                    ? "bg-emerald-600 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-100 border"
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
+                  activeTab === tab.id
+                    ? "bg-emerald-50 text-emerald-600 font-semibold"
+                    : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                {option.label}
+                {tab.label}
               </button>
             ))}
           </div>
 
-          {/* Orders List */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {filteredOrders.length > 0 ? (
-              filteredOrders.map((order) => (
-                <OrderCard key={order.orderId} order={order} />
-              ))
-            ) : (
-              <div className="col-span-2 text-center py-12">
-                <p className="text-gray-600">No orders found</p>
+          {/* Loading State */}
+          {loading && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="h-48 bg-white rounded-xl border animate-pulse"
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Error State */}
+          {!loading && error && (
+            <div className="text-center py-12 bg-white rounded-xl border border-red-100 p-6">
+              <p className="text-red-600 font-medium mb-3">{error}</p>
+              <Button onClick={fetchOrders} variant="outline" size="sm">
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!loading && !error && filteredOrders.length === 0 && (
+            <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-emerald-50 rounded-full mb-4">
+                <Package className="h-8 w-8 text-emerald-600" />
               </div>
-            )}
-          </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                No orders found
+              </h3>
+              <p className="text-sm text-gray-500 max-w-sm mx-auto mb-6">
+                {searchQuery || activeTab !== "all"
+                  ? "No orders matched your search criteria."
+                  : "When you place an order, it will appear here."}
+              </p>
+              <Link href="/products">
+                <Button className="gradient-primary text-white">
+                  Start Shopping
+                </Button>
+              </Link>
+            </div>
+          )}
+
+          {/* Orders List Grid */}
+          {!loading && !error && filteredOrders.length > 0 && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {filteredOrders.map((order) => (
+                <OrderCard key={order.fullId} order={order} />
+              ))}
+            </div>
+          )}
         </main>
       </div>
     </div>

@@ -17,7 +17,7 @@ export function ReviewEmptyState({ onRefresh, onViewProducts }: ReviewEmptyState
           No Reviews Yet
         </h3>
         <p className="text-gray-600 mb-6">
-          You haven't received any customer reviews yet. Reviews will appear here once customers start reviewing your products.
+          You haven&apos;t received any customer reviews yet. Reviews will appear here once customers start reviewing your products.
         </p>
         <div className="flex items-center justify-center gap-3">
           <Button

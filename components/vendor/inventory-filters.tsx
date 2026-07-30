@@ -33,39 +33,35 @@ export function InventoryFilters({ onFilterChange, onSort }: InventoryFiltersPro
   });
 
   const statusOptions: FilterOption[] = [
-    { label: "In Stock", value: "in-stock", count: 1089 },
-    { label: "Low Stock", value: "low-stock", count: 46 },
-    { label: "Out of Stock", value: "out-of-stock", count: 23 },
-    { label: "Overstocked", value: "overstocked", count: 87 },
-    { label: "Incoming", value: "incoming", count: 156 },
+    { label: "In Stock", value: "in-stock" },
+    { label: "Low Stock", value: "low-stock" },
+    { label: "Out of Stock", value: "out-of-stock" },
   ];
 
   const categoryOptions: FilterOption[] = [
-    { label: "Electronics", value: "electronics", count: 345 },
-    { label: "Fashion", value: "fashion", count: 456 },
-    { label: "Home & Living", value: "home", count: 234 },
-    { label: "Beauty", value: "beauty", count: 123 },
-    { label: "Sports", value: "sports", count: 87 },
+    { label: "Electronics", value: "electronics" },
+    { label: "Fashion", value: "fashion" },
+    { label: "Home & Living", value: "home" },
+    { label: "Beauty", value: "beauty" },
+    { label: "Sports", value: "sports" },
   ];
 
   const warehouseOptions: FilterOption[] = [
-    { label: "Main Warehouse", value: "main", count: 789 },
-    { label: "East Warehouse", value: "east", count: 234 },
-    { label: "West Warehouse", value: "west", count: 156 },
-    { label: "Drop Shipping", value: "dropship", count: 66 },
+    { label: "Main Warehouse", value: "main" },
+    { label: "East Warehouse", value: "east" },
+    { label: "West Warehouse", value: "west" },
+    { label: "Drop Shipping", value: "dropship" },
   ];
 
   const toggleFilter = (filterType: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const current = prev[filterType] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      
-      const newFilters = { ...prev, [filterType]: updated };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    const current = selectedFilters[filterType] || [];
+    const updated = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    
+    const newFilters = { ...selectedFilters, [filterType]: updated };
+    setSelectedFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
   const clearAllFilters = () => {
@@ -86,7 +82,7 @@ export function InventoryFilters({ onFilterChange, onSort }: InventoryFiltersPro
           <Filter className="h-4 w-4" />
           Stock Status
           {selectedFilters.status?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.status.length}
             </Badge>
           )}
@@ -101,9 +97,6 @@ export function InventoryFilters({ onFilterChange, onSort }: InventoryFiltersPro
               onCheckedChange={() => toggleFilter("status", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
@@ -114,7 +107,7 @@ export function InventoryFilters({ onFilterChange, onSort }: InventoryFiltersPro
         <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
           Category
           {selectedFilters.category?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.category.length}
             </Badge>
           )}
@@ -129,37 +122,6 @@ export function InventoryFilters({ onFilterChange, onSort }: InventoryFiltersPro
               onCheckedChange={() => toggleFilter("category", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-
-      {/* Warehouse Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
-          Warehouse
-          {selectedFilters.warehouse?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
-              {selectedFilters.warehouse.length}
-            </Badge>
-          )}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel>Filter by Warehouse</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {warehouseOptions.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option.value}
-              checked={selectedFilters.warehouse?.includes(option.value)}
-              onCheckedChange={() => toggleFilter("warehouse", option.value)}
-            >
-              <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
@@ -185,12 +147,6 @@ export function InventoryFilters({ onFilterChange, onSort }: InventoryFiltersPro
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onSort("recently-updated")}>
             Recently Updated
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSort("inventory-value")}>
-            Inventory Value
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSort("highest-selling")}>
-            Highest Selling
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

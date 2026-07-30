@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { ProductStatusBadge } from "./product-status-badge";
 import { InventoryIndicator } from "./inventory-indicator";
 import { ProductActionsMenu } from "./product-actions-menu";
@@ -25,6 +23,9 @@ export interface Product {
   revenue: number;
   image: string;
   lastUpdated: string;
+  isFeatured?: boolean;
+  isBestSeller?: boolean;
+  bestSellerScore?: number;
 }
 
 interface ProductCardProps {
@@ -34,8 +35,12 @@ interface ProductCardProps {
   onAction: (action: string, productId: string) => void;
 }
 
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
+
 export function ProductCard({ product, isSelected, onSelect, onAction }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
+  const [imgSrc, setImgSrc] = useState(product.image || FALLBACK_IMAGE);
 
   return (
     <Card
@@ -54,7 +59,7 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
         >
           <Checkbox
             checked={isSelected}
-            onChange={(e) => onSelect(product.id)}
+            onChange={() => onSelect(product.id)}
             className="bg-white border-2 border-gray-300 shadow-sm"
           />
         </div>
@@ -74,16 +79,21 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
       </div>
 
       {/* Product Image */}
-      <div className="relative aspect-square bg-gray-100">
-        <Image
-          src={product.image}
+      <div className="relative aspect-square bg-gray-100 overflow-hidden">
+        <img
+          src={imgSrc}
           alt={product.name}
-          fill
-          className="object-cover"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={() => setImgSrc(FALLBACK_IMAGE)}
         />
         {/* Status Badge Overlay */}
-        <div className="absolute bottom-3 left-3">
+        <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 flex-wrap">
           <ProductStatusBadge status={product.status} />
+          {product.isFeatured && (
+            <span className="text-[10px] font-extrabold uppercase bg-amber-500 text-white px-2 py-0.5 rounded-full shadow-xs">
+              ★ Featured
+            </span>
+          )}
         </div>
       </div>
 
@@ -95,7 +105,7 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
             {product.name}
           </h3>
           <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>{product.sku}</span>
+            <span>{product.sku || "N/A"}</span>
             <span>•</span>
             <span>{product.category}</span>
           </div>
@@ -105,7 +115,7 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
         <div className="flex items-center justify-between">
           <div>
             <p className="text-2xl font-bold text-gray-900">
-              ${product.price.toFixed(2)}
+              ${Number(product.price).toFixed(2)}
             </p>
           </div>
           <InventoryIndicator stock={product.stock} />
@@ -117,13 +127,13 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
             <Star
               key={i}
               className={`h-4 w-4 ${
-                i < Math.floor(product.rating)
+                i < Math.floor(product.rating || 5)
                   ? "fill-yellow-400 text-yellow-400"
                   : "fill-gray-200 text-gray-200"
               }`}
             />
           ))}
-          <span className="text-sm text-gray-600 ml-1">({product.rating})</span>
+          <span className="text-sm text-gray-600 ml-1">({product.rating || 5})</span>
         </div>
 
         {/* Metrics */}
@@ -132,14 +142,14 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
             <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
               <Eye className="h-3 w-3" />
             </div>
-            <p className="text-xs font-semibold text-gray-900">{product.views}</p>
+            <p className="text-xs font-semibold text-gray-900">{product.views || 0}</p>
             <p className="text-xs text-gray-500">Views</p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
               <ShoppingCart className="h-3 w-3" />
             </div>
-            <p className="text-xs font-semibold text-gray-900">{product.sales}</p>
+            <p className="text-xs font-semibold text-gray-900">{product.sales || 0}</p>
             <p className="text-xs text-gray-500">Sales</p>
           </div>
           <div className="text-center">
@@ -147,7 +157,7 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
               <DollarSign className="h-3 w-3" />
             </div>
             <p className="text-xs font-semibold text-gray-900">
-              ${(product.revenue / 1000).toFixed(1)}k
+              ${((product.revenue || 0) / 1000).toFixed(1)}k
             </p>
             <p className="text-xs text-gray-500">Revenue</p>
           </div>

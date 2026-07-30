@@ -18,6 +18,8 @@ interface AuthContextType extends AuthState {
   registerCustomer: (data: RegisterCustomerData) => Promise<void>;
   registerVendor: (data: RegisterVendorData) => Promise<void>;
   upgradeToVendor: (data: any) => Promise<void>;
+  updateUser: (updatedUser: User) => void;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -179,6 +181,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [router]);
 
+  // Update user locally
+  const updateUser = useCallback((updatedUser: User) => {
+    storage.setUser(updatedUser);
+    setState((prev) => ({
+      ...prev,
+      user: updatedUser,
+    }));
+  }, []);
+
+  // Fetch fresh user from server
+  const refreshUser = useCallback(async () => {
+    try {
+      const user = await authService.getCurrentUser();
+      if (user) {
+        storage.setUser(user);
+        setState((prev) => ({
+          ...prev,
+          user,
+        }));
+      }
+    } catch {
+      // ignore refresh failures
+    }
+  }, []);
+
   const value: AuthContextType = {
     ...state,
     login,
@@ -186,6 +213,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     registerCustomer,
     registerVendor,
     upgradeToVendor,
+    updateUser,
+    refreshUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

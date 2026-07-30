@@ -26,7 +26,7 @@ export function CartSummary({
         <div className="flex items-center justify-between">
           <span className="text-gray-600">Subtotal</span>
           <span className="font-semibold text-gray-900">
-            ${subtotal.toFixed(2)}
+            GH₵{subtotal.toFixed(2)}
           </span>
         </div>
 
@@ -36,7 +36,7 @@ export function CartSummary({
             {shipping === 0 ? (
               <span className="text-green-600">Free</span>
             ) : (
-              `$${shipping.toFixed(2)}`
+              `GH₵${shipping.toFixed(2)}`
             )}
           </span>
         </div>
@@ -45,7 +45,7 @@ export function CartSummary({
           <div className="flex items-center justify-between">
             <span className="text-gray-600">Discount</span>
             <span className="font-semibold text-green-600">
-              -${discount.toFixed(2)}
+              -GH₵{discount.toFixed(2)}
             </span>
           </div>
         )}
@@ -53,22 +53,22 @@ export function CartSummary({
         <div className="flex items-center justify-between">
           <span className="text-gray-600">Tax</span>
           <span className="font-semibold text-gray-900">
-            ${tax.toFixed(2)}
+            GH₵{tax.toFixed(2)}
           </span>
         </div>
 
         <div className="pt-4 border-t">
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold text-gray-900">Total</span>
-            <span className="text-2xl font-bold text-primary">
-              ${total.toFixed(2)}
+            <span className="text-2xl font-bold text-emerald-700">
+              GH₵{total.toFixed(2)}
             </span>
           </div>
         </div>
       </div>
 
       <Link href="/checkout">
-        <Button size="lg" className="w-full gap-2 mb-3">
+        <Button size="lg" className="w-full gap-2 mb-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
           <ShoppingBag className="h-5 w-5" />
           Proceed to Checkout
         </Button>
@@ -86,7 +86,7 @@ export function CartSummary({
           <Tag className="h-5 w-5 text-green-600" />
           <div className="text-sm">
             <span className="font-semibold text-green-900">
-              You saved ${discount.toFixed(2)}
+              You saved GH₵{discount.toFixed(2)}
             </span>
             <span className="text-green-700"> on this order!</span>
           </div>

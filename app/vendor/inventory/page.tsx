@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,43 @@ import { InventoryTable, InventoryItem } from "@/components/vendor/inventory-tab
 import { InventoryPagination } from "@/components/vendor/inventory-pagination";
 import { BulkInventoryActions } from "@/components/vendor/bulk-inventory-actions";
 import { InventoryEmptyState } from "@/components/vendor/inventory-empty-state";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import type { InventoryStatus } from "@/components/vendor/inventory-status-badge";
+import { useRouter } from "next/navigation";
+
+// Map API product → InventoryItem UI shape
+function toInventoryItem(p: any): InventoryItem {
+  const stock: number = p.stock ?? 0;
+
+  const getStatus = (): InventoryStatus => {
+    if (stock === 0) return "out-of-stock";
+    if (stock <= 10) return "low-stock";
+    if (stock > 150) return "overstocked";
+    return "in-stock";
+  };
+
+  return {
+    id: p.id,
+    productName: p.name,
+    sku: p.id.slice(0, 8).toUpperCase(),
+    variant: "",
+    category: p.categoryName ?? "Uncategorized",
+    warehouse: "Main Warehouse",
+    availableStock: stock,
+    reservedStock: 0,
+    incomingStock: 0,
+    reorderLevel: 10,
+    inventoryValue: stock * Number(p.price ?? 0),
+    status: getStatus(),
+    lastUpdated: p.updatedAt
+      ? new Date(p.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+      : "—",
+    image: p.images?.[0] ?? "",
+  };
+}
 
 export default function InventoryPage() {
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -22,73 +55,85 @@ export default function InventoryPage() {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [sortBy, setSortBy] = useState("name-asc");
 
-  // Mock data - replace with actual API call
-  const mockInventory: InventoryItem[] = Array.from({ length: 100 }, (_, i) => {
-    const products = [
-      "Wireless Headphones",
-      "Smart Watch",
-      "Laptop Bag",
-      "USB-C Cable",
-      "Power Bank",
-      "Ceramic Mug",
-      "Yoga Mat",
-      "LED Lamp",
-      "Water Bottle",
-      "Phone Case",
-    ];
-    
-    const categories = ["Electronics", "Fashion", "Home", "Beauty", "Sports"];
-    const warehouses = ["Main Warehouse", "East Warehouse", "West Warehouse"];
-    const variants = ["Black", "White", "Blue", "Red", ""];
-    
-    const availableStock = ((i * 13 + 7) % 200);
-    const reservedStock = ((i * 5 + 3) % 30);
-    const incomingStock = ((i * 7 + 11) % 100);
-    const reorderLevel = 20;
-    const unitPrice = ((i * 17 + 23) % 200) + 20;
-    
-    const getStatus = (): InventoryStatus => {
-      if (availableStock === 0) return "out-of-stock";
-      if (availableStock <= reorderLevel) return "low-stock";
-      if (availableStock > 150) return "overstocked";
-      if (incomingStock > 50) return "incoming";
-      return "in-stock";
-    };
+  // Real data state
+  const [allItems, setAllItems] = useState<InventoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchInventory = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/vendor/inventory");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to load inventory");
+      }
+      const data = await res.json();
+      setAllItems((data.inventory ?? []).map(toInventoryItem));
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchInventory();
+  }, [fetchInventory]);
+
+  // Calculated inventory metrics
+  const inventoryStats = useMemo(() => {
+    let totalStock = 0;
+    let lowStock = 0;
+    let outOfStock = 0;
+    let totalVal = 0;
+
+    allItems.forEach((item) => {
+      totalStock += item.availableStock;
+      if (item.availableStock === 0) outOfStock += 1;
+      else if (item.availableStock <= 10) lowStock += 1;
+      totalVal += item.inventoryValue;
+    });
 
     return {
-      id: `inv-${i + 1}`,
-      productName: products[i % 10],
-      sku: `SKU-${String(10000 + i).padStart(5, "0")}`,
-      variant: variants[i % 5],
-      category: categories[i % 5],
-      warehouse: warehouses[i % 3],
-      availableStock,
-      reservedStock,
-      incomingStock,
-      reorderLevel,
-      inventoryValue: availableStock * unitPrice,
-      status: getStatus(),
-      lastUpdated: new Date(Date.now() - (i * 2 * 86400000)).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
-      image: `https://images.unsplash.com/photo-${1500000000000 + i * 1000}?w=100&h=100&fit=crop`,
+      totalProducts: allItems.length,
+      totalStockUnits: totalStock,
+      lowStockCount: lowStock,
+      outOfStockCount: outOfStock,
+      totalValue: totalVal,
     };
+  }, [allItems]);
+
+  // Client-side search
+  const filteredItems = allItems.filter((item) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      item.productName.toLowerCase().includes(q) ||
+      item.sku.toLowerCase().includes(q) ||
+      item.category.toLowerCase().includes(q)
+    );
   });
 
-  const totalItems = mockInventory.length;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const currentItems = mockInventory.slice(
+  // Client-side sort
+  const sortedItems = [...filteredItems].sort((a, b) => {
+    if (sortBy === "name-asc") return a.productName.localeCompare(b.productName);
+    if (sortBy === "name-desc") return b.productName.localeCompare(a.productName);
+    if (sortBy === "stock-asc") return a.availableStock - b.availableStock;
+    if (sortBy === "stock-desc") return b.availableStock - a.availableStock;
+    return 0;
+  });
+
+  const totalItems = sortedItems.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const currentItems = sortedItems.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedIds(currentItems.map((i) => i.id));
-    } else {
-      setSelectedIds([]);
-    }
+    setSelectedIds(checked ? currentItems.map((i) => i.id) : []);
   };
 
   const handleSelect = (id: string) => {
@@ -97,47 +142,37 @@ export default function InventoryPage() {
     );
   };
 
-  const handleClearSelection = () => {
-    setSelectedIds([]);
-  };
-
-  const handleBulkAction = (action: string) => {
-    console.log(`Bulk action: ${action} on ${selectedIds.length} items`);
-    setTimeout(() => {
-      setSelectedIds([]);
-    }, 1000);
-  };
+  const handleClearSelection = () => setSelectedIds([]);
 
   const handleViewItem = (item: InventoryItem) => {
-    console.log("View item:", item);
-    // Open drawer with item details
+    router.push(`/vendor/products/${item.id}/edit`);
   };
 
-  const handleAddStock = () => {
-    console.log("Add stock...");
-  };
-
+  const handleAddStock = () => router.push("/vendor/products/new");
   const handleExport = () => {
-    console.log("Exporting inventory...");
+    if (allItems.length === 0) return;
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      ["Product Name,SKU,Category,Available Stock,Inventory Value"]
+        .concat(
+          allItems.map(
+            (i) => `"${i.productName}","${i.sku}","${i.category}",${i.availableStock},${i.inventoryValue}`
+          )
+        )
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `vendor_inventory_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
-  const handleImport = () => {
-    console.log("Import inventory...");
-  };
+  const handleRefresh = () => fetchInventory();
+  const handleAddProduct = () => router.push("/vendor/products/new");
 
-  const handleAdjustment = () => {
-    console.log("Stock adjustment...");
-  };
-
-  const handleRefresh = () => {
-    console.log("Refreshing inventory...");
-  };
-
-  const handleAddProduct = () => {
-    console.log("Add product...");
-  };
-
-  const showEmptyState = false; // Change based on actual filter results
+  const showEmptyState = !loading && !error && totalItems === 0;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -160,17 +195,17 @@ export default function InventoryPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
                   Inventory Management
                 </h1>
-                <p className="text-gray-600">
-                  Monitor stock levels, manage inventory, track movements, and prevent shortages
+                <p className="text-gray-600 text-sm">
+                  Monitor stock levels, manage inventory, and prevent shortages across your storefront.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Button
                   onClick={handleAddStock}
-                  className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                  className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm rounded-xl"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Stock
@@ -178,33 +213,60 @@ export default function InventoryPage() {
               </div>
             </div>
 
-            {/* Statistics */}
-            <InventoryStatistics />
+            {/* Loading State */}
+            {loading && (
+              <div className="flex items-center justify-center py-24">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mr-3" />
+                <span className="text-gray-600 font-medium text-sm">Loading inventory...</span>
+              </div>
+            )}
+
+            {/* Error State */}
+            {!loading && error && (
+              <div className="text-center py-16">
+                <p className="text-red-600 mb-4 text-sm">{error}</p>
+                <Button onClick={handleRefresh} variant="outline" className="rounded-xl">
+                  Try Again
+                </Button>
+              </div>
+            )}
+
+            {/* Real Statistics */}
+            {!loading && !error && (
+              <InventoryStatistics
+                totalProducts={inventoryStats.totalProducts}
+                totalStockUnits={inventoryStats.totalStockUnits}
+                lowStockCount={inventoryStats.lowStockCount}
+                outOfStockCount={inventoryStats.outOfStockCount}
+                totalValue={inventoryStats.totalValue}
+              />
+            )}
 
             {/* Toolbar */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-              <InventoryToolbar
-                onSearch={setSearchQuery}
-                onFilterChange={setFilters}
-                onAddStock={handleAddStock}
-                onExport={handleExport}
-                onImport={handleImport}
-                onAdjustment={handleAdjustment}
-                onRefresh={handleRefresh}
-                onSort={setSortBy}
-              />
-            </div>
+            {!loading && !error && (
+              <div className="bg-white rounded-2xl border border-gray-200 p-4 mb-6 shadow-sm">
+                <InventoryToolbar
+                  onSearch={setSearchQuery}
+                  onFilterChange={setFilters}
+                  onAddStock={handleAddStock}
+                  onExport={handleExport}
+                  onImport={() => {}}
+                  onAdjustment={() => {}}
+                  onRefresh={handleRefresh}
+                  onSort={setSortBy}
+                />
+              </div>
+            )}
 
             {showEmptyState ? (
               <InventoryEmptyState
                 onRefresh={handleRefresh}
                 onAddProduct={handleAddProduct}
-                onImport={handleImport}
+                onImport={() => {}}
               />
-            ) : (
+            ) : !loading && !error && totalItems > 0 ? (
               <>
-                {/* Inventory Table */}
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden mb-6 shadow-sm">
                   <InventoryTable
                     items={currentItems}
                     selectedIds={selectedIds}
@@ -215,8 +277,7 @@ export default function InventoryPage() {
                   />
                 </div>
 
-                {/* Pagination */}
-                <div className="bg-white rounded-xl border border-gray-200 px-6 py-4">
+                <div className="bg-white rounded-2xl border border-gray-200 px-6 py-4 shadow-sm">
                   <InventoryPagination
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -230,16 +291,15 @@ export default function InventoryPage() {
                   />
                 </div>
               </>
-            )}
+            ) : null}
           </div>
         </main>
       </div>
 
-      {/* Bulk Action Bar */}
       <BulkInventoryActions
         selectedCount={selectedIds.length}
         onClearSelection={handleClearSelection}
-        onAction={handleBulkAction}
+        onAction={() => setSelectedIds([])}
       />
     </div>
   );

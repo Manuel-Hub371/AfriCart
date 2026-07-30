@@ -13,7 +13,7 @@ export function EmptyState() {
       </h3>
       
       <p className="text-gray-600 mb-6 max-w-md">
-        We couldn't find any products matching your filters. Try adjusting your search criteria or browse our categories.
+        We couldn&apos;t find any products matching your filters. Try adjusting your search criteria or browse our categories.
       </p>
       
       <Button className="gap-2">

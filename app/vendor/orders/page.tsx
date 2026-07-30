@@ -1,17 +1,58 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { Button } from "@/components/ui/button";
-import { OrderStatistics } from "@/components/vendor/order-statistics";
 import { OrderToolbar } from "@/components/vendor/order-toolbar";
 import { OrdersTable, Order } from "@/components/vendor/orders-table";
 import { OrderPagination } from "@/components/vendor/order-pagination";
 import { BulkOrderActions } from "@/components/vendor/bulk-order-actions";
 import { OrderDetailsDrawer } from "@/components/vendor/order-details-drawer";
-import { Download, Printer } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { OrderStatus } from "@/components/vendor/order-status-badge";
+
+// Map API OrderDTO -> Vendor Order UI shape
+function toVendorUIOrder(order: any): Order {
+  const customerName = order.customerName || "Customer";
+  const customerEmail = order.customerEmail || "customer@example.com";
+
+  let orderStatus: OrderStatus = "processing";
+  if (order.status === "SHIPPED") orderStatus = "shipped";
+  else if (order.status === "DELIVERED") orderStatus = "delivered";
+  else if (order.status === "CANCELLED") orderStatus = "cancelled";
+  else orderStatus = "processing";
+
+  let shippingStatus: Order["shippingStatus"] = "not-shipped";
+  if (orderStatus === "shipped") shippingStatus = "in-transit";
+  else if (orderStatus === "delivered") shippingStatus = "delivered";
+
+  return {
+    id: order.id,
+    orderNumber: `ORD-${order.id.slice(0, 8).toUpperCase()}`,
+    customer: {
+      name: customerName,
+      email: customerEmail,
+    },
+    products: (order.orderItems || []).map((item: any) => ({
+      name: item.productName || item.product?.name || "Product",
+      sku: (item.productId || "").slice(0, 8).toUpperCase(),
+      price: item.price,
+      quantity: item.quantity,
+      image: item.productImage || item.product?.images?.[0] || "",
+    })),
+    totalAmount: order.totalAmount,
+    orderStatus,
+    shippingStatus,
+    paymentStatus: order.paymentStatus === "PAID" ? "paid" : "pending",
+    orderDate: new Date(order.createdAt).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    expectedDelivery: "3 - 5 business days",
+  };
+}
 
 export default function OrdersPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -23,87 +64,76 @@ export default function OrdersPage() {
   const [sortBy, setSortBy] = useState("newest");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Mock data - replace with actual API call
-  const mockOrders: Order[] = Array.from({ length: 100 }, (_, i) => ({
-    id: `order-${i + 1}`,
-    orderNumber: `ORD-${String(10000 + i).padStart(5, "0")}`,
-    customer: {
-      name: [
-        "John Smith",
-        "Sarah Johnson",
-        "Michael Brown",
-        "Emily Davis",
-        "David Wilson",
-        "Jessica Martinez",
-        "Daniel Garcia",
-        "Ashley Rodriguez",
-        "Christopher Lee",
-        "Amanda Taylor",
-      ][i % 10],
-      email: [
-        "john.smith@email.com",
-        "sarah.j@email.com",
-        "michael.b@email.com",
-        "emily.d@email.com",
-        "david.w@email.com",
-        "jessica.m@email.com",
-        "daniel.g@email.com",
-        "ashley.r@email.com",
-        "chris.l@email.com",
-        "amanda.t@email.com",
-      ][i % 10],
-    },
-    products: Array.from({ length: ((i % 3) + 1) }, (_, j) => ({
-      name: [
-        "Wireless Headphones",
-        "Smart Watch",
-        "Laptop Bag",
-        "USB-C Cable",
-        "Power Bank",
-      ][j % 5],
-      image: `https://images.unsplash.com/photo-${1500000000000 + i * 1000 + j * 100}?w=100&h=100&fit=crop`,
-      quantity: ((i + j) % 3) + 1,
-    })),
-    totalAmount: ((i * 37 + 123) % 500) + 50,
-    paymentStatus: (["paid", "pending", "failed", "refunded"] as const)[i % 4],
-    orderStatus: (
-      [
-        "pending",
-        "confirmed",
-        "processing",
-        "packed",
-        "ready-to-ship",
-        "shipped",
-        "delivered",
-        "cancelled",
-      ] as const
-    )[i % 8] as OrderStatus,
-    shippingStatus: (["not-shipped", "in-transit", "delivered"] as const)[i % 3],
-    orderDate: new Date(Date.now() - i * 86400000).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }),
-    expectedDelivery: new Date(Date.now() + (7 - i) * 86400000).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    }),
-  }));
+  // Real API state
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalOrders = mockOrders.length;
-  const totalPages = Math.ceil(totalOrders / itemsPerPage);
-  const currentOrders = mockOrders.slice(
+  const fetchVendorOrders = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/vendor/orders");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to load orders");
+      }
+      const data = await res.json();
+      setAllOrders((data.orders || []).map(toVendorUIOrder));
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchVendorOrders();
+  }, [fetchVendorOrders]);
+
+  // Client-side search and status filter
+  const filteredOrders = allOrders.filter((order) => {
+    // 1. Search Query Filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch =
+        order.orderNumber.toLowerCase().includes(q) ||
+        order.customer.name.toLowerCase().includes(q) ||
+        order.customer.email.toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+    }
+
+    // 2. Status Filter
+    if (filters.status && filters.status.length > 0) {
+      const matchesStatus = filters.status.includes(order.orderStatus);
+      if (!matchesStatus) return false;
+    }
+
+    // 3. Payment Filter
+    if (filters.payment && filters.payment.length > 0) {
+      const matchesPayment = filters.payment.includes(order.paymentStatus);
+      if (!matchesPayment) return false;
+    }
+
+    return true;
+  });
+
+  // Client-side Sort
+  const sortedOrders = [...filteredOrders].sort((a, b) => {
+    if (sortBy === "amount-high") return b.totalAmount - a.totalAmount;
+    if (sortBy === "amount-low") return a.totalAmount - b.totalAmount;
+    return 0; // default newest
+  });
+
+  const totalOrders = sortedOrders.length;
+  const totalPages = Math.ceil(totalOrders / itemsPerPage) || 1;
+  const currentOrders = sortedOrders.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      setSelectedIds(currentOrders.map((o) => o.id));
-    } else {
-      setSelectedIds([]);
-    }
+    setSelectedIds(checked ? currentOrders.map((o) => o.id) : []);
   };
 
   const handleSelect = (id: string) => {
@@ -112,31 +142,49 @@ export default function OrdersPage() {
     );
   };
 
-  const handleClearSelection = () => {
-    setSelectedIds([]);
+  const handleClearSelection = () => setSelectedIds([]);
+
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    let apiStatus = "PROCESSING";
+    if (newStatus === "shipped") apiStatus = "SHIPPED";
+    else if (newStatus === "delivered") apiStatus = "DELIVERED";
+    else if (newStatus === "cancelled") apiStatus = "CANCELLED";
+
+    try {
+      const res = await fetch(`/api/vendor/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: apiStatus }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to update status");
+      }
+      await fetchVendorOrders();
+    } catch (e: any) {
+      alert(e.message);
+    }
   };
 
-  const handleBulkAction = (action: string) => {
-    console.log(`Bulk action: ${action} on ${selectedIds.length} orders`);
-    setTimeout(() => {
-      setSelectedIds([]);
-    }, 1000);
-  };
-
-  const handleViewOrder = (order: Order) => {
-    setSelectedOrder(order);
-  };
-
-  const handleExport = () => {
-    console.log("Exporting orders...");
-  };
-
-  const handlePrint = () => {
-    console.log("Printing orders...");
-  };
-
-  const handleRefresh = () => {
-    console.log("Refreshing orders...");
+  const handleExportOrders = () => {
+    if (allOrders.length === 0) return;
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      ["Order Number,Customer,Email,Total Amount,Status,Payment Status,Order Date"]
+        .concat(
+          allOrders.map(
+            (o) =>
+              `"${o.orderNumber}","${o.customer.name}","${o.customer.email}",${o.totalAmount},"${o.orderStatus}","${o.paymentStatus}","${o.orderDate}"`
+          )
+        )
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `vendor_orders_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -160,74 +208,77 @@ export default function OrdersPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Orders Management
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
+                  Order Management
                 </h1>
-                <p className="text-gray-600">
-                  Manage customer orders, fulfillment, shipping, returns, and refunds
+                <p className="text-gray-600 text-sm">
+                  Track, process, and fulfill customer order line items in real time.
                 </p>
               </div>
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  onClick={handleExport}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handlePrint}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
-                >
-                  <Printer className="h-4 w-4 mr-2" />
-                  Print
+            </div>
+
+            {/* Loading State */}
+            {loading && (
+              <div className="flex items-center justify-center py-24">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mr-3" />
+                <span className="text-gray-600 text-sm font-medium">Loading vendor orders...</span>
+              </div>
+            )}
+
+            {/* Error State */}
+            {!loading && error && (
+              <div className="text-center py-16">
+                <p className="text-red-600 mb-4 text-sm">{error}</p>
+                <Button onClick={fetchVendorOrders} variant="outline" className="rounded-xl">
+                  Try Again
                 </Button>
               </div>
-            </div>
+            )}
 
-            {/* Statistics */}
-            <OrderStatistics />
+            {/* Orders Display (No Summary Cards as per Part 1) */}
+            {!loading && !error && (
+              <div className="space-y-6">
+                {/* Toolbar */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
+                  <OrderToolbar
+                    orders={allOrders}
+                    onSearch={setSearchQuery}
+                    onFilterChange={setFilters}
+                    onExport={handleExportOrders}
+                    onPrint={() => window.print()}
+                    onRefresh={fetchVendorOrders}
+                    onSort={setSortBy}
+                  />
+                </div>
 
-            {/* Toolbar */}
-            <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-              <OrderToolbar
-                onSearch={setSearchQuery}
-                onFilterChange={setFilters}
-                onExport={handleExport}
-                onPrint={handlePrint}
-                onRefresh={handleRefresh}
-                onSort={setSortBy}
-              />
-            </div>
+                {/* Orders Table */}
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                  <OrdersTable
+                    orders={currentOrders}
+                    selectedIds={selectedIds}
+                    onSelectAll={handleSelectAll}
+                    onSelect={handleSelect}
+                    onViewOrder={(order) => setSelectedOrder(order)}
+                    onSort={(column) => console.log("Sort by:", column)}
+                  />
+                </div>
 
-            {/* Orders Table */}
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-6">
-              <OrdersTable
-                orders={currentOrders}
-                selectedIds={selectedIds}
-                onSelectAll={handleSelectAll}
-                onSelect={handleSelect}
-                onViewOrder={handleViewOrder}
-                onSort={(column) => console.log("Sort by:", column)}
-              />
-            </div>
-
-            {/* Pagination */}
-            <div className="bg-white rounded-xl border border-gray-200 px-6 py-4">
-              <OrderPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalOrders}
-                itemsPerPage={itemsPerPage}
-                onPageChange={setCurrentPage}
-                onItemsPerPageChange={(items) => {
-                  setItemsPerPage(items);
-                  setCurrentPage(1);
-                }}
-              />
-            </div>
+                {/* Pagination */}
+                <div className="bg-white rounded-2xl border border-gray-200 px-6 py-4 shadow-sm">
+                  <OrderPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={totalOrders}
+                    itemsPerPage={itemsPerPage}
+                    onPageChange={setCurrentPage}
+                    onItemsPerPageChange={(items) => {
+                      setItemsPerPage(items);
+                      setCurrentPage(1);
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </main>
       </div>
@@ -236,14 +287,20 @@ export default function OrdersPage() {
       <BulkOrderActions
         selectedCount={selectedIds.length}
         onClearSelection={handleClearSelection}
-        onAction={handleBulkAction}
+        onAction={(action) => console.log("Bulk action:", action)}
       />
 
       {/* Order Details Drawer */}
-      <OrderDetailsDrawer
-        order={selectedOrder}
-        onClose={() => setSelectedOrder(null)}
-      />
+      {selectedOrder && (
+        <OrderDetailsDrawer
+          order={selectedOrder}
+          onClose={() => setSelectedOrder(null)}
+          onStatusChange={(newStatus) => {
+            handleStatusChange(selectedOrder.id, newStatus);
+            setSelectedOrder(null);
+          }}
+        />
+      )}
     </div>
   );
 }

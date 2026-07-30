@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { useAuth } from "@/lib/auth/context";
+import { useUpload } from "@/lib/hooks/use-upload";
 import { 
   Store, 
   Building2, 
@@ -18,16 +19,31 @@ import {
   Upload,
   ArrowLeft,
   ArrowRight,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2,
+  X
 } from "lucide-react";
 
 export default function VendorRegistrationPage() {
   const router = useRouter();
   const { registerVendor } = useAuth();
+  const { uploadFile } = useUpload();
+
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [vendorRegData, setVendorRegData] = useState<any>(null);
+
+  // Upload States
+  const [storeLogoUrl, setStoreLogoUrl] = useState<string>("");
+  const [storeBannerUrl, setStoreBannerUrl] = useState<string>("");
+  const [idDocumentUrl, setIdDocumentUrl] = useState<string>("");
+  const [businessCertificateUrl, setBusinessCertificateUrl] = useState<string>("");
+
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingId, setUploadingId] = useState(false);
+  const [uploadingCert, setUploadingCert] = useState(false);
 
   useEffect(() => {
     const data = sessionStorage.getItem("vendorRegData");
@@ -39,20 +55,13 @@ export default function VendorRegistrationPage() {
   }, [router]);
 
   const [formData, setFormData] = useState({
-    // Store Information
     storeName: "",
     storeDescription: "",
     storeCategory: "",
-    storeLogo: null as File | null,
-    storeBanner: null as File | null,
-
-    // Business Information
     businessType: "",
     businessName: "",
     registrationNumber: "",
     taxId: "",
-
-    // Contact Information
     businessEmail: "",
     businessPhone: "",
     country: "",
@@ -60,15 +69,7 @@ export default function VendorRegistrationPage() {
     city: "",
     streetAddress: "",
     postalCode: "",
-
-    // Identity Verification
-    idDocument: null as File | null,
-    businessCertificate: null as File | null,
-
-    // Payout Preference
     payoutMethod: "",
-
-    // Agreements
     acceptSellerAgreement: false,
     acceptTerms: false,
     acceptPrivacy: false,
@@ -76,8 +77,42 @@ export default function VendorRegistrationPage() {
 
   const totalSteps = 6;
 
-  const handleFileChange = (field: string, file: File | null) => {
-    setFormData({ ...formData, [field]: file });
+  const handleFileUpload = async (
+    field: "storeLogo" | "storeBanner" | "idDocument" | "businessCertificate",
+    file: File | null
+  ) => {
+    if (!file) return;
+
+    // Generate immediate local preview for image fields
+    const localPreviewUrl = URL.createObjectURL(file);
+    if (field === "storeLogo") {
+      setStoreLogoUrl(localPreviewUrl);
+      setUploadingLogo(true);
+    } else if (field === "storeBanner") {
+      setStoreBannerUrl(localPreviewUrl);
+      setUploadingBanner(true);
+    } else if (field === "idDocument") {
+      setUploadingId(true);
+    } else if (field === "businessCertificate") {
+      setUploadingCert(true);
+    }
+
+    try {
+      const url = await uploadFile(file);
+      if (url) {
+        if (field === "storeLogo") setStoreLogoUrl(url);
+        if (field === "storeBanner") setStoreBannerUrl(url);
+        if (field === "idDocument") setIdDocumentUrl(url);
+        if (field === "businessCertificate") setBusinessCertificateUrl(url);
+      }
+    } catch (err) {
+      console.error(`Failed to upload ${field}:`, err);
+    } finally {
+      if (field === "storeLogo") setUploadingLogo(false);
+      if (field === "storeBanner") setUploadingBanner(false);
+      if (field === "idDocument") setUploadingId(false);
+      if (field === "businessCertificate") setUploadingCert(false);
+    }
   };
 
   const handleNext = () => {
@@ -110,6 +145,9 @@ export default function VendorRegistrationPage() {
         storeName: formData.storeName,
         storeDescription: formData.storeDescription,
         storeCategory: formData.storeCategory,
+        storeLogo: storeLogoUrl.startsWith("blob:") ? undefined : storeLogoUrl || undefined,
+        storeBanner: storeBannerUrl.startsWith("blob:") ? undefined : storeBannerUrl || undefined,
+
         businessType: formData.businessType,
         businessName: formData.businessName,
         registrationNumber: formData.registrationNumber,
@@ -126,7 +164,6 @@ export default function VendorRegistrationPage() {
         acceptVendorPolicy: formData.acceptSellerAgreement,
       });
       sessionStorage.removeItem("vendorRegData");
-      // Redirect handled by context
     } catch (err: any) {
       setError(err.message || "Vendor registration failed. Please try again.");
     } finally {
@@ -281,54 +318,146 @@ export default function VendorRegistrationPage() {
                   </select>
                 </div>
 
+                {/* Store Logo */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Store Logo <span className="text-red-500">*</span>
+                    Store Logo
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 transition-colors">
-                    <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">Click to upload or drag and drop</p>
-                    <p className="text-xs text-gray-500">PNG, JPG up to 2MB</p>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange("storeLogo", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="storeLogo"
-                    />
-                    <label htmlFor="storeLogo" className="mt-3 inline-block">
-                      <Button type="button" variant="outline" size="sm">
-                        Choose File
-                      </Button>
-                    </label>
-                    {formData.storeLogo && (
-                      <p className="text-sm text-green-600 mt-2">✓ {formData.storeLogo.name}</p>
+                    {storeLogoUrl ? (
+                      <div className="flex flex-col items-center">
+                        <div className="relative mb-3">
+                          <img
+                            src={storeLogoUrl}
+                            alt="Store Logo Preview"
+                            className="w-24 h-24 object-cover rounded-xl border border-gray-200 shadow-sm"
+                          />
+                          {uploadingLogo && (
+                            <div className="absolute inset-0 bg-white/70 rounded-xl flex items-center justify-center">
+                              <Loader2 className="h-6 w-6 text-green-600 animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload("storeLogo", e.target.files?.[0] || null)}
+                            className="hidden"
+                            id="storeLogoInput"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById("storeLogoInput")?.click()}
+                          >
+                            Replace Logo
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setStoreLogoUrl("")}
+                            className="text-red-600 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4 mr-1" /> Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <ImageIcon className="h-12 w-12 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600 mb-1">Click to upload store logo</p>
+                        <p className="text-xs text-gray-500 mb-3">PNG, JPG, WEBP up to 10MB</p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload("storeLogo", e.target.files?.[0] || null)}
+                          className="hidden"
+                          id="storeLogoInput"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById("storeLogoInput")?.click()}
+                        >
+                          Choose File
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
 
+                {/* Store Banner */}
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Store Banner (Optional)
                   </label>
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 transition-colors">
-                    <Upload className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">Click to upload banner image</p>
-                    <p className="text-xs text-gray-500">PNG, JPG up to 5MB (1200x400 recommended)</p>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleFileChange("storeBanner", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="storeBanner"
-                    />
-                    <label htmlFor="storeBanner" className="mt-3 inline-block">
-                      <Button type="button" variant="outline" size="sm">
-                        Choose File
-                      </Button>
-                    </label>
-                    {formData.storeBanner && (
-                      <p className="text-sm text-green-600 mt-2">✓ {formData.storeBanner.name}</p>
+                    {storeBannerUrl ? (
+                      <div className="flex flex-col items-center">
+                        <div className="relative w-full mb-3">
+                          <img
+                            src={storeBannerUrl}
+                            alt="Store Banner Preview"
+                            className="w-full h-32 object-cover rounded-xl border border-gray-200 shadow-sm"
+                          />
+                          {uploadingBanner && (
+                            <div className="absolute inset-0 bg-white/70 rounded-xl flex items-center justify-center">
+                              <Loader2 className="h-6 w-6 text-green-600 animate-spin" />
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleFileUpload("storeBanner", e.target.files?.[0] || null)}
+                            className="hidden"
+                            id="storeBannerInput"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById("storeBannerInput")?.click()}
+                          >
+                            Replace Banner
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setStoreBannerUrl("")}
+                            className="text-red-600 hover:bg-red-50"
+                          >
+                            <X className="h-4 w-4 mr-1" /> Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <Upload className="h-12 w-12 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600 mb-1">Click to upload store banner</p>
+                        <p className="text-xs text-gray-500 mb-3">PNG, JPG, WEBP up to 10MB (1200x400 recommended)</p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload("storeBanner", e.target.files?.[0] || null)}
+                          className="hidden"
+                          id="storeBannerInput"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById("storeBannerInput")?.click()}
+                        >
+                          Choose File
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -520,26 +649,54 @@ export default function VendorRegistrationPage() {
                     ID Document <span className="text-red-500">*</span>
                   </label>
                   <p className="text-xs text-gray-500 mb-3">
-                    National ID, Passport, or Driver's License
+                    National ID, Passport, or Driver&apos;s License
                   </p>
                   <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 transition-colors">
-                    <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600 mb-2">Upload your ID document</p>
-                    <p className="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
-                    <input
-                      type="file"
-                      accept="image/*,.pdf"
-                      onChange={(e) => handleFileChange("idDocument", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="idDocument"
-                    />
-                    <label htmlFor="idDocument" className="mt-3 inline-block">
-                      <Button type="button" variant="outline" size="sm">
-                        Choose File
-                      </Button>
-                    </label>
-                    {formData.idDocument && (
-                      <p className="text-sm text-green-600 mt-2">✓ {formData.idDocument.name}</p>
+                    {uploadingId ? (
+                      <div className="flex flex-col items-center py-4">
+                        <Loader2 className="h-8 w-8 text-green-600 animate-spin mb-2" />
+                        <p className="text-sm text-gray-600">Uploading document...</p>
+                      </div>
+                    ) : idDocumentUrl ? (
+                      <div className="flex flex-col items-center">
+                        <p className="text-sm text-green-600 font-semibold mb-2">✓ Document uploaded successfully</p>
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={(e) => handleFileUpload("idDocument", e.target.files?.[0] || null)}
+                          className="hidden"
+                          id="idDocumentInput"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById("idDocumentInput")?.click()}
+                        >
+                          Replace Document
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center">
+                        <FileText className="h-12 w-12 text-gray-400 mb-2" />
+                        <p className="text-sm text-gray-600 mb-1">Upload your ID document</p>
+                        <p className="text-xs text-gray-500 mb-3">PDF, JPG, PNG up to 10MB</p>
+                        <input
+                          type="file"
+                          accept="image/*,.pdf"
+                          onChange={(e) => handleFileUpload("idDocument", e.target.files?.[0] || null)}
+                          className="hidden"
+                          id="idDocumentInput"
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => document.getElementById("idDocumentInput")?.click()}
+                        >
+                          Choose File
+                        </Button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -550,23 +707,51 @@ export default function VendorRegistrationPage() {
                       Business Registration Certificate <span className="text-red-500">*</span>
                     </label>
                     <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-green-500 transition-colors">
-                      <FileText className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-sm text-gray-600 mb-2">Upload business certificate</p>
-                      <p className="text-xs text-gray-500">PDF, JPG, PNG up to 5MB</p>
-                      <input
-                        type="file"
-                        accept="image/*,.pdf"
-                        onChange={(e) => handleFileChange("businessCertificate", e.target.files?.[0] || null)}
-                        className="hidden"
-                        id="businessCertificate"
-                      />
-                      <label htmlFor="businessCertificate" className="mt-3 inline-block">
-                        <Button type="button" variant="outline" size="sm">
-                          Choose File
-                        </Button>
-                      </label>
-                      {formData.businessCertificate && (
-                        <p className="text-sm text-green-600 mt-2">✓ {formData.businessCertificate.name}</p>
+                      {uploadingCert ? (
+                        <div className="flex flex-col items-center py-4">
+                          <Loader2 className="h-8 w-8 text-green-600 animate-spin mb-2" />
+                          <p className="text-sm text-gray-600">Uploading certificate...</p>
+                        </div>
+                      ) : businessCertificateUrl ? (
+                        <div className="flex flex-col items-center">
+                          <p className="text-sm text-green-600 font-semibold mb-2">✓ Certificate uploaded successfully</p>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => handleFileUpload("businessCertificate", e.target.files?.[0] || null)}
+                            className="hidden"
+                            id="businessCertificateInput"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById("businessCertificateInput")?.click()}
+                          >
+                            Replace Certificate
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <FileText className="h-12 w-12 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600 mb-1">Upload business certificate</p>
+                          <p className="text-xs text-gray-500 mb-3">PDF, JPG, PNG up to 10MB</p>
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => handleFileUpload("businessCertificate", e.target.files?.[0] || null)}
+                            className="hidden"
+                            id="businessCertificateInput"
+                          />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => document.getElementById("businessCertificateInput")?.click()}
+                          >
+                            Choose File
+                          </Button>
+                        </div>
                       )}
                     </div>
                   </div>
@@ -630,6 +815,12 @@ export default function VendorRegistrationPage() {
                       <p className="text-sm text-gray-600">Store Name</p>
                       <p className="font-semibold text-gray-900">{formData.storeName || "Not provided"}</p>
                     </div>
+                    {storeLogoUrl && (
+                      <div>
+                        <p className="text-sm text-gray-600 mb-1">Store Logo</p>
+                        <img src={storeLogoUrl} alt="Logo" className="w-16 h-16 object-cover rounded-lg border" />
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm text-gray-600">Business Type</p>
                       <p className="font-semibold text-gray-900">{formData.businessType || "Not selected"}</p>

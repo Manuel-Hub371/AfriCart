@@ -14,15 +14,39 @@ const SelectContext = React.createContext<SelectContextValue>({
   setOpen: () => {},
 });
 
-// Select Root
-interface SelectProps {
+interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   value?: string;
+  defaultValue?: string;
   onValueChange?: (value: string) => void;
   children: React.ReactNode;
 }
 
-const Select = ({ value, onValueChange, children }: SelectProps) => {
+const Select = ({ value, defaultValue, onValueChange, children, className, onChange, ...props }: SelectProps) => {
   const [open, setOpen] = React.useState(false);
+
+  const hasOptions = React.Children.toArray(children).some(
+    (child) => React.isValidElement(child) && child.type === "option"
+  );
+
+  if (hasOptions) {
+    return (
+      <select
+        value={value}
+        defaultValue={defaultValue}
+        onChange={(e) => {
+          onChange?.(e);
+          onValueChange?.(e.target.value);
+        }}
+        className={cn(
+          "h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </select>
+    );
+  }
 
   return (
     <SelectContext.Provider value={{ value, onValueChange, open, setOpen }}>

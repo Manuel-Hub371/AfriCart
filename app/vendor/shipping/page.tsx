@@ -1,238 +1,69 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { Button } from "@/components/ui/button";
-import { ShippingStatistics } from "@/components/vendor/shipping-statistics";
-import { ShippingMethodCard, ShippingMethod } from "@/components/vendor/shipping-method-card";
-import { ShippingZoneTable, ShippingZone } from "@/components/vendor/shipping-zone-table";
-import { ShipmentTable, Shipment, ShipmentStatus } from "@/components/vendor/shipment-table";
-import { ShipmentDrawer } from "@/components/vendor/shipment-drawer";
-import { ShippingEmptyState } from "@/components/vendor/shipping-empty-state";
-import { Plus, Download, FileText } from "lucide-react";
-
-// Generate deterministic shipping methods
-const mockShippingMethods: ShippingMethod[] = [
-  {
-    id: "sm-1",
-    name: "Standard Shipping",
-    deliveryTime: "3-5 business days",
-    cost: 10,
-    costType: "flat",
-    isActive: true,
-    description: "Regular delivery for most orders",
-  },
-  {
-    id: "sm-2",
-    name: "Express Shipping",
-    deliveryTime: "1-2 business days",
-    cost: 25,
-    costType: "flat",
-    isActive: true,
-    description: "Fast delivery for urgent orders",
-  },
-  {
-    id: "sm-3",
-    name: "Same Day Delivery",
-    deliveryTime: "Same day",
-    cost: 35,
-    costType: "flat",
-    isActive: true,
-    description: "Ultra-fast delivery within city limits",
-  },
-  {
-    id: "sm-4",
-    name: "Free Shipping",
-    deliveryTime: "5-7 business days",
-    cost: 0,
-    costType: "free",
-    isActive: true,
-    description: "Free delivery for orders above $100",
-  },
-  {
-    id: "sm-5",
-    name: "Store Pickup",
-    deliveryTime: "Ready in 2 hours",
-    cost: 0,
-    costType: "free",
-    isActive: false,
-    description: "Customer picks up from store location",
-  },
-];
-
-// Generate deterministic shipping zones
-const mockShippingZones: ShippingZone[] = [
-  {
-    id: "sz-1",
-    name: "Greater Accra",
-    country: "Ghana",
-    regions: ["Accra Central", "East Legon", "Tema", "Madina"],
-    shippingFee: 20,
-    deliveryTime: "1-2 days",
-    isActive: true,
-  },
-  {
-    id: "sz-2",
-    name: "Ashanti Region",
-    country: "Ghana",
-    regions: ["Kumasi", "Obuasi", "Mampong"],
-    shippingFee: 35,
-    deliveryTime: "2-3 days",
-    isActive: true,
-  },
-  {
-    id: "sz-3",
-    name: "Western Region",
-    country: "Ghana",
-    regions: ["Takoradi", "Sekondi", "Tarkwa"],
-    shippingFee: 40,
-    deliveryTime: "3-4 days",
-    isActive: true,
-  },
-  {
-    id: "sz-4",
-    name: "Northern Region",
-    country: "Ghana",
-    regions: ["Tamale", "Yendi", "Savelugu"],
-    shippingFee: 50,
-    deliveryTime: "4-5 days",
-    isActive: true,
-  },
-  {
-    id: "sz-5",
-    name: "Eastern Region",
-    country: "Ghana",
-    regions: ["Koforidua", "Akosombo", "Begoro"],
-    shippingFee: 30,
-    deliveryTime: "2-3 days",
-    isActive: false,
-  },
-];
-
-// Generate deterministic shipments
-function generateShipments(count: number): Shipment[] {
-  const shipments: Shipment[] = [];
-  const statuses: ShipmentStatus[] = [
-    "pending",
-    "processing",
-    "packed",
-    "ready-for-pickup",
-    "shipped",
-    "in-transit",
-    "delivered",
-  ];
-  
-  const customers = [
-    "John Mensah",
-    "Sarah Osei",
-    "Michael Asante",
-    "Emily Boateng",
-    "David Owusu",
-  ];
-
-  const products = [
-    "Premium Laptop Stand",
-    "Wireless Mouse & Keyboard",
-    "USB-C Hub Adapter",
-    "Ergonomic Office Chair",
-    "4K Webcam",
-  ];
-
-  const couriers = [
-    "DHL Express",
-    "Ghana Post",
-    "UPS",
-    "FedEx",
-    "Local Courier",
-  ];
-
-  const addresses = [
-    "123 Independence Ave, Accra, Ghana",
-    "45 Oxford Street, Osu, Accra, Ghana",
-    "78 Spintex Road, Accra, Ghana",
-    "12 Kumasi Road, Tema, Ghana",
-    "56 Airport Residential, Accra, Ghana",
-  ];
-
-  for (let i = 0; i < count; i++) {
-    const statusIndex = (i * 2) % statuses.length;
-    const day = (i * 3) % 28 + 1;
-    
-    shipments.push({
-      id: `ship-${(1000 + i).toString()}`,
-      orderNumber: `ORD-${(20000 + i * 7).toString()}`,
-      customer: customers[i % customers.length],
-      product: products[i % products.length],
-      courier: couriers[i % couriers.length],
-      trackingNumber: `TRK${(100000 + i * 123).toString()}`,
-      status: statuses[statusIndex],
-      deliveryDate: `July ${day}, 2026`,
-      shippingAddress: addresses[i % addresses.length],
-    });
-  }
-
-  return shipments;
-}
+import { 
+  Truck, 
+  Package, 
+  CheckCircle, 
+  Clock, 
+  MapPin, 
+  Download,
+  Loader2 
+} from "lucide-react";
 
 export default function VendorShippingPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Generate mock shipments
-  const shipments = useMemo(() => generateShipments(50), []);
-
-  const handleAddShippingMethod = () => {
-    console.log("Add shipping method");
-  };
-
-  const handleAddZone = () => {
-    console.log("Add shipping zone");
-  };
-
-  const handleExportShipments = () => {
-    console.log("Export shipments");
-  };
-
-  const handleCreateRule = () => {
-    console.log("Create shipping rule");
-  };
-
-  const handleEditMethod = (id: string) => {
-    console.log("Edit method:", id);
-  };
-
-  const handleToggleMethod = (id: string) => {
-    console.log("Toggle method:", id);
-  };
-
-  const handleDeleteMethod = (id: string) => {
-    console.log("Delete method:", id);
-  };
-
-  const handleEditZone = (id: string) => {
-    console.log("Edit zone:", id);
-  };
-
-  const handleDeleteZone = (id: string) => {
-    console.log("Delete zone:", id);
-  };
-
-  const handleViewShipment = (id: string) => {
-    const shipment = shipments.find((s) => s.id === id);
-    if (shipment) {
-      setSelectedShipment(shipment);
-      setDrawerOpen(true);
+  useEffect(() => {
+    async function loadFulfillment() {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/vendor/orders");
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data.orders || []);
+        }
+      } catch (err) {
+        console.error("Failed to load vendor orders for shipping:", err);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  };
+    loadFulfillment();
+  }, []);
 
-  const handleUpdateTracking = (id: string) => {
-    console.log("Update tracking:", id);
-    setDrawerOpen(false);
-  };
+  const shippedOrders = useMemo(() => {
+    return orders.filter((o) => o.status === "SHIPPED" || o.status === "DELIVERED");
+  }, [orders]);
 
-  const showEmptyState = mockShippingMethods.length === 0 && mockShippingZones.length === 0;
+  const pendingShipments = useMemo(() => {
+    return orders.filter((o) => o.status === "PENDING" || o.status === "PROCESSING" || o.status === "PACKED");
+  }, [orders]);
+
+  const handleExport = () => {
+    if (orders.length === 0) return;
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      ["Order ID,Customer,Total Amount,Status,Date"]
+        .concat(
+          orders.map(
+            (o) => `"${o.id}","${o.customerName || "Customer"}",${o.totalAmount},"${o.status}","${new Date(o.createdAt).toLocaleDateString()}"`
+          )
+        )
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `vendor_shipments_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -255,125 +86,144 @@ export default function VendorShippingPage() {
             {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Shipping Management
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
+                  Shipping &amp; Fulfillment
                 </h1>
-                <p className="text-gray-600">
-                  Manage delivery methods, shipping rates, tracking, and fulfillment settings
+                <p className="text-gray-600 text-sm">
+                  Track store dispatch, order shipments, delivery status, and fulfillment metrics.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
-                  onClick={handleCreateRule}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
-                >
-                  <FileText className="h-4 w-4 mr-2" />
-                  Create Rule
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleExportShipments}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
+                  onClick={handleExport}
+                  disabled={orders.length === 0}
+                  className="h-10 px-4 border-gray-200 hover:bg-gray-50 rounded-xl"
                 >
                   <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-                <Button
-                  onClick={handleAddShippingMethod}
-                  className="h-10 px-4 bg-emerald-600 hover:bg-emerald-700 text-white"
-                >
-                  <Plus className="h-5 w-5 mr-2" />
-                  Add Method
+                  Export CSV
                 </Button>
               </div>
             </div>
 
-            {/* Empty State */}
-            {showEmptyState ? (
-              <ShippingEmptyState
-                onAddShippingMethod={handleAddShippingMethod}
-                onAddZone={handleAddZone}
-              />
+            {isLoading ? (
+              <div className="py-24 text-center bg-white rounded-2xl border border-gray-200 shadow-sm">
+                <Loader2 className="h-10 w-10 text-emerald-600 animate-spin mx-auto mb-3" />
+                <p className="text-gray-500 font-medium text-sm">Loading fulfillment data...</p>
+              </div>
             ) : (
               <>
-                {/* Shipping Statistics */}
-                <ShippingStatistics />
-
-                {/* Shipping Methods */}
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-6">
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Shipping Methods</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Configure available delivery options for your customers
-                      </p>
+                {/* Fulfillment KPI Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500">Awaiting Dispatch</span>
+                      <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+                        <Clock className="h-5 w-5" />
+                      </div>
                     </div>
-                    <Button
-                      onClick={handleAddShippingMethod}
-                      variant="outline"
-                      className="border-gray-200"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Method
-                    </Button>
+                    <h3 className="text-3xl font-extrabold text-amber-600">{pendingShipments.length}</h3>
+                    <p className="text-xs text-gray-400 mt-1">Pending or processing orders</p>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {mockShippingMethods.map((method) => (
-                      <ShippingMethodCard
-                        key={method.id}
-                        method={method}
-                        onEdit={handleEditMethod}
-                        onToggle={handleToggleMethod}
-                        onDelete={handleDeleteMethod}
-                      />
-                    ))}
+
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500">In-Transit &amp; Shipped</span>
+                      <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                        <Truck className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-extrabold text-blue-600">
+                      {orders.filter((o) => o.status === "SHIPPED").length}
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-1">En route to customers</p>
+                  </div>
+
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-500">Delivered Orders</span>
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+                        <CheckCircle className="h-5 w-5" />
+                      </div>
+                    </div>
+                    <h3 className="text-3xl font-extrabold text-emerald-600">
+                      {orders.filter((o) => o.status === "DELIVERED").length}
+                    </h3>
+                    <p className="text-xs text-gray-400 mt-1">Completed door deliveries</p>
                   </div>
                 </div>
 
-                {/* Shipping Zones */}
-                <div className="mb-8">
-                  <div className="flex items-center justify-between mb-6">
+                {/* Active Shipments Table */}
+                <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                  <div className="p-6 border-b border-gray-200 flex items-center justify-between">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">Delivery Zones</h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Define regions where you deliver and set zone-specific rates
-                      </p>
+                      <h2 className="text-xl font-bold text-gray-900">Shipment Fulfillment Log</h2>
+                      <p className="text-xs text-gray-500">Real customer orders requiring or undergoing delivery</p>
                     </div>
-                    <Button
-                      onClick={handleAddZone}
-                      variant="outline"
-                      className="border-gray-200"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Zone
-                    </Button>
                   </div>
-                  <ShippingZoneTable
-                    zones={mockShippingZones}
-                    onEdit={handleEditZone}
-                    onDelete={handleDeleteZone}
-                  />
-                </div>
 
-                {/* Active Shipments */}
-                <ShipmentTable
-                  shipments={shipments}
-                  onViewDetails={handleViewShipment}
-                />
+                  {orders.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full">
+                        <thead>
+                          <tr className="border-b text-xs uppercase text-gray-400 font-bold tracking-wider">
+                            <th className="text-left py-3 px-6">Order Ref</th>
+                            <th className="text-left py-3 px-6">Customer</th>
+                            <th className="text-left py-3 px-6">Destination Address</th>
+                            <th className="text-left py-3 px-6">Fulfillment Status</th>
+                            <th className="text-left py-3 px-6">Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {orders.map((o) => (
+                            <tr key={o.id} className="border-b last:border-0 hover:bg-gray-50/50">
+                              <td className="py-4 px-6 text-sm font-bold text-gray-900">
+                                #{o.id.slice(0, 8).toUpperCase()}
+                              </td>
+                              <td className="py-4 px-6 text-sm text-gray-600">
+                                {o.customerName || o.customerEmail || "Customer"}
+                              </td>
+                              <td className="py-4 px-6 text-sm text-gray-600 flex items-center gap-1">
+                                <MapPin className="h-3.5 w-3.5 text-gray-400 flex-shrink-0" />
+                                <span className="truncate max-w-xs font-medium">
+                                  {typeof o.shippingAddress === "object"
+                                    ? `${o.shippingAddress?.address || "Address"}, ${o.shippingAddress?.city || "Accra"}`
+                                    : "Standard Doorstep Delivery"}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6">
+                                <span
+                                  className={`text-xs px-2.5 py-1 rounded-full font-bold border ${
+                                    o.status === "DELIVERED"
+                                      ? "bg-green-100 text-green-700 border-green-200"
+                                      : o.status === "SHIPPED"
+                                      ? "bg-blue-100 text-blue-700 border-blue-200"
+                                      : "bg-amber-100 text-amber-700 border-amber-200"
+                                  }`}
+                                >
+                                  {o.status}
+                                </span>
+                              </td>
+                              <td className="py-4 px-6 text-sm text-gray-500">
+                                {new Date(o.createdAt).toLocaleDateString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <div className="py-16 text-center text-gray-500 text-sm">
+                      <Truck className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                      No active store shipments yet. Once customers order from your store, delivery logs will appear here.
+                    </div>
+                  )}
+                </div>
               </>
             )}
           </div>
         </main>
       </div>
-
-      {/* Shipment Details Drawer */}
-      <ShipmentDrawer
-        shipment={selectedShipment}
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        onUpdateTracking={handleUpdateTracking}
-      />
     </div>
   );
 }

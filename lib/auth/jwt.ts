@@ -26,7 +26,7 @@ export async function generateAccessToken(payload: JWTPayload): Promise<string> 
 /**
  * Generate a long-lived refresh token (7 days)
  */
-export async function generateRefreshToken(payload: { userId: string }): Promise<string> {
+export async function generateRefreshToken(payload: Partial<JWTPayload> & { userId: string }): Promise<string> {
   return await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()

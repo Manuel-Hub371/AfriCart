@@ -1,19 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { Button } from "@/components/ui/button";
-import { StatisticsCards } from "@/components/vendor/statistics-cards";
 import { ProductToolbar } from "@/components/vendor/product-toolbar";
 import { ProductTable } from "@/components/vendor/product-table";
 import { ProductGrid } from "@/components/vendor/product-grid";
 import { ProductPagination } from "@/components/vendor/product-pagination";
 import { BulkActionBar } from "@/components/vendor/bulk-action-bar";
 import { ProductEmptyState } from "@/components/vendor/product-empty-state";
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import type { Product } from "@/components/vendor/product-card";
+
+// Map API product → UI Product shape
+function toUIProduct(p: any): Product {
+  const stock: number = p.stock ?? 0;
+  let status: Product["status"] = "published";
+  if (p.status === "DRAFT") status = "draft";
+  else if (p.status === "OUT_OF_STOCK" || stock === 0) status = "out-of-stock";
+  else if (stock > 0 && stock <= 10) status = "low-stock";
+  else if (p.status === "ACTIVE") status = "published";
+
+  return {
+    id: p.id,
+    name: p.name,
+    sku: p.id.slice(0, 8).toUpperCase(),
+    category: p.categoryName ?? "Uncategorized",
+    price: p.price,
+    stock,
+    status,
+    rating: p.rating ?? 5.0,
+    sales: p.orderCount ?? 0,
+    views: p.views ?? 0,
+    revenue: p.totalRevenue ?? 0,
+    image: p.images?.[0] ?? "",
+    isFeatured: Boolean(p.isFeatured),
+    isBestSeller: Boolean(p.soldCount > 0 || (p.bestSellerScore && p.bestSellerScore >= 15)),
+    bestSellerScore: p.bestSellerScore || 0,
+    lastUpdated: p.updatedAt
+      ? new Date(p.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
+      : "—",
+  };
+}
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -26,40 +56,70 @@ export default function ProductsPage() {
   const [filters, setFilters] = useState<Record<string, string[]>>({});
   const [sortBy, setSortBy] = useState("newest");
 
-  // Mock data - replace with actual API call
-  const mockProducts: Product[] = Array.from({ length: 100 }, (_, i) => ({
-    id: `product-${i + 1}`,
-    name: [
-      "Wireless Bluetooth Headphones",
-      "Premium Cotton T-Shirt",
-      "Smart Watch Series 5",
-      "Leather Laptop Bag",
-      "USB-C Charging Cable",
-      "Portable Power Bank",
-      "Ceramic Coffee Mug",
-      "Yoga Exercise Mat",
-      "LED Desk Lamp",
-      "Stainless Steel Water Bottle",
-    ][i % 10],
-    sku: `SKU-${10000 + i}`,
-    category: ["Electronics", "Fashion", "Home", "Beauty", "Sports"][i % 5],
-    brand: ["Sony", "Nike", "Apple", "Samsung", "Adidas"][i % 5],
-    price: Math.floor(Math.random() * 500) + 20,
-    stock: Math.floor(Math.random() * 200),
-    status: (
-      ["published", "draft", "archived", "low-stock", "out-of-stock"] as const
-    )[i % 5],
-    rating: Math.floor(Math.random() * 2) + 3.5,
-    sales: Math.floor(Math.random() * 1000),
-    views: Math.floor(Math.random() * 5000),
-    revenue: Math.floor(Math.random() * 50000),
-    image: `https://images.unsplash.com/photo-${1500000000000 + i * 1000}?w=400&h=400&fit=crop`,
-    lastUpdated: ["Today", "Yesterday", "2 days ago", "1 week ago"][i % 4],
-  }));
+  // Real data state
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const totalProducts = mockProducts.length;
-  const totalPages = Math.ceil(totalProducts / itemsPerPage);
-  const currentProducts = mockProducts.slice(
+  // Fetch products from API
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/vendor/products");
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error ?? "Failed to load products");
+      }
+      const data = await res.json();
+      setAllProducts((data.products ?? []).map(toUIProduct));
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
+
+  // Client-side search and status/featured filter
+  const filteredProducts = allProducts.filter((p) => {
+    // 1. Search Query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch = p.name.toLowerCase().includes(q) || p.category.toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+    }
+
+    // 2. Featured Filter
+    if (filters.featured && filters.featured.length > 0) {
+      const wantFeatured = filters.featured.includes("featured");
+      const wantNotFeatured = filters.featured.includes("not-featured");
+      if (wantFeatured && !wantNotFeatured && !p.isFeatured) return false;
+      if (wantNotFeatured && !wantFeatured && p.isFeatured) return false;
+    }
+
+    // 3. Status Filter
+    if (filters.status && filters.status.length > 0) {
+      if (!filters.status.includes(p.status)) return false;
+    }
+
+    return true;
+  });
+
+  // Client-side sort
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    if (sortBy === "price-asc") return a.price - b.price;
+    if (sortBy === "price-desc") return b.price - a.price;
+    if (sortBy === "name-asc") return a.name.localeCompare(b.name);
+    return 0; // newest = default API order
+  });
+
+  const totalProducts = sortedProducts.length;
+  const totalPages = Math.ceil(totalProducts / itemsPerPage) || 1;
+  const currentProducts = sortedProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -78,55 +138,80 @@ export default function ProductsPage() {
     );
   };
 
-  const handleClearSelection = () => {
+  const handleClearSelection = () => setSelectedIds([]);
+
+  const handleBulkAction = async (action: string) => {
+    if (action === "delete") {
+      await Promise.all(
+        selectedIds.map((id) =>
+          fetch(`/api/vendor/products/${id}`, { method: "DELETE" })
+        )
+      );
+      await fetchProducts();
+    }
     setSelectedIds([]);
   };
 
-  const handleBulkAction = (action: string) => {
-    console.log(`Bulk action: ${action} on ${selectedIds.length} products`);
-    // Implement bulk action logic
-    setTimeout(() => {
-      setSelectedIds([]);
-    }, 1000);
-  };
-
-  const handleProductAction = (action: string, productId: string) => {
-    console.log(`Action: ${action} on product ${productId}`);
+  const handleProductAction = async (action: string, productId: string) => {
     switch (action) {
+      case "toggle-featured": {
+        const target = allProducts.find((p) => p.id === productId);
+        if (!target) break;
+        const newStatus = !target.isFeatured;
+        setAllProducts((prev) =>
+          prev.map((p) => (p.id === productId ? { ...p, isFeatured: newStatus } : p))
+        );
+        try {
+          await fetch(`/api/vendor/products/${productId}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ isFeatured: newStatus }),
+          });
+        } catch {
+          fetchProducts();
+        }
+        break;
+      }
       case "edit":
         router.push(`/vendor/products/${productId}/edit`);
         break;
       case "view":
-        router.push(`/product/${productId}`);
-        break;
-      case "duplicate":
-        console.log("Duplicating product...");
+      case "inventory":
+      case "analytics":
+      case "promote":
+        // Open dedicated Vendor Product Management Workspace
+        router.push(`/vendor/products/${productId}`);
         break;
       case "delete":
-        console.log("Deleting product...");
+        await fetch(`/api/vendor/products/${productId}`, { method: "DELETE" });
+        await fetchProducts();
         break;
-      default:
-        console.log(`Unknown action: ${action}`);
     }
   };
 
-  const handleAddProduct = () => {
-    router.push("/vendor/products/new");
-  };
-
-  const handleImportProducts = () => {
-    console.log("Opening import dialog...");
-  };
-
+  const handleAddProduct = () => router.push("/vendor/products/new");
   const handleExportProducts = () => {
-    console.log("Exporting products...");
+    if (allProducts.length === 0) return;
+    const csvContent =
+      "data:text/csv;charset=utf-8," +
+      ["Product ID,Name,SKU,Category,Price,Stock,Status"]
+        .concat(
+          allProducts.map(
+            (p) => `"${p.id}","${p.name}","${p.sku}","${p.category}",${p.price},${p.stock},"${p.status}"`
+          )
+        )
+        .join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `vendor_products_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
+  const handleRefresh = () => fetchProducts();
 
-  const handleRefresh = () => {
-    console.log("Refreshing products...");
-  };
-
-  const showEmptyState = totalProducts === 0;
+  const showEmptyState = !loading && !error && totalProducts === 0;
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -146,34 +231,27 @@ export default function ProductsPage() {
 
         <main className="flex-1 overflow-auto">
           <div className="p-6 lg:p-8 max-w-[1600px] mx-auto">
-            {/* Page Header with Actions */}
+            {/* Page Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 gap-4">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                <h1 className="text-3xl font-extrabold text-gray-900 mb-1">
                   Product Catalog
                 </h1>
-                <p className="text-gray-600">
-                  Manage inventory, pricing, and publishing across your store
+                <p className="text-gray-600 text-sm">
+                  Manage store inventory, edit listings, and access product management workspaces.
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <Button
                   variant="outline"
                   onClick={handleExportProducts}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
+                  className="h-10 px-4 border-gray-200 hover:bg-gray-50 rounded-xl"
                 >
-                  Export
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleImportProducts}
-                  className="h-10 px-4 border-gray-200 hover:bg-gray-50"
-                >
-                  Import
+                  Export CSV
                 </Button>
                 <Button
                   onClick={handleAddProduct}
-                  className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                  className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm rounded-xl font-semibold"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Add Product
@@ -181,34 +259,51 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {showEmptyState ? (
+            {/* Loading State */}
+            {loading && (
+              <div className="flex items-center justify-center py-24">
+                <Loader2 className="h-8 w-8 animate-spin text-emerald-600 mr-3" />
+                <span className="text-gray-600 text-sm font-medium">Loading catalog products...</span>
+              </div>
+            )}
+
+            {/* Error State */}
+            {!loading && error && (
+              <div className="text-center py-16">
+                <p className="text-red-600 mb-4 text-sm">{error}</p>
+                <Button onClick={handleRefresh} variant="outline" className="rounded-xl">
+                  Try Again
+                </Button>
+              </div>
+            )}
+
+            {/* Empty State */}
+            {showEmptyState && (
               <ProductEmptyState
                 onAddProduct={handleAddProduct}
-                onImportProducts={handleImportProducts}
+                onImportProducts={() => {}}
               />
-            ) : (
-              <div className="space-y-6">
-                {/* Statistics Cards */}
-                <StatisticsCards />
+            )}
 
-                {/* Toolbar Section */}
-                <div className="bg-white rounded-xl border border-gray-200 p-4">
+            {/* Products Display (No Top Summary Cards as per Part 1) */}
+            {!loading && !error && totalProducts > 0 && (
+              <div className="space-y-6">
+                <div className="bg-white rounded-2xl border border-gray-200 p-4 shadow-sm">
                   <ProductToolbar
                     viewMode={viewMode}
                     onViewModeChange={setViewMode}
                     onSearch={setSearchQuery}
                     onFilterChange={setFilters}
                     onAddProduct={handleAddProduct}
-                    onImportProducts={handleImportProducts}
+                    onImportProducts={() => {}}
                     onExportProducts={handleExportProducts}
                     onRefresh={handleRefresh}
                     onSort={setSortBy}
                   />
                 </div>
 
-                {/* Products Display */}
                 {viewMode === "table" ? (
-                  <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                  <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
                     <ProductTable
                       products={currentProducts}
                       selectedIds={selectedIds}
@@ -227,8 +322,7 @@ export default function ProductsPage() {
                   />
                 )}
 
-                {/* Pagination */}
-                <div className="bg-white rounded-xl border border-gray-200 px-6 py-4">
+                <div className="bg-white rounded-2xl border border-gray-200 px-6 py-4 shadow-sm">
                   <ProductPagination
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -247,7 +341,6 @@ export default function ProductsPage() {
         </main>
       </div>
 
-      {/* Bulk Action Bar */}
       <BulkActionBar
         selectedCount={selectedIds.length}
         onClearSelection={handleClearSelection}

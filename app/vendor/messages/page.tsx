@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { ConversationList } from "@/components/vendor/conversation-list";
@@ -8,139 +8,107 @@ import { ChatWindow } from "@/components/vendor/chat-window";
 import { Conversation } from "@/components/vendor/conversation-card";
 import { Message } from "@/components/vendor/message-bubble";
 
-// Generate deterministic conversations
-function generateConversations(): Conversation[] {
-  const customers = [
-    "John Smith",
-    "Sarah Johnson",
-    "Michael Brown",
-    "Emily Davis",
-    "David Wilson",
-    "Jessica Martinez",
-    "Robert Taylor",
-    "Lisa Anderson",
-  ];
-
-  const messages = [
-    "Is this available in black?",
-    "When will my order ship?",
-    "Can I get a discount on bulk orders?",
-    "What's the return policy?",
-    "Is this product still in stock?",
-    "I have a question about sizing",
-    "Can you ship internationally?",
-    "How long is the warranty?",
-  ];
-
-  const products = [
-    "Wireless Headphones",
-    "Smart Watch",
-    "Laptop Stand",
-    "Mechanical Keyboard",
-    "USB-C Cable",
-    "Phone Case",
-    "Tablet Cover",
-    "Gaming Mouse",
-  ];
-
-  const conversations: Conversation[] = [];
-
-  for (let i = 0; i < customers.length; i++) {
-    const hasOrder = i % 3 === 0;
-    const hasProduct = i % 2 === 0;
-    const unreadCount = i === 0 ? 2 : i === 1 ? 1 : 0;
-    const hoursAgo = i * 15;
-
-    conversations.push({
-      id: `conv-${i + 1}`,
-      customerName: customers[i],
-      customerAvatar: "",
-      lastMessage: messages[i],
-      timestamp:
-        hoursAgo < 60
-          ? `${hoursAgo}m ago`
-          : hoursAgo < 1440
-          ? `${Math.floor(hoursAgo / 60)}h ago`
-          : `${Math.floor(hoursAgo / 1440)}d ago`,
-      unreadCount,
-      orderNumber: hasOrder ? `#${45890 + i}` : undefined,
-      productName: hasProduct ? products[i] : undefined,
-      type: hasOrder ? "order" : hasProduct ? "product" : "general",
-    });
-  }
-
-  return conversations;
-}
-
-// Generate deterministic messages
-function generateMessages(conversationId: string): Message[] {
-  const baseMessages: Message[] = [
-    {
-      id: "msg-1",
-      sender: "customer",
-      text: "Hi, I'm interested in this product. Is it available in black color?",
-      timestamp: "10:30 AM",
-    },
-    {
-      id: "msg-2",
-      sender: "vendor",
-      text: "Hello! Thank you for your interest. Yes, this product is available in black. We currently have 15 units in stock.",
-      timestamp: "10:32 AM",
-      status: "read",
-    },
-    {
-      id: "msg-3",
-      sender: "customer",
-      text: "Great! Can you tell me more about the warranty?",
-      timestamp: "10:35 AM",
-    },
-    {
-      id: "msg-4",
-      sender: "vendor",
-      text: "This product comes with a 2-year manufacturer warranty covering any defects. We also offer free returns within 30 days if you're not satisfied.",
-      timestamp: "10:38 AM",
-      status: "read",
-    },
-    {
-      id: "msg-5",
-      sender: "customer",
-      text: "Perfect! I'll place an order shortly.",
-      timestamp: "10:40 AM",
-    },
-    {
-      id: "msg-6",
-      sender: "vendor",
-      text: "Wonderful! If you have any questions during checkout, feel free to reach out. We're here to help!",
-      timestamp: "10:42 AM",
-      status: "delivered",
-    },
-  ];
-
-  return baseMessages;
-}
-
 export default function VendorMessagesPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeConversationId, setActiveConversationId] = useState<string | null>("conv-1");
+  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Generate conversations
-  const conversations = useMemo(() => generateConversations(), []);
+  // Fetch vendor conversations
+  useEffect(() => {
+    async function loadConversations() {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/messaging/conversations?role=vendor");
+        if (res.ok) {
+          const data = await res.json();
+          const mapped: Conversation[] = (data || []).map((c: any) => ({
+            id: c.id,
+            customerName: c.customerName || "Customer",
+            customerAvatar: "",
+            lastMessage: c.lastMessageText || "No messages yet",
+            timestamp: new Date(c.lastMessageAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            unreadCount: c.unreadCount || 0,
+            type: "general",
+          }));
+          setConversations(mapped);
+          if (mapped.length > 0 && !activeConversationId) {
+            setActiveConversationId(mapped[0].id);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load vendor conversations:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadConversations();
+  }, []);
 
-  // Get active conversation
+  // Fetch messages for active conversation
+  useEffect(() => {
+    if (!activeConversationId) return;
+
+    async function loadMessages() {
+      try {
+        const res = await fetch(`/api/messaging/conversations/${activeConversationId}/messages`);
+        if (res.ok) {
+          const data = await res.json();
+          const mapped: Message[] = (data || []).map((m: any) => ({
+            id: m.id,
+            sender: m.senderType === "VENDOR" ? "vendor" : "customer",
+            text: m.text,
+            timestamp: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: m.isRead ? "read" : "delivered",
+          }));
+          setMessages(mapped);
+        }
+      } catch (err) {
+        console.error("Failed to load messages:", err);
+      }
+    }
+    loadMessages();
+  }, [activeConversationId]);
+
   const activeConversation = conversations.find(
     (conv) => conv.id === activeConversationId
   );
 
-  // Generate messages for active conversation
-  const messages = useMemo(
-    () => (activeConversationId ? generateMessages(activeConversationId) : []),
-    [activeConversationId]
-  );
+  const handleSendMessage = async (text: string) => {
+    if (!activeConversationId || !text.trim()) return;
 
-  const handleSendMessage = (text: string, attachments?: File[]) => {
-    console.log("Send message:", text, attachments);
-    // In a real app, this would send the message to the server
+    try {
+      const res = await fetch(`/api/messaging/conversations/${activeConversationId}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+
+      if (res.ok) {
+        const newMsg = await res.json();
+        const mappedMsg: Message = {
+          id: newMsg.id,
+          sender: "vendor",
+          text: newMsg.text,
+          timestamp: new Date(newMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: "delivered",
+        };
+        setMessages((prev) => [...prev, mappedMsg]);
+
+        // Update last message in conversation list
+        setConversations((prev) =>
+          prev.map((c) =>
+            c.id === activeConversationId
+              ? { ...c, lastMessage: text, timestamp: "Just now" }
+              : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    }
   };
 
   const handleSelectConversation = (id: string) => {
@@ -160,7 +128,7 @@ export default function VendorMessagesPage() {
           ]}
         />
 
-        {/* Main Content - Fixed height layout */}
+        {/* Main Content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Left: Conversation List */}
           <div className="hidden lg:block flex-shrink-0">
@@ -173,7 +141,7 @@ export default function VendorMessagesPage() {
             />
           </div>
 
-          {/* Right: Chat Window - Full width */}
+          {/* Right: Chat Window */}
           {activeConversation ? (
             <ChatWindow
               customerName={activeConversation.customerName}
@@ -199,10 +167,12 @@ export default function VendorMessagesPage() {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  Select a conversation
+                  {isLoading ? "Loading Conversations..." : "No Conversations Found"}
                 </h3>
                 <p className="text-sm text-gray-600 max-w-sm">
-                  Choose a conversation from the list to start messaging with your customers
+                  {isLoading
+                    ? "Please wait while we fetch your active messages..."
+                    : "When customers send messages to your store, they will appear here."}
                 </p>
               </div>
             </div>

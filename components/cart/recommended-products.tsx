@@ -1,73 +1,65 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/products/product-card";
 
-const recommendedProducts = [
-  {
-    id: "r1",
-    name: "Wireless Mouse",
-    storeName: "Tech Accessories",
-    verified: true,
-    rating: 4.7,
-    reviews: 234,
-    price: 24.99,
-    originalPrice: 34.99,
-    discount: 29,
-    image: "bg-gradient-to-br from-gray-100 to-gray-200",
-    inStock: true,
-    images: 3,
-  },
-  {
-    id: "r2",
-    name: "USB-C Cable 2m",
-    storeName: "Cable World",
-    verified: false,
-    rating: 4.5,
-    reviews: 189,
-    price: 12.99,
-    image: "bg-gradient-to-br from-blue-100 to-blue-200",
-    inStock: true,
-    images: 2,
-  },
-  {
-    id: "r3",
-    name: "Phone Stand Holder",
-    storeName: "Mobile Gear",
-    verified: true,
-    rating: 4.8,
-    reviews: 456,
-    price: 19.99,
-    originalPrice: 29.99,
-    discount: 33,
-    image: "bg-gradient-to-br from-green-100 to-green-200",
-    inStock: true,
-    images: 4,
-  },
-  {
-    id: "r4",
-    name: "Screen Protector",
-    storeName: "Protect Plus",
-    verified: true,
-    rating: 4.6,
-    reviews: 678,
-    price: 9.99,
-    image: "bg-gradient-to-br from-green-100 to-green-200",
-    inStock: true,
-    images: 2,
-  },
-];
-
 export function RecommendedProducts() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadRecommended() {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/products?limit=4");
+        if (res.ok) {
+          const data = await res.json();
+          setProducts(data.products || []);
+        }
+      } catch (err) {
+        console.error("Failed to load recommended products:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadRecommended();
+  }, []);
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900">
-        You may also like
+    <div className="space-y-6 pt-8 border-t">
+      <h2 className="text-2xl font-extrabold text-gray-900">
+        You May Also Like
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {recommendedProducts.map((product) => (
-          <ProductCard key={product.id} {...product} />
-        ))}
-      </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-xl border p-4 space-y-4 animate-pulse">
+              <div className="h-48 bg-gray-200 rounded-lg"></div>
+              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            </div>
+          ))}
+        </div>
+      ) : products.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <ProductCard
+              key={product.id}
+              id={product.id}
+              name={product.name}
+              storeName={product.store?.name || "AfriCart Store"}
+              verified={true}
+              rating={product.rating || 5}
+              reviews={product.numReviews || 0}
+              price={product.price}
+              originalPrice={product.compareAtPrice || undefined}
+              discount={product.compareAtPrice ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) : undefined}
+              image={product.images}
+              inStock={product.stock > 0}
+              imagesCount={Array.isArray(product.images) ? product.images.length : 1}
+            />
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }

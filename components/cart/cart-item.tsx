@@ -131,20 +131,20 @@ export function CartItem({
           {/* Price */}
           <div className="text-right">
             <div className="text-xl font-bold text-gray-900">
-              ${itemTotal.toFixed(2)}
+              GH₵{itemTotal.toFixed(2)}
             </div>
             {originalPrice && (
               <div className="text-sm">
                 <span className="text-gray-500 line-through">
-                  ${(originalPrice * qty).toFixed(2)}
+                  GH₵{(originalPrice * qty).toFixed(2)}
                 </span>
                 <span className="text-green-600 ml-2">
-                  Save ${savings.toFixed(2)}
+                  Save GH₵{savings.toFixed(2)}
                 </span>
               </div>
             )}
             <div className="text-sm text-gray-600">
-              ${price.toFixed(2)} each
+              GH₵{price.toFixed(2)} each
             </div>
           </div>
         </div>

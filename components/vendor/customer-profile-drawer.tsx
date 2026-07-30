@@ -14,64 +14,13 @@ interface CustomerProfileDrawerProps {
 }
 
 export function CustomerProfileDrawer({ customer, onClose }: CustomerProfileDrawerProps) {
-  const [notes, setNotes] = useState("Prefers express delivery. Frequent bulk buyer.");
+  const [notes, setNotes] = useState("");
 
   if (!customer) return null;
 
-  // Mock recent orders
-  const recentOrders = [
-    {
-      id: "ORD-10234",
-      products: ["Wireless Headphones", "USB-C Cable"],
-      date: "Dec 10, 2024",
-      total: 145.50,
-      status: "delivered" as const,
-    },
-    {
-      id: "ORD-10198",
-      products: ["Smart Watch", "Power Bank"],
-      date: "Nov 28, 2024",
-      total: 289.99,
-      status: "delivered" as const,
-    },
-    {
-      id: "ORD-10156",
-      products: ["Laptop Bag"],
-      date: "Nov 15, 2024",
-      total: 79.99,
-      status: "delivered" as const,
-    },
-  ];
-
-  // Mock favorite products
-  const favoriteProducts = [
-    {
-      name: "Wireless Headphones",
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop",
-      purchaseCount: 3,
-    },
-    {
-      name: "USB-C Cable",
-      image: "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=100&h=100&fit=crop",
-      purchaseCount: 5,
-    },
-  ];
-
-  // Mock reviews
-  const reviews = [
-    {
-      rating: 5,
-      review: "Excellent product quality! Fast shipping and great customer service.",
-      product: "Wireless Headphones",
-      date: "Dec 12, 2024",
-    },
-    {
-      rating: 4,
-      review: "Good value for money. Would recommend to others.",
-      product: "Smart Watch",
-      date: "Nov 30, 2024",
-    },
-  ];
+  const recentOrders = (customer as any).recentOrders || [];
+  const favoriteProducts = (customer as any).favoriteProducts || [];
+  const reviews = (customer as any).reviews || [];
 
   return (
     <>
@@ -171,52 +120,62 @@ export function CustomerProfileDrawer({ customer, onClose }: CustomerProfileDraw
               {/* Recent Orders */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Recent Orders</h3>
-                <div className="space-y-3">
-                  {recentOrders.map((order) => (
-                    <div key={order.id} className="bg-gray-50 rounded-lg p-4">
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <div className="font-medium text-gray-900 text-sm">{order.id}</div>
-                          <div className="text-xs text-gray-500">{order.date}</div>
+                {recentOrders.length === 0 ? (
+                  <p className="text-xs text-gray-400 italic">No recent order history.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {recentOrders.map((order: any) => (
+                      <div key={order.id} className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <div className="font-medium text-gray-900 text-sm">{order.id}</div>
+                            <div className="text-xs text-gray-500">{order.date}</div>
+                          </div>
+                          <Badge className="bg-emerald-100 text-emerald-700">
+                            {order.status}
+                          </Badge>
                         </div>
-                        <Badge className="bg-emerald-100 text-emerald-700">
-                          {order.status}
-                        </Badge>
+                        <div className="text-sm text-gray-700 mb-2">
+                          {(order.products || []).join(", ")}
+                        </div>
+                        <div className="text-sm font-semibold text-gray-900">
+                          ${order.total ? Number(order.total).toFixed(2) : "0.00"}
+                        </div>
                       </div>
-                      <div className="text-sm text-gray-700 mb-2">
-                        {order.products.join(", ")}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900">
-                        ${order.total.toFixed(2)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Favorite Products */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Favorite Products</h3>
-                <div className="space-y-3">
-                  {favoriteProducts.map((product, idx) => (
-                    <div key={idx} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
-                      <div className="relative w-12 h-12 rounded-md overflow-hidden bg-white border border-gray-200 flex-shrink-0">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <div className="font-medium text-gray-900 text-sm">{product.name}</div>
-                        <div className="text-xs text-gray-500">
-                          Purchased {product.purchaseCount} times
+                {favoriteProducts.length === 0 ? (
+                  <p className="text-xs text-gray-400 italic">No purchase history yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {favoriteProducts.map((product: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-3 bg-gray-50 rounded-lg p-3">
+                        <div className="relative w-12 h-12 rounded-md overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                          {product.image && (
+                            <Image
+                              src={product.image}
+                              alt={product.name}
+                              fill
+                              className="object-cover"
+                            />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium text-gray-900 text-sm">{product.name}</div>
+                          <div className="text-xs text-gray-500">
+                            Purchased {product.purchaseCount} times
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Customer Notes */}
@@ -236,9 +195,12 @@ export function CustomerProfileDrawer({ customer, onClose }: CustomerProfileDraw
               {/* Customer Reviews */}
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-3">Customer Reviews</h3>
-                <div className="space-y-3">
-                  {reviews.map((review, idx) => (
-                    <div key={idx} className="bg-gray-50 rounded-lg p-4">
+                {reviews.length === 0 ? (
+                  <p className="text-xs text-gray-400 italic">No reviews submitted yet.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {reviews.map((review: any, idx: number) => (
+                      <div key={idx} className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-1">
                           {Array.from({ length: 5 }).map((_, i) => (
@@ -259,8 +221,9 @@ export function CustomerProfileDrawer({ customer, onClose }: CustomerProfileDraw
                     </div>
                   ))}
                 </div>
-              </div>
+              )}
             </div>
+          </div>
           </div>
 
           {/* Footer Actions */}

@@ -25,16 +25,30 @@ export function ProtectedRoute({
 
     // Not authenticated - redirect to login
     if (!isAuthenticated || !user) {
-      // Store intended destination
       sessionStorage.setItem("redirectAfterLogin", pathname);
       router.push(redirectTo);
       return;
     }
 
-    // Authenticated but wrong role - redirect to unauthorized or their dashboard
-    if (!allowedRoles.includes(user.role)) {
+    const userRoleList = [
+      String(user.role || "").toLowerCase(),
+      ...(user.roles || []).map((r: string) => String(r).toLowerCase()),
+    ];
+
+    const hasRole = allowedRoles.some((allowed) =>
+      userRoleList.includes(String(allowed).toLowerCase())
+    );
+
+    const isVendorAllowed =
+      allowedRoles.map((r) => String(r).toLowerCase()).includes("vendor") &&
+      (userRoleList.includes("vendor") || !!user.storeName || !!user.storeStatus);
+
+    // Authenticated but wrong role - redirect to their dashboard
+    if (!hasRole && !isVendorAllowed) {
       const userDashboard = getUserDashboard(user.role);
-      router.push(userDashboard);
+      if (pathname !== userDashboard) {
+        router.push(userDashboard);
+      }
     }
   }, [isAuthenticated, user, isLoading, allowedRoles, router, redirectTo, pathname]);
 
@@ -44,7 +58,7 @@ export function ProtectedRoute({
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600 font-medium">Verifying access authorization...</p>
         </div>
       </div>
     );
@@ -55,8 +69,21 @@ export function ProtectedRoute({
     return null;
   }
 
+  const userRoleList = [
+    String(user.role || "").toLowerCase(),
+    ...(user.roles || []).map((r: string) => String(r).toLowerCase()),
+  ];
+
+  const hasRole = allowedRoles.some((allowed) =>
+    userRoleList.includes(String(allowed).toLowerCase())
+  );
+
+  const isVendorAllowed =
+    allowedRoles.map((r) => String(r).toLowerCase()).includes("vendor") &&
+    (userRoleList.includes("vendor") || !!user.storeName || !!user.storeStatus);
+
   // Wrong role
-  if (!allowedRoles.includes(user.role)) {
+  if (!hasRole && !isVendorAllowed) {
     return null;
   }
 

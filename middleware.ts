@@ -35,28 +35,40 @@ export async function middleware(request: NextRequest) {
 
   // 1. Guard customer and vendor routes
   if (isCustomerRoute || isVendorRoute) {
-    if (!session) {
+    if (!session || !session.userId) {
       const loginUrl = new URL("/auth/login", request.url);
       loginUrl.searchParams.set("redirect", pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    // 2. Guard Vendor routes specifically (requires VENDOR role)
+    // 2. Guard Vendor routes specifically
     if (isVendorRoute) {
-      const roles = session.roles || [];
-      const hasVendorRole = roles.includes("VENDOR") || roles.includes("ADMIN");
-      
-      if (!hasVendorRole) {
-        // User is customer but not vendor, redirect to customer dashboard
+      const roles = Array.isArray(session.roles)
+        ? session.roles.map((r: string) => String(r).toUpperCase())
+        : [];
+      const singleRole = String(session.role || "").toUpperCase();
+
+      const isVendorOrAdmin = 
+        roles.includes("VENDOR") || 
+        roles.includes("ADMIN") || 
+        singleRole === "VENDOR" || 
+        singleRole === "ADMIN";
+
+      // Only redirect to /profile if roles array is defined AND explicitly lacks VENDOR/ADMIN
+      if (roles.length > 0 && !isVendorOrAdmin && singleRole === "CUSTOMER") {
         return NextResponse.redirect(new URL("/profile", request.url));
       }
     }
   }
 
   // 3. Redirect authenticated users away from authentication pages
-  if (isAuthRoute && session) {
-    const roles = session.roles || [];
-    if (roles.includes("VENDOR") || roles.includes("ADMIN")) {
+  if (isAuthRoute && session && session.userId) {
+    const roles = Array.isArray(session.roles)
+      ? session.roles.map((r: string) => String(r).toUpperCase())
+      : [];
+    const singleRole = String(session.role || "").toUpperCase();
+
+    if (roles.includes("VENDOR") || roles.includes("ADMIN") || singleRole === "VENDOR" || singleRole === "ADMIN") {
       return NextResponse.redirect(new URL("/vendor", request.url));
     } else {
       return NextResponse.redirect(new URL("/profile", request.url));

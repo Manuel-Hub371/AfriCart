@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight, ExternalLink } from "lucide-react";
 export type TransactionType = "sale" | "refund" | "commission" | "withdrawal" | "adjustment" | "bonus";
 export type TransactionStatus = "completed" | "pending" | "failed";
 
-interface Transaction {
+export interface Transaction {
   id: string;
   type: TransactionType;
   orderNumber?: string;

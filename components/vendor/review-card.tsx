@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 
 export interface Review {
   id: string;
+  productId?: string;
   customerName: string;
   customerAvatar?: string;
   rating: number;
@@ -174,7 +175,7 @@ export function ReviewCard({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onViewProduct(review.id)}
+            onClick={() => onViewProduct(review.productId || review.id)}
             className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
           >
             View Product

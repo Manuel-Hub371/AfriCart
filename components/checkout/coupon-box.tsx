@@ -17,19 +17,21 @@ export default function CouponBox({
   const [couponCode, setCouponCode] = useState("");
   const [error, setError] = useState("");
 
+  const validCoupons = ["SAVE50", "AFRICART10", "WELCOME20"];
+
   const handleApplyCoupon = () => {
-    if (!couponCode.trim()) {
-      setError("Please enter a coupon code");
+    const code = couponCode.trim().toUpperCase();
+    if (!code) {
+      setError("Please enter a valid promo or coupon code");
       return;
     }
 
-    // Simulate coupon validation (accept "SAVE50" for demo)
-    if (couponCode.toUpperCase() === "SAVE50") {
-      onApplyCoupon(couponCode.toUpperCase());
+    if (validCoupons.includes(code)) {
+      onApplyCoupon(code);
       setCouponCode("");
       setError("");
     } else {
-      setError("Invalid coupon code");
+      setError("Invalid or expired coupon code");
     }
   };
 
@@ -38,25 +40,25 @@ export default function CouponBox({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6">
+    <div className="bg-white rounded-2xl shadow-sm border p-6">
       <div className="flex items-center gap-2 mb-4">
         <Tag className="h-5 w-5 text-emerald-600" />
-        <h3 className="font-semibold text-gray-900">Apply Coupon</h3>
+        <h3 className="font-bold text-gray-900">Apply Promo Coupon</h3>
       </div>
 
       {appliedCoupon ? (
-        <div className="flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+        <div className="flex items-center justify-between p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl">
           <div>
-            <p className="text-sm font-medium text-emerald-700">
-              Coupon Applied: {appliedCoupon}
+            <p className="text-sm font-bold text-emerald-800">
+              Coupon Code Applied: {appliedCoupon}
             </p>
-            <p className="text-xs text-emerald-600 mt-0.5">
-              You saved $50 on this order
+            <p className="text-xs text-emerald-600 mt-0.5 font-medium">
+              Promotional discount calculated at order review
             </p>
           </div>
           <button
             onClick={handleRemoveCoupon}
-            className="text-emerald-700 hover:text-emerald-800"
+            className="text-emerald-700 hover:text-emerald-900 p-1 rounded-lg hover:bg-emerald-100"
           >
             <X className="h-5 w-5" />
           </button>
@@ -70,15 +72,14 @@ export default function CouponBox({
                 setCouponCode(e.target.value);
                 setError("");
               }}
-              placeholder="Enter coupon code"
-              className="flex-1"
+              placeholder="Enter coupon code (e.g. AFRICART10)"
+              className="flex-1 rounded-xl"
             />
-            <Button onClick={handleApplyCoupon}>Apply</Button>
+            <Button onClick={handleApplyCoupon} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
+              Apply
+            </Button>
           </div>
-          {error && <p className="text-sm text-red-600 mt-2">{error}</p>}
-          <p className="text-xs text-gray-500 mt-2">
-            Try "SAVE50" for $50 discount
-          </p>
+          {error && <p className="text-xs font-semibold text-red-600 mt-2">{error}</p>}
         </div>
       )}
     </div>

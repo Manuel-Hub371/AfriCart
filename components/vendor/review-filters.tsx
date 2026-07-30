@@ -17,7 +17,6 @@ import { Filter, X, ArrowUpDown, Star } from "lucide-react";
 interface FilterOption {
   label: string;
   value: string;
-  count?: number;
 }
 
 interface ReviewFiltersProps {
@@ -32,30 +31,27 @@ export function ReviewFilters({ onFilterChange, onSort }: ReviewFiltersProps) {
   });
 
   const ratingOptions: FilterOption[] = [
-    { label: "5 Stars", value: "5", count: 1936 },
-    { label: "4 Stars", value: "4", count: 512 },
-    { label: "3 Stars", value: "3", count: 228 },
-    { label: "2 Stars", value: "2", count: 114 },
-    { label: "1 Star", value: "1", count: 57 },
+    { label: "5 Stars", value: "5" },
+    { label: "4 Stars", value: "4" },
+    { label: "3 Stars", value: "3" },
+    { label: "2 Stars", value: "2" },
+    { label: "1 Star", value: "1" },
   ];
 
   const statusOptions: FilterOption[] = [
-    { label: "Unanswered", value: "unanswered", count: 47 },
-    { label: "Replied", value: "replied", count: 2788 },
-    { label: "Reported", value: "reported", count: 12 },
+    { label: "Unanswered", value: "unanswered" },
+    { label: "Replied", value: "replied" },
   ];
 
   const toggleFilter = (filterType: string, value: string) => {
-    setSelectedFilters((prev) => {
-      const current = prev[filterType] || [];
-      const updated = current.includes(value)
-        ? current.filter((v) => v !== value)
-        : [...current, value];
-      
-      const newFilters = { ...prev, [filterType]: updated };
-      onFilterChange(newFilters);
-      return newFilters;
-    });
+    const current = selectedFilters[filterType] || [];
+    const updated = current.includes(value)
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+    
+    const newFilters = { ...selectedFilters, [filterType]: updated };
+    setSelectedFilters(newFilters);
+    onFilterChange(newFilters);
   };
 
   const clearAllFilters = () => {
@@ -76,7 +72,7 @@ export function ReviewFilters({ onFilterChange, onSort }: ReviewFiltersProps) {
           <Star className="h-4 w-4" />
           Rating
           {selectedFilters.rating?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.rating.length}
             </Badge>
           )}
@@ -91,9 +87,6 @@ export function ReviewFilters({ onFilterChange, onSort }: ReviewFiltersProps) {
               onCheckedChange={() => toggleFilter("rating", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
@@ -105,7 +98,7 @@ export function ReviewFilters({ onFilterChange, onSort }: ReviewFiltersProps) {
           <Filter className="h-4 w-4" />
           Status
           {selectedFilters.status?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700">
+            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
               {selectedFilters.status.length}
             </Badge>
           )}
@@ -120,9 +113,6 @@ export function ReviewFilters({ onFilterChange, onSort }: ReviewFiltersProps) {
               onCheckedChange={() => toggleFilter("status", option.value)}
             >
               <span className="flex-1">{option.label}</span>
-              {option.count && (
-                <span className="text-xs text-gray-500 ml-2">({option.count})</span>
-              )}
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
@@ -148,9 +138,6 @@ export function ReviewFilters({ onFilterChange, onSort }: ReviewFiltersProps) {
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => onSort("lowest-rating")}>
             Lowest Rating
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onSort("most-helpful")}>
-            Most Helpful
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

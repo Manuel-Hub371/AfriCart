@@ -6,7 +6,7 @@ import { CreditCard, Building2, Smartphone, Check, Edit, Trash2 } from "lucide-r
 
 export type PaymentMethodType = "bank" | "mobile" | "paypal";
 
-interface PaymentMethod {
+export interface PaymentMethod {
   id: string;
   type: PaymentMethodType;
   name: string;

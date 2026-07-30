@@ -1,25 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import DashboardSidebar from "@/components/profile/dashboard-sidebar";
 import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar } from "@/components/ui/avatar";
-import { Camera, Save } from "lucide-react";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Camera, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { useUpload } from "@/lib/hooks/use-upload";
+import { useAuth } from "@/lib/auth/context";
 
 export default function SettingsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, updateUser } = useAuth();
+
+  const [avatarUrl, setAvatarUrl] = useState<string>("");
   const [formData, setFormData] = useState({
-    fullName: "Manuel Darko",
-    email: "manueldarko@gmail.com",
-    phone: "+233 54 982 0094",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
     language: "English",
-    currency: "GHS",
+    currency: "USD",
     emailNotifications: true,
     orderUpdates: true,
     promotions: false,
   });
+
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const { uploadFile, uploading: uploadingPhoto } = useUpload();
+
+  // Populate user data from auth context
+  useEffect(() => {
+    if (user) {
+      setAvatarUrl(user.avatar || "");
+      setFormData((prev) => ({
+        ...prev,
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+      }));
+    }
+  }, [user]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -32,9 +59,93 @@ export default function SettingsPage() {
     });
   };
 
-  const handleSave = () => {
-    alert("Settings saved successfully!");
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setSaveError(null);
+    const url = await uploadFile(file);
+    if (url) {
+      setAvatarUrl(url);
+
+      // Persist avatar change immediately to database
+      try {
+        const res = await fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ avatar: url }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.user) {
+            updateUser(data.user);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to persist avatar:", err);
+      }
+    }
+    e.target.value = "";
   };
+
+  const handleRemovePhoto = async () => {
+    setAvatarUrl("");
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar: null }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.user) {
+          updateUser(data.user);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to remove avatar:", err);
+    }
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveSuccess(false);
+    setSaveError(null);
+
+    try {
+      const res = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          avatar: avatarUrl || null,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to save profile changes");
+      }
+
+      const data = await res.json();
+      if (data.user) {
+        updateUser(data.user);
+      }
+
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: any) {
+      setSaveError(err.message || "Failed to save settings");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const displayName = `${formData.firstName} ${formData.lastName}`.trim();
+  const initials = displayName
+    ? displayName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "U";
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -52,20 +163,77 @@ export default function SettingsPage() {
             <p className="text-gray-600">Manage your account preferences</p>
           </div>
 
+          {saveSuccess && (
+            <div className="max-w-3xl mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+              Settings and profile picture updated successfully!
+            </div>
+          )}
+
+          {saveError && (
+            <div className="max-w-3xl mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0" />
+              {saveError}
+            </div>
+          )}
+
           <div className="max-w-3xl space-y-6">
             {/* Profile Picture */}
             <div className="bg-white rounded-lg border p-6">
               <h2 className="text-xl font-semibold mb-4">Profile Picture</h2>
               <div className="flex items-center gap-4">
-                <Avatar className="h-24 w-24">
-                  <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-3xl font-bold">
-                    MD
-                  </div>
-                </Avatar>
-                <Button variant="outline" className="gap-2">
-                  <Camera className="h-4 w-4" />
-                  Change Photo
-                </Button>
+                <div className="relative">
+                  <Avatar className="h-24 w-24 overflow-hidden">
+                    {avatarUrl ? (
+                      <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover rounded-full" />
+                    ) : (
+                      <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-emerald-600 text-white text-3xl font-bold">
+                        {initials}
+                      </AvatarFallback>
+                    )}
+                  </Avatar>
+                  {uploadingPhoto && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/70 rounded-full">
+                      <Loader2 className="h-5 w-5 text-emerald-600 animate-spin" />
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handlePhotoChange}
+                    className="sr-only"
+                    id="profile-photo-input"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="gap-2"
+                    disabled={uploadingPhoto}
+                    onClick={() => photoInputRef.current?.click()}
+                  >
+                    {uploadingPhoto ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Camera className="h-4 w-4" />
+                    )}
+                    {uploadingPhoto ? "Uploading..." : "Change Photo"}
+                  </Button>
+                  {avatarUrl && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 text-xs"
+                      onClick={handleRemovePhoto}
+                    >
+                      Remove Photo
+                    </Button>
+                  )}
+                  <p className="text-xs text-gray-500">PNG, JPG, WEBP up to 10 MB</p>
+                </div>
               </div>
             </div>
 
@@ -75,15 +243,27 @@ export default function SettingsPage() {
                 Personal Information
               </h2>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Full Name
-                  </label>
-                  <Input
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      First Name
+                    </label>
+                    <Input
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Last Name
+                    </label>
+                    <Input
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -93,7 +273,8 @@ export default function SettingsPage() {
                     type="email"
                     name="email"
                     value={formData.email}
-                    onChange={handleChange}
+                    disabled
+                    className="bg-gray-50 text-gray-500 cursor-not-allowed"
                   />
                 </div>
                 <div>
@@ -105,46 +286,6 @@ export default function SettingsPage() {
                     value={formData.phone}
                     onChange={handleChange}
                   />
-                </div>
-              </div>
-            </div>
-
-            {/* Security */}
-            <div className="bg-white rounded-lg border p-6">
-              <h2 className="text-xl font-semibold mb-4">Security</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Current Password
-                  </label>
-                  <Input type="password" placeholder="••••••••" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    New Password
-                  </label>
-                  <Input type="password" placeholder="••••••••" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Confirm New Password
-                  </label>
-                  <Input type="password" placeholder="••••••••" />
-                </div>
-                <Button variant="outline">Change Password</Button>
-              </div>
-
-              <div className="mt-6 pt-6 border-t">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      Two-Factor Authentication
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Add an extra layer of security
-                    </p>
-                  </div>
-                  <Button variant="outline">Enable</Button>
                 </div>
               </div>
             </div>
@@ -224,31 +365,22 @@ export default function SettingsPage() {
                     className="h-5 w-5 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
                   />
                 </label>
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      Promotions & Deals
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Special offers and discounts
-                    </p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    name="promotions"
-                    checked={formData.promotions}
-                    onChange={handleChange}
-                    className="h-5 w-5 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-                  />
-                </label>
               </div>
             </div>
 
             {/* Save Button */}
             <div className="flex justify-end">
-              <Button onClick={handleSave} className="gap-2">
-                <Save className="h-5 w-5" />
-                Save Changes
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="gradient-primary text-white gap-2"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Save className="h-5 w-5" />
+                )}
+                {isSaving ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </div>

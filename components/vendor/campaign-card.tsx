@@ -26,14 +26,21 @@ export type CampaignStatus = "active" | "scheduled" | "paused" | "ended";
 export interface Campaign {
   id: string;
   name: string;
-  type: CampaignType;
+  type: string;
+  description?: string | null;
+  badge?: string | null;
+  color?: string | null;
   startDate: string;
   endDate: string;
-  status: CampaignStatus;
-  revenue: number;
-  orders: number;
-  conversionRate: number;
-  discount: string;
+  isActive: boolean;
+  discountType: string;
+  discountValue?: number | null;
+  productsCount: number;
+  // Real performance stats from DB
+  revenueGenerated: number;
+  salesCount: number;
+  viewsCount: number;
+  usedCount: number;
 }
 
 interface CampaignCardProps {
@@ -46,33 +53,25 @@ interface CampaignCardProps {
   onViewDetails: (campaign: Campaign) => void;
 }
 
-const campaignTypeLabels: Record<CampaignType, string> = {
-  "percentage-discount": "Percentage Off",
-  "fixed-discount": "Fixed Amount",
-  "bogo": "Buy One Get One",
-  "bundle": "Bundle Discount",
-  "free-shipping": "Free Shipping",
-  "category-discount": "Category Sale",
-  "product-discount": "Product Sale",
-  "minimum-spend": "Minimum Spend",
-};
+// Compute status from real API fields
+function getCampaignStatus(c: Campaign): { label: string; className: string } {
+  const now = new Date();
+  const start = new Date(c.startDate);
+  const end = new Date(c.endDate);
+  if (!c.isActive) return { label: "Paused", className: "bg-yellow-100 text-yellow-700 border-yellow-200" };
+  if (end < now) return { label: "Ended", className: "bg-gray-100 text-gray-700 border-gray-200" };
+  if (start > now) return { label: "Scheduled", className: "bg-blue-100 text-blue-700 border-blue-200" };
+  return { label: "Active", className: "bg-emerald-100 text-emerald-700 border-emerald-200" };
+}
 
-const statusConfig = {
-  active: { label: "Active", className: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  scheduled: { label: "Scheduled", className: "bg-blue-100 text-blue-700 border-blue-200" },
-  paused: { label: "Paused", className: "bg-yellow-100 text-yellow-700 border-yellow-200" },
-  ended: { label: "Ended", className: "bg-gray-100 text-gray-700 border-gray-200" },
-};
+  const status = getCampaignStatus(campaign);
+  const discountLabel =
+    campaign.discountType === "PERCENTAGE" && campaign.discountValue != null
+      ? `${campaign.discountValue}% OFF`
+      : campaign.discountType === "FIXED" && campaign.discountValue != null
+      ? `GH₵${campaign.discountValue} OFF`
+      : "No Direct Discount";
 
-export function CampaignCard({
-  campaign,
-  onEdit,
-  onPause,
-  onResume,
-  onDuplicate,
-  onDelete,
-  onViewDetails,
-}: CampaignCardProps) {
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow cursor-pointer"
       onClick={() => onViewDetails(campaign)}>
@@ -81,13 +80,13 @@ export function CampaignCard({
           <h3 className="text-lg font-semibold text-gray-900 mb-2">{campaign.name}</h3>
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className="text-xs">
-              {campaignTypeLabels[campaign.type]}
+              {campaign.type?.replace(/_/g, " ") || "Campaign"}
             </Badge>
-            <Badge 
-              variant="outline" 
-              className={`text-xs font-medium ${statusConfig[campaign.status].className}`}
+            <Badge
+              variant="outline"
+              className={`text-xs font-medium ${status.className}`}
             >
-              {statusConfig[campaign.status].label}
+              {status.label}
             </Badge>
           </div>
         </div>
@@ -103,17 +102,17 @@ export function CampaignCard({
               <Edit className="h-4 w-4 mr-2" />
               Edit Campaign
             </DropdownMenuItem>
-            {campaign.status === "active" ? (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onPause(campaign.id); }}>
-                <Pause className="h-4 w-4 mr-2" />
-                Pause Campaign
-              </DropdownMenuItem>
-            ) : campaign.status === "paused" ? (
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onResume(campaign.id); }}>
-                <Play className="h-4 w-4 mr-2" />
-                Resume Campaign
-              </DropdownMenuItem>
-            ) : null}
+          {campaign.isActive ? (
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onPause(campaign.id); }}>
+              <Pause className="h-4 w-4 mr-2" />
+              Pause Campaign
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onResume(campaign.id); }}>
+              <Play className="h-4 w-4 mr-2" />
+              Resume Campaign
+            </DropdownMenuItem>
+          )}
             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDuplicate(campaign.id); }}>
               <Copy className="h-4 w-4 mr-2" />
               Duplicate
@@ -133,11 +132,15 @@ export function CampaignCard({
       <div className="space-y-3 mb-4">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Calendar className="h-4 w-4" />
-          <span>{campaign.startDate} - {campaign.endDate}</span>
+          <span>
+            {new Date(campaign.startDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+            {" → "}
+            {new Date(campaign.endDate).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          </span>
         </div>
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Percent className="h-4 w-4" />
-          <span>Discount: {campaign.discount}</span>
+          <span>Discount: {discountLabel}</span>
         </div>
       </div>
 
@@ -148,25 +151,25 @@ export function CampaignCard({
             Revenue
           </div>
           <div className="text-lg font-semibold text-gray-900">
-            ${campaign.revenue.toLocaleString()}
+            GH₵{Number(campaign.revenueGenerated || 0).toFixed(0)}
           </div>
         </div>
         <div>
           <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
             <ShoppingCart className="h-3 w-3" />
-            Orders
+            Sales
           </div>
           <div className="text-lg font-semibold text-gray-900">
-            {campaign.orders}
+            {campaign.salesCount || 0}
           </div>
         </div>
         <div>
           <div className="flex items-center gap-1 text-xs text-gray-500 mb-1">
             <Percent className="h-3 w-3" />
-            Conversion
+            Products
           </div>
           <div className="text-lg font-semibold text-gray-900">
-            {campaign.conversionRate}%
+            {campaign.productsCount || 0}
           </div>
         </div>
       </div>

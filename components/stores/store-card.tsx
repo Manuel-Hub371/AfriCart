@@ -1,101 +1,195 @@
+"use client";
+
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Star, Package, Users, CheckCircle, MapPin, Heart } from "lucide-react";
+import { Avatar } from "@/components/ui/avatar";
+import { Star, Package, Users, CheckCircle, MapPin, Heart, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface StoreCardProps {
   id: string;
   name: string;
-  banner: string;
-  logo: string;
-  verified: boolean;
-  rating: number;
-  products: number;
-  followers: number;
-  category: string;
-  location: string;
+  description?: string;
+  banner?: string;
+  logo?: string;
+  verified?: boolean;
+  rating?: number;
+  products?: number;
+  productCount?: number;
+  followers?: number;
+  followerCount?: number;
+  isFollowing?: boolean;
+  category?: string;
+  location?: string;
+  slug?: string;
 }
 
 export function StoreCard({
   id,
   name,
+  description,
   banner,
   logo,
-  verified,
-  rating,
+  verified = true,
+  rating = 5.0,
   products,
+  productCount,
   followers,
-  category,
-  location,
+  followerCount,
+  isFollowing = false,
+  category = "General",
+  location = "Ghana",
+  slug,
 }: StoreCardProps) {
+  const router = useRouter();
+  const [followingState, setFollowingState] = useState(isFollowing);
+  const [followersCountState, setFollowersCountState] = useState(
+    followerCount ?? followers ?? 0
+  );
+  const [isTogglingFollow, setIsTogglingFollow] = useState(false);
+
+  const realProductCount = productCount ?? products ?? 0;
+  const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/")));
+  const isBannerUrl = Boolean(banner && (banner.startsWith("http") || banner.startsWith("/")));
+  const storeHref = `/stores/${slug || id}`;
+
+  const handleFollowToggle = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isTogglingFollow) return;
+
+    try {
+      setIsTogglingFollow(true);
+      const res = await fetch(`/api/stores/${id}/follow`, {
+        method: "POST",
+      });
+
+      if (res.status === 401) {
+        router.push("/auth/login");
+        return;
+      }
+
+      if (res.ok) {
+        const data = await res.json();
+        setFollowingState(data.isFollowing);
+        setFollowersCountState(data.followerCount);
+      }
+    } catch (err) {
+      console.error("Failed to toggle store follow:", err);
+    } finally {
+      setIsTogglingFollow(false);
+    }
+  };
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
+    <Card className="overflow-hidden border border-gray-200 rounded-3xl hover:shadow-xl transition-all duration-300 group bg-white flex flex-col justify-between">
       {/* Banner */}
-      <Link href={`/store/${id}`}>
-        <div className={`h-24 ${banner} relative`}>
-          <button className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-primary hover:text-white">
-            <Heart className="h-4 w-4" />
+      <Link href={storeHref}>
+        <div className="h-28 relative bg-gradient-to-r from-emerald-500 via-teal-600 to-green-600 overflow-hidden">
+          {isBannerUrl ? (
+            <img
+              src={banner}
+              alt={`${name} Banner`}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-r from-emerald-600 to-teal-700 opacity-90"></div>
+          )}
+
+          {/* Follow Heart Button */}
+          <button
+            onClick={handleFollowToggle}
+            title={followingState ? "Unfollow Store" : "Follow Store"}
+            className={`absolute top-3 right-3 p-2 rounded-full shadow-md transition-all ${
+              followingState
+                ? "bg-red-500 text-white"
+                : "bg-white/90 backdrop-blur-xs text-gray-700 hover:bg-emerald-600 hover:text-white"
+            }`}
+          >
+            {isTogglingFollow ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Heart className={`h-4 w-4 ${followingState ? "fill-white" : ""}`} />
+            )}
           </button>
         </div>
       </Link>
 
       {/* Content */}
-      <div className="p-4 relative">
+      <div className="p-5 relative flex-1 flex flex-col justify-between">
         {/* Logo */}
-        <Avatar className="h-16 w-16 absolute -top-8 left-4 border-4 border-white shadow-md">
-          <div className={`w-full h-full ${logo} flex items-center justify-center text-white text-xl font-bold`}>
-            {name.charAt(0)}
-          </div>
+        <Avatar className="h-16 w-16 absolute -top-8 left-5 border-4 border-white shadow-lg overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold text-xl flex items-center justify-center">
+          {isLogoUrl ? (
+            <img
+              src={logo}
+              alt={`${name} Logo`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span>{name.charAt(0).toUpperCase()}</span>
+          )}
         </Avatar>
 
-        <div className="pt-10 space-y-3">
-          {/* Store Name */}
-          <div>
-            <Link href={`/store/${id}`}>
-              <div className="flex items-center gap-1.5 mb-1">
-                <h3 className="text-lg font-bold text-gray-900 hover:text-primary transition-colors line-clamp-1">
-                  {name}
-                </h3>
-                {verified && (
-                  <CheckCircle className="h-4 w-4 text-primary flex-shrink-0" />
-                )}
-              </div>
-            </Link>
-            <Badge variant="secondary" className="text-xs">
-              {category}
-            </Badge>
+        <div className="pt-10 space-y-3 flex-1 flex flex-col justify-between">
+          <div className="space-y-2">
+            {/* Store Name & Category */}
+            <div>
+              <Link href={storeHref}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <h3 className="text-lg font-extrabold text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-1">
+                    {name}
+                  </h3>
+                  {verified && (
+                    <CheckCircle className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                  )}
+                </div>
+              </Link>
+              <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-100 font-semibold">
+                {category}
+              </Badge>
+            </div>
+
+            {/* Store Description */}
+            {description && (
+              <p className="text-xs text-gray-600 font-medium line-clamp-2 leading-relaxed">
+                {description}
+              </p>
+            )}
           </div>
 
-          {/* Stats */}
+          {/* Real-time DB Stats */}
           <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
             <div className="flex items-center gap-1">
               <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-              <span className="font-semibold text-gray-900">{rating}</span>
+              <span className="font-bold text-gray-900">{rating}</span>
             </div>
             <div className="flex items-center gap-1">
-              <Package className="h-3.5 w-3.5" />
-              <span className="font-semibold text-gray-900">
-                {products >= 1000 ? `${(products / 1000).toFixed(1)}K` : products}
+              <Package className="h-3.5 w-3.5 text-gray-400" />
+              <span className="font-bold text-gray-900">
+                {realProductCount >= 1000 ? `${(realProductCount / 1000).toFixed(1)}K` : realProductCount}
               </span>
+              <span>items</span>
             </div>
             <div className="flex items-center gap-1">
-              <Users className="h-3.5 w-3.5" />
-              <span className="font-semibold text-gray-900">
-                {followers >= 1000 ? `${(followers / 1000).toFixed(0)}K` : followers}
+              <Users className="h-3.5 w-3.5 text-gray-400" />
+              <span className="font-bold text-gray-900">
+                {followersCountState >= 1000 ? `${(followersCountState / 1000).toFixed(1)}K` : followersCountState}
               </span>
+              <span>followers</span>
             </div>
             <div className="flex items-center gap-1">
-              <MapPin className="h-3.5 w-3.5" />
+              <MapPin className="h-3.5 w-3.5 text-gray-400" />
               <span className="line-clamp-1">{location}</span>
             </div>
           </div>
 
           {/* Action */}
-          <Link href={`/store/${id}`} className="block">
-            <Button className="w-full" size="sm">
-              Visit Store
+          <Link href={storeHref} className="block pt-1">
+            <Button className="w-full h-10 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white" size="sm">
+              Visit Store →
             </Button>
           </Link>
         </div>

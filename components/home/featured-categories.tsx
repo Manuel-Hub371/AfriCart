@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import {
   Smartphone,
@@ -11,66 +14,39 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-const categories = [
-  { 
-    name: "Electronics", 
-    icon: Smartphone, 
-    count: "12,543", 
-    gradient: "from-blue-500 to-cyan-500",
-    bgGradient: "from-blue-50 to-cyan-50"
-  },
-  { 
-    name: "Fashion", 
-    icon: Shirt, 
-    count: "8,234", 
-    gradient: "from-pink-500 to-rose-500",
-    bgGradient: "from-pink-50 to-rose-50"
-  },
-  { 
-    name: "Home & Living", 
-    icon: Home, 
-    count: "6,789", 
-    gradient: "from-orange-500 to-amber-500",
-    bgGradient: "from-orange-50 to-amber-50"
-  },
-  { 
-    name: "Beauty", 
-    icon: Sparkles, 
-    count: "4,567", 
-    gradient: "from-green-500 to-pink-500",
-    bgGradient: "from-green-50 to-pink-50"
-  },
-  { 
-    name: "Sports", 
-    icon: Dumbbell, 
-    count: "3,456", 
-    gradient: "from-green-500 to-emerald-500",
-    bgGradient: "from-green-50 to-emerald-50"
-  },
-  { 
-    name: "Books", 
-    icon: BookOpen, 
-    count: "9,876", 
-    gradient: "from-emerald-500 to-green-500",
-    bgGradient: "from-emerald-50 to-green-50"
-  },
-  { 
-    name: "Groceries", 
-    icon: ShoppingBasket, 
-    count: "5,432", 
-    gradient: "from-red-500 to-orange-500",
-    bgGradient: "from-red-50 to-orange-50"
-  },
-  { 
-    name: "Automotive", 
-    icon: Car, 
-    count: "2,345", 
-    gradient: "from-gray-600 to-slate-600",
-    bgGradient: "from-gray-50 to-slate-50"
-  },
-];
+const iconMap: Record<string, any> = {
+  electronics: Smartphone,
+  fashion: Shirt,
+  home: Home,
+  beauty: Sparkles,
+  sports: Dumbbell,
+  books: BookOpen,
+  groceries: ShoppingBasket,
+  automotive: Car,
+};
 
 export function FeaturedCategories() {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadCategories() {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/categories");
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data);
+        }
+      } catch (err) {
+        console.error("Failed to load categories:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadCategories();
+  }, []);
+
   return (
     <section className="section-padding bg-gradient-to-b from-white to-green-50/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -88,33 +64,41 @@ export function FeaturedCategories() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
-          {categories.map((category, index) => {
-            const Icon = category.icon;
-            return (
-              <Link key={category.name} href={`/category/${category.name.toLowerCase()}`}>
-                <Card className="group relative overflow-hidden bg-white border-2 border-gray-100 hover:border-green-200 p-6 card-hover cursor-pointer">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${category.bgGradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></div>
-                  
-                  <div className="relative flex flex-col items-center text-center space-y-4">
-                    <div className={`relative w-16 h-16 rounded-2xl bg-gradient-to-br ${category.gradient} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="h-8 w-8 text-white" />
-                      <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${category.gradient} blur-xl opacity-50 group-hover:opacity-75 transition-opacity`}></div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-32 bg-gray-100 rounded-2xl animate-pulse"></div>
+            ))}
+          </div>
+        ) : categories.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 md:gap-6">
+            {categories.map((category) => {
+              const slug = category.slug || category.name.toLowerCase();
+              const Icon = iconMap[slug] || Smartphone;
+              return (
+                <Link key={category.id} href={`/products?category=${slug}`}>
+                  <Card className="group relative overflow-hidden bg-white border-2 border-gray-100 hover:border-green-200 p-6 card-hover cursor-pointer">
+                    <div className="relative flex flex-col items-center text-center space-y-4">
+                      <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <Icon className="h-8 w-8 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-gray-900 text-base mb-1 group-hover:text-green-700 transition-colors">
+                          {category.name}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {category.productCount || 0} items
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-bold text-gray-900 text-base mb-1 group-hover:text-green-700 transition-colors">
-                        {category.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {category.count} items
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            );
-          })}
-        </div>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">No categories found.</div>
+        )}
       </div>
     </section>
   );

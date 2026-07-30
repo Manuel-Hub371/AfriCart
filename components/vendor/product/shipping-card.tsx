@@ -2,123 +2,214 @@
 
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Truck, Check, AlertCircle, Plus, ShieldCheck, Clock } from "lucide-react";
+import Link from "next/link";
 
-export default function ShippingCard() {
+export interface ShippingPolicyOption {
+  id: string;
+  name: string;
+  shippingMethod: string;
+  deliveryTime: string;
+  shippingCost: number;
+  freeShippingThreshold?: number | null;
+  trackingSupported?: boolean;
+  localPickup?: boolean;
+  isActive?: boolean;
+}
+
+interface ShippingCardProps {
+  availablePolicies?: ShippingPolicyOption[];
+  selectedPolicyIds?: string[];
+  onChangePolicyIds?: (ids: string[]) => void;
+  weight?: number;
+  onChangeWeight?: (weight: number) => void;
+  length?: number;
+  width?: number;
+  height?: number;
+  onChangeDimensions?: (dims: { length?: number; width?: number; height?: number }) => void;
+}
+
+export default function ShippingCard({
+  availablePolicies = [],
+  selectedPolicyIds = [],
+  onChangePolicyIds,
+  weight = 0,
+  onChangeWeight,
+  length = 0,
+  width = 0,
+  height = 0,
+  onChangeDimensions,
+}: ShippingCardProps) {
+  const activePolicies = availablePolicies.filter((p) => p.isActive !== false);
+
+  const togglePolicy = (policyId: string) => {
+    if (!onChangePolicyIds) return;
+    if (selectedPolicyIds.includes(policyId)) {
+      onChangePolicyIds(selectedPolicyIds.filter((id) => id !== policyId));
+    } else {
+      onChangePolicyIds([...selectedPolicyIds, policyId]);
+    }
+  };
+
   return (
-    <Card className="p-6">
-      <h2 className="text-xl font-semibold mb-6">Shipping</h2>
-
-      <div className="space-y-6">
-        {/* Weight & Dimensions */}
+    <Card className="p-6 space-y-6">
+      <div className="flex items-center justify-between border-b pb-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Package Dimensions
-          </label>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">
-                Weight (kg)
-              </label>
-              <Input type="number" placeholder="0.0" step="0.01" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">
-                Length (cm)
-              </label>
-              <Input type="number" placeholder="0" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">
-                Width (cm)
-              </label>
-              <Input type="number" placeholder="0" />
-            </div>
-            <div>
-              <label className="block text-xs text-gray-600 mb-1">
-                Height (cm)
-              </label>
-              <Input type="number" placeholder="0" />
-            </div>
-          </div>
-        </div>
-
-        {/* Shipping Class */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Shipping Class
-          </label>
-          <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option>Standard Shipping</option>
-            <option>Express Shipping</option>
-            <option>Heavy Items</option>
-            <option>Fragile Items</option>
-          </select>
-        </div>
-
-        {/* Delivery Time */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Minimum Delivery Days
-            </label>
-            <Input type="number" placeholder="3" min="1" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Maximum Delivery Days
-            </label>
-            <Input type="number" placeholder="7" min="1" />
-          </div>
-        </div>
-
-        {/* Shipping Cost */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Shipping Cost
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600">
-              $
-            </span>
-            <Input
-              type="number"
-              placeholder="0.00"
-              className="pl-8"
-              step="0.01"
-            />
-          </div>
-          <p className="text-xs text-gray-500 mt-1">
-            Leave blank to calculate automatically
+          <h2 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+            <Truck className="h-5 w-5 text-emerald-600" /> Store Shipping Policies
+          </h2>
+          <p className="text-xs text-gray-500 mt-0.5">
+            Select central store shipping policies assigned to this product. No manual shipping rates retyping required.
           </p>
         </div>
+        <Link href="/vendor/store?section=shipping">
+          <span className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center gap-1">
+            <Plus className="h-3.5 w-3.5" /> Manage Policies
+          </span>
+        </Link>
+      </div>
 
-        {/* Shipping Options */}
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            <input type="checkbox" className="rounded" />
-            <label className="text-sm text-gray-700">
-              Free shipping available
-            </label>
+      {/* Package Weight & Dimensions */}
+      <div>
+        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+          Package Weight &amp; Dimensions
+        </label>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Weight (kg)</label>
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="0.5"
+              value={weight || ""}
+              onChange={(e) => onChangeWeight && onChangeWeight(parseFloat(e.target.value) || 0)}
+              className="h-10 rounded-xl text-sm"
+            />
           </div>
-          <div className="flex items-center gap-3">
-            <input type="checkbox" className="rounded" />
-            <label className="text-sm text-gray-700">
-              Pickup available
-            </label>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Length (cm)</label>
+            <Input
+              type="number"
+              placeholder="10"
+              value={length || ""}
+              onChange={(e) =>
+                onChangeDimensions &&
+                onChangeDimensions({ length: parseFloat(e.target.value) || 0, width, height })
+              }
+              className="h-10 rounded-xl text-sm"
+            />
           </div>
-          <div className="flex items-center gap-3">
-            <input type="checkbox" className="rounded" />
-            <label className="text-sm text-gray-700">
-              Local delivery available
-            </label>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Width (cm)</label>
+            <Input
+              type="number"
+              placeholder="10"
+              value={width || ""}
+              onChange={(e) =>
+                onChangeDimensions &&
+                onChangeDimensions({ length, width: parseFloat(e.target.value) || 0, height })
+              }
+              className="h-10 rounded-xl text-sm"
+            />
           </div>
-          <div className="flex items-center gap-3">
-            <input type="checkbox" className="rounded" />
-            <label className="text-sm text-gray-700">
-              International shipping available
-            </label>
+          <div>
+            <label className="block text-xs text-gray-600 mb-1">Height (cm)</label>
+            <Input
+              type="number"
+              placeholder="10"
+              value={height || ""}
+              onChange={(e) =>
+                onChangeDimensions &&
+                onChangeDimensions({ length, width, height: parseFloat(e.target.value) || 0 })
+              }
+              className="h-10 rounded-xl text-sm"
+            />
           </div>
         </div>
+      </div>
+
+      {/* Policy Selector */}
+      <div className="space-y-3 pt-2">
+        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+          Assign Shipping Policies <span className="text-red-500">*</span>
+        </label>
+
+        {activePolicies.length > 0 ? (
+          <div className="space-y-2">
+            {activePolicies.map((policy) => {
+              const isSelected = selectedPolicyIds.includes(policy.id);
+              return (
+                <div
+                  key={policy.id}
+                  onClick={() => togglePolicy(policy.id)}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-4 ${
+                    isSelected
+                      ? "border-emerald-500 bg-emerald-50/50 shadow-sm"
+                      : "border-gray-200 hover:border-gray-300 bg-white"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
+                        isSelected
+                          ? "bg-emerald-600 border-emerald-600 text-white"
+                          : "border-gray-300 bg-white"
+                      }`}
+                    >
+                      {isSelected && <Check className="h-3.5 w-3.5 stroke-[3]" />}
+                    </div>
+
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-bold text-gray-900 text-sm">{policy.name}</h4>
+                        <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-[10px] py-0">
+                          {policy.shippingMethod}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-500 flex items-center gap-3 mt-0.5">
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3 text-gray-400" /> {policy.deliveryTime}
+                        </span>
+                        <span>•</span>
+                        <span>
+                          Cost: <strong>${policy.shippingCost.toFixed(2)}</strong>
+                        </span>
+                        {policy.freeShippingThreshold && (
+                          <>
+                            <span>•</span>
+                            <span>Free over ${policy.freeShippingThreshold}</span>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  {isSelected && (
+                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full flex-shrink-0">
+                      Assigned
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-6 bg-amber-50/80 rounded-2xl border border-amber-200 text-center space-y-3">
+            <AlertCircle className="h-8 w-8 text-amber-600 mx-auto" />
+            <div className="space-y-1">
+              <p className="font-extrabold text-amber-900 text-sm">No Active Shipping Policies Found</p>
+              <p className="text-xs text-amber-700 max-w-sm mx-auto">
+                You must configure at least one active shipping policy in your Store Settings before assigning shipping methods to products.
+              </p>
+            </div>
+            <Link href="/vendor/store?section=shipping">
+              <span className="inline-block bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs px-4 py-2 rounded-xl shadow-sm">
+                Configure Shipping Policies in Settings
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
     </Card>
   );

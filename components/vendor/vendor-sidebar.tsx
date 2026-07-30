@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -29,23 +29,6 @@ interface VendorSidebarProps {
   onClose?: () => void;
 }
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Dashboard", href: "/vendor" },
-  { icon: Package, label: "Products", href: "/vendor/products" },
-  { icon: ShoppingBag, label: "Orders", href: "/vendor/orders" },
-  { icon: Users, label: "Customers", href: "/vendor/customers" },
-  { icon: Boxes, label: "Inventory", href: "/vendor/inventory" },
-  { icon: MessageSquare, label: "Reviews", href: "/vendor/reviews" },
-  { icon: BarChart3, label: "Analytics", href: "/vendor/analytics" },
-  { icon: Tag, label: "Marketing", href: "/vendor/marketing" },
-  { icon: DollarSign, label: "Finance", href: "/vendor/finance" },
-  { icon: Truck, label: "Shipping", href: "/vendor/shipping" },
-  { icon: Mail, label: "Messages", href: "/vendor/messages", badge: 5 },
-  { icon: Bell, label: "Notifications", href: "/vendor/notifications", badge: 12 },
-  { icon: Store, label: "Store Settings", href: "/vendor/store" },
-  { icon: HelpCircle, label: "Support", href: "/vendor/support" },
-];
-
 export default function VendorSidebar({
   isOpen = true,
   onClose,
@@ -53,6 +36,32 @@ export default function VendorSidebar({
   const pathname = usePathname();
   const { logout, user } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const [unreadMessages, setUnreadMessages] = useState<number>(0);
+  const [unreadNotifications, setUnreadNotifications] = useState<number>(0);
+
+  useEffect(() => {
+    async function fetchCounts() {
+      try {
+        const [msgRes, notifRes] = await Promise.all([
+          fetch("/api/messaging/conversations?role=vendor"),
+          fetch("/api/vendor/notifications"),
+        ]);
+        if (msgRes.ok) {
+          const mData = await msgRes.json();
+          const totalUnread = (mData || []).reduce((acc: number, c: any) => acc + (c.unreadCount || 0), 0);
+          setUnreadMessages(totalUnread);
+        }
+        if (notifRes.ok) {
+          const nData = await notifRes.json();
+          setUnreadNotifications(nData.unreadCount || (nData.notifications || []).filter((n: any) => !n.isRead).length || 0);
+        }
+      } catch {
+        // ignore fetch failures silently
+      }
+    }
+    fetchCounts();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -63,6 +72,23 @@ export default function VendorSidebar({
       setIsLoggingOut(false);
     }
   };
+
+  const menuItems = [
+    { icon: LayoutDashboard, label: "Dashboard", href: "/vendor" },
+    { icon: Package, label: "Products", href: "/vendor/products" },
+    { icon: ShoppingBag, label: "Orders", href: "/vendor/orders" },
+    { icon: Users, label: "Customers", href: "/vendor/customers" },
+    { icon: Boxes, label: "Inventory", href: "/vendor/inventory" },
+    { icon: MessageSquare, label: "Reviews", href: "/vendor/reviews" },
+    { icon: BarChart3, label: "Analytics", href: "/vendor/analytics" },
+    { icon: Tag, label: "Marketing", href: "/vendor/marketing" },
+    { icon: DollarSign, label: "Finance", href: "/vendor/finance" },
+    { icon: Truck, label: "Shipping", href: "/vendor/shipping" },
+    { icon: Mail, label: "Messages", href: "/vendor/messages", badge: unreadMessages },
+    { icon: Bell, label: "Notifications", href: "/vendor/notifications", badge: unreadNotifications },
+    { icon: Store, label: "Store Settings", href: "/vendor/store" },
+    { icon: HelpCircle, label: "Support", href: "/vendor/support" },
+  ];
 
   return (
     <>
@@ -97,7 +123,7 @@ export default function VendorSidebar({
               <Store className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900">
+              <h2 className="font-bold text-gray-900 line-clamp-1">
                 {user?.storeName || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "My Store"}
               </h2>
               <p className="text-xs text-gray-600">Vendor Dashboard</p>
@@ -123,11 +149,11 @@ export default function VendorSidebar({
                   >
                     <item.icon className="h-5 w-5" />
                     <span className="flex-1">{item.label}</span>
-                    {item.badge && item.badge > 0 && (
+                    {item.badge && item.badge > 0 ? (
                       <span className="min-w-[20px] h-5 px-1.5 bg-red-500 text-white text-xs font-semibold rounded-full flex items-center justify-center">
                         {item.badge > 99 ? '99+' : item.badge}
                       </span>
-                    )}
+                    ) : null}
                   </Link>
                 </li>
               );
@@ -140,7 +166,7 @@ export default function VendorSidebar({
           <Link
             href="/vendor/settings"
             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-              pathname === "/vendor/settings"
+              pathname === "/vendor/settings" || pathname === "/vendor/store"
                 ? "bg-emerald-50 text-emerald-600 font-medium"
                 : "text-gray-700 hover:bg-gray-100"
             }`}

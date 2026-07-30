@@ -6,7 +6,7 @@ import { Download, ExternalLink, DollarSign } from "lucide-react";
 
 export type PayoutStatus = "completed" | "processing" | "pending" | "failed";
 
-interface Payout {
+export interface Payout {
   id: string;
   date: string;
   amount: number;

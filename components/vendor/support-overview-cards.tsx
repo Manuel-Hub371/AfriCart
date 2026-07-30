@@ -34,30 +34,38 @@ function StatCard({ title, value, icon, color }: StatCardProps) {
   );
 }
 
-export function SupportOverviewCards() {
+interface SupportOverviewCardsProps {
+  tickets?: any[];
+}
+
+export function SupportOverviewCards({ tickets = [] }: SupportOverviewCardsProps) {
+  const openCount = tickets.filter((t) => ["open", "in-progress"].includes((t.status || "").toLowerCase())).length;
+  const pendingCount = tickets.filter((t) => ["pending", "awaiting-reply"].includes((t.status || "").toLowerCase())).length;
+  const resolvedCount = tickets.filter((t) => ["resolved", "closed"].includes((t.status || "").toLowerCase())).length;
+
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <StatCard
         title="Open Tickets"
-        value={3}
+        value={openCount}
         icon={<Ticket className="h-6 w-6" />}
         color="blue"
       />
       <StatCard
         title="Pending Responses"
-        value={2}
+        value={pendingCount}
         icon={<MessageSquare className="h-6 w-6" />}
         color="yellow"
       />
       <StatCard
         title="Resolved Tickets"
-        value={24}
+        value={resolvedCount}
         icon={<CheckCircle className="h-6 w-6" />}
         color="green"
       />
       <StatCard
-        title="Avg Response Time"
-        value="2.5 hrs"
+        title="Total Support Tickets"
+        value={tickets.length}
         icon={<Clock className="h-6 w-6" />}
         color="purple"
       />

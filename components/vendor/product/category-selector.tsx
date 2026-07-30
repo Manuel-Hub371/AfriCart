@@ -4,8 +4,15 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-export default function CategorySelector() {
-  const [category, setCategory] = useState("");
+interface CategorySelectorProps {
+  category?: string;
+  onCategoryChange?: (category: string) => void;
+}
+
+export default function CategorySelector({
+  category = "",
+  onCategoryChange,
+}: CategorySelectorProps) {
   const [subcategory, setSubcategory] = useState("");
 
   const categories = [
@@ -20,6 +27,18 @@ export default function CategorySelector() {
     {
       name: "Home & Garden",
       subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
+    },
+    {
+      name: "Beauty",
+      subcategories: ["Skincare", "Makeup", "Haircare", "Fragrances"],
+    },
+    {
+      name: "Groceries",
+      subcategories: ["Fresh Foods", "Spices", "Snacks", "Beverages"],
+    },
+    {
+      name: "Other",
+      subcategories: ["General"],
     },
   ];
 
@@ -38,10 +57,10 @@ export default function CategorySelector() {
           <select
             value={category}
             onChange={(e) => {
-              setCategory(e.target.value);
+              onCategoryChange?.(e.target.value);
               setSubcategory("");
             }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
           >
             <option value="">Select category</option>
             {categories.map((cat) => (
@@ -61,7 +80,7 @@ export default function CategorySelector() {
             <select
               value={subcategory}
               onChange={(e) => setSubcategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
             >
               <option value="">Select subcategory</option>
               {selectedCategory.subcategories.map((sub) => (
@@ -72,19 +91,6 @@ export default function CategorySelector() {
             </select>
           </div>
         )}
-
-        {/* Product Collection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Product Collection
-          </label>
-          <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-            <option>No collection</option>
-            <option>Summer Collection</option>
-            <option>New Arrivals</option>
-            <option>Best Sellers</option>
-          </select>
-        </div>
 
         {/* Selected Path */}
         {category && (

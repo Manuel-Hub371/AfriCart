@@ -9,6 +9,7 @@ import Link from "next/link";
 interface OrderCardProps {
   order: {
     orderId: string;
+    fullId?: string;
     date: string;
     vendor: {
       name: string;
@@ -32,7 +33,8 @@ const statusConfig = {
 };
 
 export default function OrderCard({ order }: OrderCardProps) {
-  const statusInfo = statusConfig[order.status];
+  const statusInfo = statusConfig[order.status] || statusConfig.Processing;
+  const targetId = order.fullId || order.orderId;
 
   return (
     <Card className="p-6">
@@ -48,7 +50,7 @@ export default function OrderCard({ order }: OrderCardProps) {
         </div>
         <div className="text-left sm:text-right">
           <p className="text-2xl font-bold text-gray-900">
-            ${order.total.toFixed(2)}
+            GH₵{order.total.toFixed(2)}
           </p>
         </div>
       </div>
@@ -62,23 +64,38 @@ export default function OrderCard({ order }: OrderCardProps) {
       </div>
 
       <div className="space-y-3 mb-4">
-        {order.products.map((product, index) => (
-          <div key={index} className="flex items-center gap-3">
-            <div
-              className={`w-16 h-16 ${product.image} rounded-lg flex-shrink-0`}
-            />
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-gray-900 truncate">
-                {product.name}
-              </p>
-              <p className="text-sm text-gray-600">Qty: {product.quantity}</p>
+        {order.products.map((product, index) => {
+          const isUrl = product.image && (product.image.startsWith("http") || product.image.startsWith("/"));
+          return (
+            <div key={index} className="flex items-center gap-3">
+              {isUrl ? (
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  className="w-16 h-16 object-cover rounded-lg flex-shrink-0 border border-gray-100"
+                />
+              ) : (
+                <div
+                  className={`w-16 h-16 ${
+                    product.image || "bg-gradient-to-br from-emerald-100 to-emerald-200"
+                  } rounded-lg flex items-center justify-center font-bold text-emerald-800 flex-shrink-0`}
+                >
+                  {!product.image && product.name ? product.name[0] : ""}
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-gray-900 truncate">
+                  {product.name}
+                </p>
+                <p className="text-sm text-gray-600">Qty: {product.quantity}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex gap-3">
-        <Link href={`/profile/orders/${order.orderId}`} className="flex-1">
+        <Link href={`/profile/orders/${targetId}`} className="flex-1">
           <Button variant="outline" className="w-full gap-2">
             <Eye className="h-4 w-4" />
             View Details

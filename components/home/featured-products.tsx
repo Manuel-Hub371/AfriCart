@@ -1,93 +1,30 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/products/product-card";
 
-const products = [
-  {
-    id: "1",
-    name: "Wireless Bluetooth Headphones with Noise Cancellation",
-    storeName: "TechStore",
-    rating: 4.8,
-    reviews: 256,
-    price: 89.99,
-    originalPrice: 129.99,
-    discount: 31,
-    image: "bg-gradient-to-br from-blue-100 to-blue-200",
-  },
-  {
-    id: "2",
-    name: "Premium Cotton T-Shirt - Multiple Colors Available",
-    storeName: "Fashion Hub",
-    rating: 4.6,
-    reviews: 189,
-    price: 24.99,
-    originalPrice: 39.99,
-    discount: 38,
-    image: "bg-gradient-to-br from-pink-100 to-pink-200",
-  },
-  {
-    id: "3",
-    name: "Smart Watch with Fitness Tracker and Heart Rate Monitor",
-    storeName: "Gadget World",
-    rating: 4.9,
-    reviews: 412,
-    price: 149.99,
-    image: "bg-gradient-to-br from-green-100 to-green-200",
-  },
-  {
-    id: "4",
-    name: "Organic Face Cream with Vitamin C and Hyaluronic Acid",
-    storeName: "Beauty Plus",
-    rating: 4.7,
-    reviews: 324,
-    price: 34.99,
-    originalPrice: 49.99,
-    discount: 30,
-    image: "bg-gradient-to-br from-green-100 to-green-200",
-  },
-  {
-    id: "5",
-    name: "Yoga Mat - Non-Slip Exercise Mat with Carrying Strap",
-    storeName: "Fitness Pro",
-    rating: 4.5,
-    reviews: 156,
-    price: 29.99,
-    image: "bg-gradient-to-br from-orange-100 to-orange-200",
-  },
-  {
-    id: "6",
-    name: "Stainless Steel Water Bottle - Insulated 32oz",
-    storeName: "Eco Store",
-    rating: 4.8,
-    reviews: 289,
-    price: 19.99,
-    originalPrice: 29.99,
-    discount: 33,
-    image: "bg-gradient-to-br from-teal-100 to-teal-200",
-  },
-  {
-    id: "7",
-    name: "LED Desk Lamp with USB Charging Port and Touch Control",
-    storeName: "Home Essentials",
-    rating: 4.6,
-    reviews: 178,
-    price: 39.99,
-    image: "bg-gradient-to-br from-yellow-100 to-yellow-200",
-  },
-  {
-    id: "8",
-    name: "Professional Chef Knife Set - 8 Piece Kitchen Knife Set",
-    storeName: "Kitchen Pro",
-    rating: 4.9,
-    reviews: 445,
-    price: 79.99,
-    originalPrice: 119.99,
-    discount: 33,
-    image: "bg-gradient-to-br from-red-100 to-red-200",
-  },
-];
-
 export function FeaturedProducts() {
+  const [products, setProducts] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadFeaturedProducts() {
+      try {
+        setIsLoading(true);
+        const res = await fetch("/api/products?limit=8");
+        if (res.ok) {
+          const data = await res.json();
+          setProducts(data.products || []);
+        }
+      } catch (err) {
+        console.error("Failed to load featured products:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadFeaturedProducts();
+  }, []);
+
   return (
     <section className="section-padding bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -105,11 +42,43 @@ export function FeaturedProducts() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} {...product} />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-gray-50 rounded-xl border p-4 space-y-4 animate-pulse">
+                <div className="h-48 bg-gray-200 rounded-lg"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))}
+          </div>
+        ) : products.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                name={product.name}
+                brand={product.brand}
+                storeName={product.store?.name || "Store"}
+                verified={true}
+                rating={product.rating}
+                reviews={product.numReviews}
+                price={product.price}
+                originalPrice={product.compareAtPrice || undefined}
+                discount={product.compareAtPrice && product.compareAtPrice > product.price ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) : undefined}
+                image={product.images}
+                inStock={product.stock > 0}
+                images={product.images?.length || 1}
+                campaigns={product.campaigns}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            No products available yet.
+          </div>
+        )}
       </div>
     </section>
   );

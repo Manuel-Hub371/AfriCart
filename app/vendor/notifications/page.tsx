@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import VendorSidebar from "@/components/vendor/vendor-sidebar";
 import VendorTopbar from "@/components/vendor/vendor-topbar";
 import { NotificationStatistics } from "@/components/vendor/notification-statistics";
@@ -36,103 +36,50 @@ export interface Notification {
   };
 }
 
-// Generate deterministic notifications
-function generateNotifications(count: number): Notification[] {
-  const categories: NotificationCategory[] = [
-    "orders",
-    "products",
-    "inventory",
-    "customers",
-    "finance",
-    "marketing",
-    "marketplace",
-  ];
-
-  const templates = {
-    orders: [
-      { title: "New Order Received", desc: "Order #ORDER has been placed by a customer" },
-      { title: "Order Cancelled", desc: "Order #ORDER was cancelled by the customer" },
-      { title: "Order Delivered", desc: "Order #ORDER has been successfully delivered" },
-    ],
-    products: [
-      { title: "Product Approved", desc: "Your product listing has been approved" },
-      { title: "Product Rejected", desc: "Product listing requires modifications" },
-      { title: "Product Updated", desc: "Product inventory has been updated" },
-    ],
-    inventory: [
-      { title: "Low Stock Alert", desc: "Product stock is running low (5 units remaining)" },
-      { title: "Out of Stock", desc: "Product is currently out of stock" },
-      { title: "Inventory Adjusted", desc: "Inventory adjustment completed successfully" },
-    ],
-    customers: [
-      { title: "New Message", desc: "You have a new message from a customer" },
-      { title: "New Review Posted", desc: "A customer left a review on your product" },
-      { title: "Customer Complaint", desc: "Customer reported an issue with their order" },
-    ],
-    finance: [
-      { title: "Payment Received", desc: "Payment of $150.00 has been received" },
-      { title: "Payout Completed", desc: "Your payout of $1,250.00 has been processed" },
-      { title: "Refund Processed", desc: "Refund of $75.00 has been issued" },
-    ],
-    marketing: [
-      { title: "Campaign Started", desc: "Your marketing campaign is now live" },
-      { title: "Coupon Expired", desc: "Coupon code SUMMER2026 has expired" },
-      { title: "Promotion Completed", desc: "Your promotion period has ended" },
-    ],
-    marketplace: [
-      { title: "Policy Update", desc: "Marketplace policies have been updated" },
-      { title: "Maintenance Notice", desc: "Scheduled maintenance on July 20, 2026" },
-      { title: "Platform Announcement", desc: "New features available in vendor dashboard" },
-    ],
-  };
-
-  const notifications: Notification[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const categoryIndex = i % categories.length;
-    const category = categories[categoryIndex];
-    const templateIndex = i % templates[category].length;
-    const template = templates[category][templateIndex];
-    
-    const hoursAgo = i * 2;
-    const isUnread = i < 8;
-    const isImportant = i % 7 === 0;
-
-    notifications.push({
-      id: `notif-${i + 1}`,
-      category,
-      title: template.title,
-      description: template.desc.replace("#ORDER", `#${45000 + i}`),
-      timestamp:
-        hoursAgo < 1
-          ? "Just now"
-          : hoursAgo < 24
-          ? `${hoursAgo}h ago`
-          : `${Math.floor(hoursAgo / 24)}d ago`,
-      status: isImportant ? "important" : isUnread ? "unread" : "read",
-      actionType: category === "orders" ? "view-order" : category === "inventory" ? "restock" : "view",
-      actionData: {
-        orderId: category === "orders" ? `${45000 + i}` : undefined,
-        productId: category === "products" ? `prod-${i}` : undefined,
-      },
-    });
-  }
-
-  return notifications;
-}
-
 export default function VendorNotificationsPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Generate notifications
-  const allNotifications = useMemo(() => generateNotifications(50), []);
+  const fetchNotifications = async () => {
+    try {
+      setIsLoading(true);
+      const res = await fetch("/api/notifications");
+      if (res.ok) {
+        const data = await res.json();
+        const mapped: Notification[] = (data || []).map((n: any) => {
+          let category: NotificationCategory = "marketplace";
+          if (n.type === "ORDER") category = "orders";
+          if (n.type === "PROMOTION") category = "marketing";
+
+          return {
+            id: n.id,
+            category,
+            title: n.title,
+            description: n.message,
+            timestamp: new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            status: n.isRead ? "read" : "unread",
+          };
+        });
+        setNotifications(mapped);
+      }
+    } catch (err) {
+      console.error("Failed to load notifications:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
   // Filter notifications
   const filteredNotifications = useMemo(() => {
-    return allNotifications.filter((notif) => {
+    return notifications.filter((notif) => {
       const matchesCategory = selectedCategory === "all" || notif.category === selectedCategory;
       const matchesStatus =
         selectedStatus === "all" ||
@@ -146,14 +93,17 @@ export default function VendorNotificationsPage() {
 
       return matchesCategory && matchesStatus && matchesSearch;
     });
-  }, [allNotifications, selectedCategory, selectedStatus, searchQuery]);
+  }, [notifications, selectedCategory, selectedStatus, searchQuery]);
 
-  const handleMarkAllAsRead = () => {
-    console.log("Mark all as read");
-  };
-
-  const handleClearAll = () => {
-    console.log("Clear all notifications");
+  const handleMarkAllAsRead = async () => {
+    try {
+      const res = await fetch("/api/notifications/read-all", { method: "POST" });
+      if (res.ok) {
+        setNotifications((prev) => prev.map((n) => ({ ...n, status: "read" })));
+      }
+    } catch (err) {
+      console.error("Failed to mark all as read:", err);
+    }
   };
 
   return (
@@ -188,23 +138,11 @@ export default function VendorNotificationsPage() {
                   <CheckCheck className="h-4 w-4" />
                   Mark All as Read
                 </Button>
-                <Button
-                  onClick={handleClearAll}
-                  variant="outline"
-                  className="flex items-center gap-2 text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Clear All
-                </Button>
-                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Settings
-                </Button>
               </div>
             </div>
 
             {/* Statistics */}
-            <NotificationStatistics notifications={allNotifications} />
+            <NotificationStatistics notifications={notifications} />
 
             {/* Filters */}
             <NotificationFilters
@@ -217,7 +155,13 @@ export default function VendorNotificationsPage() {
             />
 
             {/* Notification List */}
-            <NotificationList notifications={filteredNotifications} />
+            {isLoading ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center text-gray-500 mt-6">
+                Loading store notifications...
+              </div>
+            ) : (
+              <NotificationList notifications={filteredNotifications} />
+            )}
           </div>
         </main>
       </div>

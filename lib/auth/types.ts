@@ -46,6 +46,8 @@ export interface RegisterVendorData extends RegisterCustomerData {
   storeName: string;
   storeDescription: string;
   storeCategory: string;
+  storeLogo?: string;
+  storeBanner?: string;
   businessType: string;
   businessName: string;
   registrationNumber?: string;
