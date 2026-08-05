@@ -19,7 +19,24 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/backend/*": ["./backend/*"],
+      "@/frontend/*": ["./frontend/*"],
+      "@/components/*": ["./frontend/components/*"],
+      "@/modules/*": ["./backend/modules/*"],
+      "@/app/*": ["./frontend/app/*"],
+      "@/lib/db": ["./backend/database/client"],
+      "@/lib/auth/context": ["./frontend/context/auth-context"],
+      "@/lib/auth/storage": ["./frontend/lib/auth/storage"],
+      "@/lib/auth/service": ["./frontend/lib/auth/service"],
+      "@/lib/auth/authorization/*": ["./backend/auth/authorization/*"],
+      "@/lib/auth/*": ["./backend/auth/*"],
+      "@/lib/campaign-pricing": ["./backend/modules/catalog/campaign-pricing"],
+      "@/lib/events": ["./backend/events/index"],
+      "@/lib/events/*": ["./backend/events/*"],
+      "@/lib/hooks/*": ["./frontend/hooks/*"],
+      "@/lib/utils": ["./frontend/lib/utils"],
+      "@/lib/*": ["./frontend/lib/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

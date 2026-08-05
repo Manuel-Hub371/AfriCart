@@ -1,12 +1,19 @@
 {
-  "name": "onlinestore",
+  "name": "africart",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:generate": "prisma generate --schema=backend/database/prisma/schema.prisma",
+    "db:push": "prisma db push --schema=backend/database/prisma/schema.prisma",
+    "db:seed": "npx tsx backend/database/prisma/seed.ts"
+  },
+  "prisma": {
+    "schema": "backend/database/prisma/schema.prisma",
+    "seed": "npx tsx backend/database/prisma/seed.ts"
   },
   "dependencies": {
     "@next/swc-win32-x64-msvc": "^16.2.11",
