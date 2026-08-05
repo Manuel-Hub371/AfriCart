@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { resolveCampaignPricing, extractCampaigns } from "@/lib/campaign-pricing";
+import { isBestSellerProduct } from "@/modules/catalog/best-seller-calculator";
 
 // GET /api/campaigns/[slug]
 export async function GET(
@@ -24,6 +26,7 @@ export async function GET(
             product: {
               include: {
                 store: { select: { id: true, name: true, slug: true } },
+                campaignProducts: { include: { campaign: true } },
               },
             },
           },
@@ -41,38 +44,59 @@ export async function GET(
       data: { viewsCount: { increment: 1 } },
     }).catch(() => {});
 
-    // Compute dynamic prices for products
-    const products = (campaign.campaignProducts || []).map((cp: any) => {
+    // Compute dynamic prices using single source of truth resolveCampaignPricing
+    const products = (campaign.campaignProducts || []).map((cp: any, index: number) => {
       const p = cp.product;
-      let effectivePrice = p.price;
-      let originalPrice = p.compareAtPrice || p.price;
-      let discountPercent = 0;
+      const campaigns = extractCampaigns((p as any).campaignProducts || [campaign]);
+      const productMeta = { id: p.id, categoryName: p.categoryName, brand: p.brand, storeId: p.storeId };
+      const pricing = resolveCampaignPricing(p.price, campaigns, productMeta);
 
-      if (campaign.discountType === "PERCENTAGE" && campaign.discountValue) {
-        discountPercent = Math.min(100, Math.max(0, campaign.discountValue));
-        effectivePrice = p.price * (1 - discountPercent / 100);
-        originalPrice = p.price;
-      } else if (campaign.discountType === "FIXED" && campaign.discountValue) {
-        effectivePrice = Math.max(0, p.price - campaign.discountValue);
-        originalPrice = p.price;
-        discountPercent = p.price > 0 ? Math.round(((p.price - effectivePrice) / p.price) * 100) : 0;
-      }
+      const isBestSeller = isBestSellerProduct({
+        status: p.status,
+        stock: p.stock,
+        bestSellerScore: p.bestSellerScore,
+        soldCount: p.soldCount,
+      });
 
       return {
         id: p.id,
         name: p.name,
         slug: p.slug,
-        brand: p.brand,
-        price: effectivePrice,
-        originalPrice: originalPrice > effectivePrice ? originalPrice : undefined,
-        discountPercent: discountPercent > 0 ? discountPercent : undefined,
+        brand: p.brand || null,
+        description: p.description,
+
+        // Part 10 API Specs
+        originalPrice: pricing.originalPrice,
+        price: pricing.effectivePrice,
+        campaignPrice: pricing.campaignPrice,
+        compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : null,
+
+        campaign: pricing.campaign,
+        campaignId: pricing.campaignId,
+        campaignName: pricing.campaignName,
+        campaignType: pricing.campaignType,
+        campaignStatus: pricing.campaignStatus,
+        discountType: pricing.discountType,
+        discountValue: pricing.discountValue,
+        campaignBadge: pricing.campaignBadge,
+        campaignColor: pricing.campaignColor,
+        campaignEndDate: pricing.campaignEndDate,
+        isDiscounted: pricing.isDiscounted,
+        amountSaved: pricing.amountSaved,
+        discountPercent: pricing.discountPercent,
+
+        isBestSeller,
+        bestSellerScore: p.bestSellerScore || 0,
+        bestSellerRank: isBestSeller ? index + 1 : null,
+
+        category: p.categoryName,
         images: Array.isArray(p.images) ? p.images : [],
         stock: p.stock,
         rating: p.rating,
         numReviews: p.numReviews,
         storeName: p.store.name,
         verified: true,
-        campaignBadge: campaign.badge || campaign.name,
+        store: p.store,
       };
     });
 
@@ -88,8 +112,11 @@ export async function GET(
         color: campaign.color,
         startDate: campaign.startDate.toISOString(),
         endDate: campaign.endDate.toISOString(),
+        status: campaign.status || "ACTIVE",
         discountType: campaign.discountType,
         discountValue: campaign.discountValue,
+        priority: campaign.priority,
+        targetScope: campaign.targetScope || "PRODUCT",
         store: campaign.store,
       },
       products,

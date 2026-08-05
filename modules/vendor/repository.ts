@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { recalculateProductBestSellerScore } from "@/modules/catalog/best-seller-calculator";
+import { queueProductBestSellerRecalculation } from "@/modules/catalog/best-seller-calculator";
 import { UpdateStoreInput, VendorProductInput } from "./dto";
 
 export class VendorRepository {
@@ -143,7 +143,7 @@ export class VendorRepository {
       await this.setProductCampaigns(product.id, input.campaignIds);
     }
 
-    await recalculateProductBestSellerScore(product.id);
+    queueProductBestSellerRecalculation(product.id);
 
     return product;
   }
@@ -198,7 +198,7 @@ export class VendorRepository {
       await this.setProductCampaigns(productId, input.campaignIds);
     }
 
-    await recalculateProductBestSellerScore(productId);
+    queueProductBestSellerRecalculation(productId);
 
     return updated;
   }
@@ -222,7 +222,7 @@ export class VendorRepository {
       where: { id: productId, storeId, deletedAt: null },
       data: { stock, status },
     });
-    await recalculateProductBestSellerScore(productId);
+    queueProductBestSellerRecalculation(productId);
     return res;
   }
 
@@ -679,9 +679,18 @@ export class VendorRepository {
     });
   }
 
-  async createCampaign(storeId: string, data: any) {
+  async createCampaign(storeId: string, data: any, actorUserId?: string) {
     const slug = data.slug || `${data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now().toString(36)}`;
-    return db.marketingCampaign.create({
+    const now = new Date();
+    const startDate = data.startDate ? new Date(data.startDate) : now;
+    const endDate = new Date(data.endDate);
+
+    let status = data.status || "ACTIVE";
+    if (data.isActive === false) status = "DRAFT";
+    else if (startDate > now) status = "SCHEDULED";
+    else if (endDate < now) status = "EXPIRED";
+
+    const campaign = await db.marketingCampaign.create({
       data: {
         storeId,
         name: data.name,
@@ -691,23 +700,70 @@ export class VendorRepository {
         banner: data.banner || null,
         badge: data.badge || null,
         color: data.color || null,
-        startDate: data.startDate ? new Date(data.startDate) : new Date(),
-        endDate: new Date(data.endDate),
+        startDate,
+        endDate,
         isActive: data.isActive !== undefined ? Boolean(data.isActive) : true,
+        status,
         visibility: data.visibility || "PUBLIC",
         discountType: data.discountType || "PERCENTAGE",
         discountValue: data.discountValue ? Number(data.discountValue) : null,
         priority: data.priority ? Number(data.priority) : 0,
+        targetScope: data.targetScope || "PRODUCT",
+        targetCategories: data.targetCategories || null,
+        targetBrands: data.targetBrands || null,
+        perCustomerLimit: data.perCustomerLimit ? Number(data.perCustomerLimit) : null,
+        minimumOrderValue: data.minimumOrderValue ? Number(data.minimumOrderValue) : null,
+        maximumDiscount: data.maximumDiscount ? Number(data.maximumDiscount) : null,
+        eligibleCustomerGroups: data.eligibleCustomerGroups || null,
         maxUses: data.maxUses ? Number(data.maxUses) : null,
       },
     });
+
+    if (Array.isArray(data.productIds) && data.productIds.length > 0) {
+      await db.campaignProduct.createMany({
+        data: data.productIds.map((pid: string) => ({
+          campaignId: campaign.id,
+          productId: pid,
+          assignedBy: actorUserId || null,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    // Invalidate pricing cache & record audit log
+    const { invalidateCampaignCache } = await import("@/lib/campaign-pricing");
+    invalidateCampaignCache();
+
+    if (actorUserId) {
+      await db.auditLog.create({
+        data: {
+          actorId: actorUserId,
+          action: "MARKETING_CAMPAIGN_CREATED",
+          targetResource: `MarketingCampaign:${campaign.id}`,
+          metadata: { campaignName: campaign.name, storeId, scope: campaign.targetScope },
+        },
+      }).catch(() => {});
+    }
+
+    return campaign;
   }
 
-  async updateCampaign(id: string, storeId: string, data: any) {
+  async updateCampaign(id: string, storeId: string, data: any, actorUserId?: string) {
     const existing = await this.getCampaignById(id, storeId);
     if (!existing) return null;
 
-    return db.marketingCampaign.update({
+    const now = new Date();
+    const startDate = data.startDate ? new Date(data.startDate) : existing.startDate;
+    const endDate = data.endDate ? new Date(data.endDate) : existing.endDate;
+    const isActive = data.isActive !== undefined ? Boolean(data.isActive) : existing.isActive;
+
+    let status = data.status || existing.status;
+    if (!isActive) status = "DRAFT";
+    else if (startDate > now) status = "SCHEDULED";
+    else if (endDate < now) status = "EXPIRED";
+    else status = "ACTIVE";
+
+    const updated = await db.marketingCampaign.update({
       where: { id },
       data: {
         ...(data.name && { name: data.name }),
@@ -718,24 +774,78 @@ export class VendorRepository {
         ...(data.color !== undefined && { color: data.color }),
         ...(data.startDate && { startDate: new Date(data.startDate) }),
         ...(data.endDate && { endDate: new Date(data.endDate) }),
-        ...(data.isActive !== undefined && { isActive: Boolean(data.isActive) }),
+        ...(data.isActive !== undefined && { isActive }),
+        status,
         ...(data.visibility && { visibility: data.visibility }),
         ...(data.discountType && { discountType: data.discountType }),
         ...(data.discountValue !== undefined && { discountValue: data.discountValue ? Number(data.discountValue) : null }),
         ...(data.priority !== undefined && { priority: Number(data.priority) }),
+        ...(data.targetScope && { targetScope: data.targetScope }),
+        ...(data.targetCategories !== undefined && { targetCategories: data.targetCategories }),
+        ...(data.targetBrands !== undefined && { targetBrands: data.targetBrands }),
+        ...(data.perCustomerLimit !== undefined && { perCustomerLimit: data.perCustomerLimit ? Number(data.perCustomerLimit) : null }),
+        ...(data.minimumOrderValue !== undefined && { minimumOrderValue: data.minimumOrderValue ? Number(data.minimumOrderValue) : null }),
+        ...(data.maximumDiscount !== undefined && { maximumDiscount: data.maximumDiscount ? Number(data.maximumDiscount) : null }),
+        ...(data.eligibleCustomerGroups !== undefined && { eligibleCustomerGroups: data.eligibleCustomerGroups }),
         ...(data.maxUses !== undefined && { maxUses: data.maxUses ? Number(data.maxUses) : null }),
       },
     });
+
+    if (Array.isArray(data.productIds)) {
+      await db.campaignProduct.deleteMany({ where: { campaignId: id } });
+      if (data.productIds.length > 0) {
+        await db.campaignProduct.createMany({
+          data: data.productIds.map((pid: string) => ({
+            campaignId: id,
+            productId: pid,
+            assignedBy: actorUserId || null,
+          })),
+          skipDuplicates: true,
+        });
+      }
+    }
+
+    const { invalidateCampaignCache } = await import("@/lib/campaign-pricing");
+    invalidateCampaignCache();
+
+    if (actorUserId) {
+      await db.auditLog.create({
+        data: {
+          actorId: actorUserId,
+          action: "MARKETING_CAMPAIGN_UPDATED",
+          targetResource: `MarketingCampaign:${id}`,
+          metadata: { campaignName: updated.name, storeId, status: updated.status },
+        },
+      }).catch(() => {});
+    }
+
+    return updated;
   }
 
-  async deleteCampaign(id: string, storeId: string) {
+  async deleteCampaign(id: string, storeId: string, actorUserId?: string) {
     const existing = await this.getCampaignById(id, storeId);
     if (!existing) return null;
 
-    return db.marketingCampaign.update({
+    const res = await db.marketingCampaign.update({
       where: { id },
-      data: { deletedAt: new Date(), isActive: false },
+      data: { deletedAt: new Date(), isActive: false, status: "CANCELLED" },
     });
+
+    const { invalidateCampaignCache } = await import("@/lib/campaign-pricing");
+    invalidateCampaignCache();
+
+    if (actorUserId) {
+      await db.auditLog.create({
+        data: {
+          actorId: actorUserId,
+          action: "MARKETING_CAMPAIGN_DELETED",
+          targetResource: `MarketingCampaign:${id}`,
+          metadata: { campaignName: existing.name, storeId },
+        },
+      }).catch(() => {});
+    }
+
+    return res;
   }
 }
 

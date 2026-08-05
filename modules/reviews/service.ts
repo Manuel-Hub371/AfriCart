@@ -13,6 +13,11 @@ export class ReviewService {
 
     const review = await reviewRepository.createReview(customerProfile.id, productId, input);
 
+    // Queue background Best Seller score update asynchronously
+    import("@/modules/catalog/best-seller-calculator").then(({ queueProductBestSellerRecalculation }) => {
+      queueProductBestSellerRecalculation(productId);
+    }).catch(() => {});
+
     domainEvents.emit(EVENT_TOPICS.REVIEW_CREATED, {
       reviewId: review.id,
       productId: review.productId,

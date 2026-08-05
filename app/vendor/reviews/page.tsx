@@ -289,7 +289,7 @@ export default function ReviewsPage() {
 
             <div className="p-4 bg-gray-50 rounded-2xl border border-gray-200 mb-4 text-xs space-y-1">
               <p className="font-bold text-gray-900">{replyingReview.productName}</p>
-              <p className="text-gray-600 italic">"{replyingReview.reviewContent}"</p>
+              <p className="text-gray-600 italic">&quot;{replyingReview.reviewContent}&quot;</p>
             </div>
 
             <div className="space-y-2 mb-6">

@@ -44,7 +44,7 @@ export const GetProductsQuerySchema = {
   }
 };
 
-// Response DTO Contracts
+// Response DTO Contracts — Part 10 Full API Compliance
 export interface ProductDTO {
   id: string;
   name: string;
@@ -52,37 +52,45 @@ export interface ProductDTO {
   slug: string;
   description: string | null;
 
-  /** The base price stored in the database — never discounted */
+  /** Base price stored in the database */
   originalPrice: number;
-  /** Effective selling price after campaign discount (equals originalPrice when no campaign) */
+  /** Effective selling price after campaign discount */
   price: number;
-  /** Legacy alias kept for backward-compatibility — equals price */
+  /** Discounted effective campaign price or null */
+  campaignPrice: number | null;
+  /** Legacy compareAtPrice field */
   compareAtPrice: number | null;
 
-  // Campaign pricing fields (all null when no active campaign)
-  isDiscounted: boolean;
-  amountSaved: number;
-  discountPercent: number;
+  // Campaign pricing fields — Part 10
+  campaign: any | null;
   campaignId: string | null;
   campaignName: string | null;
   campaignType: string | null;
+  campaignStatus: string;
   discountType: string | null;
   discountValue: number | null;
   campaignBadge: string | null;
   campaignColor: string | null;
   campaignEndDate: string | null;
+  isDiscounted: boolean;
+  amountSaved: number;
+  discountPercent: number;
+
+  // Best Seller & System fields — Part 7, 8, 10
+  isBestSeller: boolean;
+  bestSellerScore: number;
+  bestSellerRank: number | null;
 
   category: string | null;
   images: string[];
   stock: number;
   rating: number;
   numReviews: number;
+  soldCount: number;
   isFeatured: boolean;
-  isBestSeller: boolean;
-  bestSellerScore: number;
   status: string;
 
-  /** Full campaign objects for legacy consumers */
+  /** Full active campaigns list for legacy callers */
   campaigns?: any[];
 
   store: {

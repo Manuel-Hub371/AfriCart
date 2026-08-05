@@ -69,7 +69,7 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const updated = await vendorRepository.updateCampaign(campaignId, store.id, body);
+    const updated = await vendorRepository.updateCampaign(campaignId, store.id, body, userId);
 
     return NextResponse.json({ campaign: updated });
   } catch (err: any) {
@@ -107,7 +107,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Forbidden: You do not own this campaign" }, { status: 403 });
     }
 
-    await vendorRepository.deleteCampaign(campaignId, store.id);
+    await vendorRepository.deleteCampaign(campaignId, store.id, userId);
 
     return NextResponse.json({ success: true, message: "Campaign deleted successfully" });
   } catch (err: any) {

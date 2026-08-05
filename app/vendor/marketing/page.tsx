@@ -19,6 +19,10 @@ import {
   ArrowRight,
   Eye,
   Percent,
+  TrendingUp,
+  DollarSign,
+  ShoppingCart,
+  Package,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -33,9 +37,20 @@ interface DashboardCampaign {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  status: string;
+  remainingDuration: string;
   discountType: string;
   discountValue?: number | null;
+  priority: number;
+  targetScope: string;
   productsCount: number;
+  viewsCount: number;
+  ordersCount: number;
+  unitsSold: number;
+  revenueGenerated: number;
+  discountGiven: number;
+  conversionRate: number;
+  campaignRoi: number;
 }
 
 export default function VendorMarketingDashboardPage() {
@@ -50,6 +65,13 @@ export default function VendorMarketingDashboardPage() {
     expiredCampaigns: 0,
     draftCampaigns: 0,
     productsInCampaigns: 0,
+    totalRevenue: 0,
+    totalOrders: 0,
+    unitsSold: 0,
+    totalDiscountGiven: 0,
+    conversionRate: 0,
+    avgDiscount: 0,
+    campaignRoi: 0,
   });
 
   const [campaigns, setCampaigns] = useState<DashboardCampaign[]>([]);
@@ -70,6 +92,7 @@ export default function VendorMarketingDashboardPage() {
     discountType: "PERCENTAGE",
     discountValue: 20,
     priority: 0,
+    targetScope: "PRODUCT",
     visibility: "PUBLIC",
     isActive: true,
   });
@@ -97,7 +120,6 @@ export default function VendorMarketingDashboardPage() {
     fetchOverview();
   }, []);
 
-  // Campaign Modal handlers
   const handleOpenCreateCampaign = () => {
     setEditingCampaign(null);
     setCampaignForm({
@@ -111,6 +133,7 @@ export default function VendorMarketingDashboardPage() {
       discountType: "PERCENTAGE",
       discountValue: 20,
       priority: 0,
+      targetScope: "PRODUCT",
       visibility: "PUBLIC",
       isActive: true,
     });
@@ -129,7 +152,8 @@ export default function VendorMarketingDashboardPage() {
       endDate: c.endDate.split("T")[0],
       discountType: c.discountType,
       discountValue: c.discountValue || 0,
-      priority: 0,
+      priority: c.priority || 0,
+      targetScope: c.targetScope || "PRODUCT",
       visibility: "PUBLIC",
       isActive: c.isActive,
     });
@@ -208,10 +232,10 @@ export default function VendorMarketingDashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight mb-1">
-                Marketing Dashboard
+                Marketing Engine Dashboard
               </h1>
               <p className="text-sm text-gray-500">
-                Central hub for promotional campaigns, flash sales, and customer discounts.
+                Real-time promotional engine analytics, campaign ROI, product assignments, and store discounts.
               </p>
             </div>
 
@@ -228,7 +252,7 @@ export default function VendorMarketingDashboardPage() {
           {loading ? (
             <div className="bg-white p-12 rounded-3xl border border-gray-200 text-center">
               <Loader2 className="h-8 w-8 text-emerald-600 animate-spin mx-auto mb-3" />
-              <p className="text-sm font-bold text-gray-600">Loading Marketing Overview Statistics...</p>
+              <p className="text-sm font-bold text-gray-600">Loading Marketing Engine Analytics...</p>
             </div>
           ) : error ? (
             <div className="bg-red-50 p-6 rounded-3xl border border-red-200 text-red-700 text-sm flex items-center gap-2">
@@ -237,53 +261,92 @@ export default function VendorMarketingDashboardPage() {
             </div>
           ) : (
             <>
-              {/* Marketing Overview Stats Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
-                <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase text-gray-400 tracking-wider">Total Campaigns</span>
-                  <p className="text-2xl font-extrabold text-gray-900">{stats.totalCampaigns}</p>
+              {/* Requirement 9 Stats Overview Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
+                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
+                    <span>Revenue Generated</span>
+                    <DollarSign className="h-4 w-4 text-emerald-600" />
+                  </div>
+                  <p className="text-3xl font-extrabold text-emerald-700">GH₵{stats.totalRevenue.toFixed(2)}</p>
+                  <span className="text-[11px] text-gray-400 font-semibold block">From active campaign orders</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase text-emerald-600 tracking-wider">Active Deals</span>
-                  <p className="text-2xl font-extrabold text-emerald-700">{stats.activeCampaigns}</p>
+                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
+                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
+                    <span>Campaign Orders</span>
+                    <ShoppingCart className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <p className="text-3xl font-extrabold text-gray-900">{stats.totalOrders}</p>
+                  <span className="text-[11px] text-gray-400 font-semibold block">{stats.unitsSold} total units sold</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase text-blue-600 tracking-wider">Scheduled</span>
-                  <p className="text-2xl font-extrabold text-blue-700">{stats.scheduledCampaigns}</p>
+                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
+                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
+                    <span>Conversion Rate</span>
+                    <TrendingUp className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <p className="text-3xl font-extrabold text-purple-700">{stats.conversionRate}%</p>
+                  <span className="text-[11px] text-gray-400 font-semibold block">Orders vs Campaign Views</span>
                 </div>
 
-                <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase text-red-500 tracking-wider">Expired</span>
-                  <p className="text-2xl font-extrabold text-red-600">{stats.expiredCampaigns}</p>
-                </div>
-
-                <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase text-gray-500 tracking-wider">Drafts</span>
-                  <p className="text-2xl font-extrabold text-gray-900">{stats.draftCampaigns}</p>
-                </div>
-
-                <div className="bg-white p-5 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <span className="text-[10px] font-extrabold uppercase text-purple-600 tracking-wider">Linked Products</span>
-                  <p className="text-2xl font-extrabold text-purple-700">{stats.productsInCampaigns}</p>
+                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
+                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
+                    <span>Campaign ROI</span>
+                    <Percent className="h-4 w-4 text-amber-500" />
+                  </div>
+                  <p className="text-3xl font-extrabold text-amber-600">{stats.campaignRoi}%</p>
+                  <span className="text-[11px] text-gray-400 font-semibold block">Net Return on Discounts</span>
                 </div>
               </div>
 
-              {/* Marketing Campaigns Overview */}
+              {/* Secondary Stats Row */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Assigned Products</span>
+                    <p className="text-xl font-extrabold text-gray-900">{stats.productsInCampaigns}</p>
+                  </div>
+                  <Package className="h-5 w-5 text-gray-400" />
+                </div>
+
+                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Total Discount Cost</span>
+                    <p className="text-xl font-extrabold text-red-600">GH₵{stats.totalDiscountGiven.toFixed(2)}</p>
+                  </div>
+                  <Flame className="h-5 w-5 text-red-500" />
+                </div>
+
+                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Active Deals</span>
+                    <p className="text-xl font-extrabold text-emerald-600">{stats.activeCampaigns}</p>
+                  </div>
+                  <Sparkles className="h-5 w-5 text-emerald-500" />
+                </div>
+
+                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Average Discount</span>
+                    <p className="text-xl font-extrabold text-gray-900">{stats.avgDiscount}%</p>
+                  </div>
+                  <Percent className="h-5 w-5 text-blue-500" />
+                </div>
+              </div>
+
+              {/* Marketing Campaigns Detailed Grid */}
               <div className="space-y-4 pt-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-emerald-600" />
-                    <h2 className="text-xl font-extrabold text-gray-900">Marketing Campaigns</h2>
+                    <h2 className="text-xl font-extrabold text-gray-900">Active Marketing Campaigns</h2>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Link href="/vendor/marketing/campaigns">
-                      <Button variant="ghost" size="sm" className="text-emerald-700 font-bold text-xs gap-1 hover:bg-emerald-50">
-                        View All Campaigns <ArrowRight className="h-3.5 w-3.5" />
-                      </Button>
-                    </Link>
-                  </div>
+                  <Link href="/vendor/marketing/campaigns">
+                    <Button variant="ghost" size="sm" className="text-emerald-700 font-bold text-xs gap-1 hover:bg-emerald-50">
+                      View &amp; Manage All <ArrowRight className="h-3.5 w-3.5" />
+                    </Button>
+                  </Link>
                 </div>
 
                 {campaigns.length === 0 ? (
@@ -291,7 +354,7 @@ export default function VendorMarketingDashboardPage() {
                     <Sparkles className="h-10 w-10 text-emerald-600 mx-auto" />
                     <h3 className="text-base font-extrabold text-gray-900">No Campaigns Configured</h3>
                     <p className="text-xs text-gray-500 max-w-sm mx-auto">
-                      Create promotional campaigns to offer percentage or flat discounts to your storefront customers.
+                      Create promotional campaigns to automatically apply discount rules to your products across AfriCart.
                     </p>
                     <Button
                       onClick={handleOpenCreateCampaign}
@@ -316,17 +379,15 @@ export default function VendorMarketingDashboardPage() {
                             >
                               {c.badge || c.type}
                             </span>
-                            <button
-                              type="button"
-                              onClick={() => handleToggleCampaignActive(c)}
-                              className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${
-                                c.isActive
-                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
-                                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                              }`}
-                            >
-                              {c.isActive ? "● Active" : "○ Paused"}
-                            </button>
+                            <span className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase ${
+                              c.status === "ACTIVE"
+                                ? "bg-emerald-100 text-emerald-800"
+                                : c.status === "SCHEDULED"
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-gray-100 text-gray-600"
+                            }`}>
+                              {c.status}
+                            </span>
                           </div>
 
                           <div>
@@ -336,23 +397,30 @@ export default function VendorMarketingDashboardPage() {
                             )}
                           </div>
 
-                          <div className="bg-gray-50 p-3 rounded-2xl border border-gray-100 space-y-2 text-xs">
-                            <div className="flex items-center justify-between text-gray-600">
-                              <span>Discount Offer</span>
-                              <strong className="text-emerald-700 font-extrabold">
-                                {c.discountType === "PERCENTAGE"
-                                  ? `${c.discountValue}% OFF`
-                                  : `$${c.discountValue} OFF`}
-                              </strong>
+                          {/* Requirement 9: Metrics Card */}
+                          <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100 grid grid-cols-2 gap-3 text-xs">
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-gray-400 block">Revenue</span>
+                              <strong className="text-emerald-700 font-extrabold text-sm">GH₵{c.revenueGenerated.toFixed(2)}</strong>
                             </div>
-                            <div className="flex items-center justify-between text-gray-600">
-                              <span>Assigned Products</span>
-                              <strong className="text-gray-900 font-extrabold">{c.productsCount} Items</strong>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-gray-400 block">Orders</span>
+                              <strong className="text-gray-900 font-extrabold text-sm">{c.ordersCount} ({c.unitsSold} units)</strong>
                             </div>
-                            <div className="flex items-center justify-between text-gray-400 text-[11px] pt-1 border-t border-gray-200">
-                              <span>
-                                {c.startDate.split("T")[0]} → {c.endDate.split("T")[0]}
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-gray-400 block">Assigned Items</span>
+                              <strong className="text-purple-700 font-extrabold text-sm">{c.productsCount} products</strong>
+                            </div>
+                            <div>
+                              <span className="text-[10px] uppercase font-bold text-gray-400 block">Campaign ROI</span>
+                              <strong className="text-amber-600 font-extrabold text-sm">{c.campaignRoi}%</strong>
+                            </div>
+                            <div className="col-span-2 pt-2 border-t border-gray-200 flex items-center justify-between text-[11px] text-gray-500">
+                              <span className="flex items-center gap-1 font-semibold">
+                                <Clock className="h-3 w-3 text-emerald-600" />
+                                {c.remainingDuration}
                               </span>
+                              <span className="font-bold text-gray-700">Priority: P{c.priority}</span>
                             </div>
                           </div>
                         </div>
@@ -449,6 +517,17 @@ export default function VendorMarketingDashboardPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Description</label>
+                <textarea
+                  rows={2}
+                  placeholder="Campaign terms & promotion details..."
+                  value={campaignForm.description}
+                  onChange={(e) => setCampaignForm({ ...campaignForm, description: e.target.value })}
+                  className="w-full p-3 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Discount Type</label>
@@ -458,7 +537,8 @@ export default function VendorMarketingDashboardPage() {
                     className="w-full h-10 px-3 rounded-xl border border-gray-300 bg-white text-xs font-medium focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
-                    <option value="FIXED">Fixed Amount ($)</option>
+                    <option value="FIXED">Fixed Amount (GH₵)</option>
+                    <option value="NONE">No Price Discount</option>
                   </select>
                 </div>
 
@@ -467,11 +547,38 @@ export default function VendorMarketingDashboardPage() {
                   <Input
                     type="number"
                     min="0"
-                    step="0.01"
+                    step="any"
                     value={campaignForm.discountValue}
-                    onChange={(e) => setCampaignForm({ ...campaignForm, discountValue: parseFloat(e.target.value) || 0 })}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, discountValue: Number(e.target.value) })}
                     className="rounded-xl"
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Priority (Higher wins)</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={campaignForm.priority}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, priority: Number(e.target.value) })}
+                    className="rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Eligibility Scope</label>
+                  <select
+                    value={campaignForm.targetScope}
+                    onChange={(e) => setCampaignForm({ ...campaignForm, targetScope: e.target.value })}
+                    className="w-full h-10 px-3 rounded-xl border border-gray-300 bg-white text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="PRODUCT">Specific Products</option>
+                    <option value="CATEGORY">Category Wide</option>
+                    <option value="BRAND">Brand Wide</option>
+                    <option value="STORE">Entire Store</option>
+                  </select>
                 </div>
               </div>
 
@@ -487,9 +594,10 @@ export default function VendorMarketingDashboardPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">End Date</label>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">End Date *</label>
                   <Input
                     type="date"
+                    required
                     value={campaignForm.endDate}
                     onChange={(e) => setCampaignForm({ ...campaignForm, endDate: e.target.value })}
                     className="rounded-xl"
@@ -497,19 +605,13 @@ export default function VendorMarketingDashboardPage() {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase text-gray-700 mb-1">Description</label>
-                <textarea
-                  rows={2}
-                  placeholder="Campaign terms & customer promotion details..."
-                  value={campaignForm.description}
-                  onChange={(e) => setCampaignForm({ ...campaignForm, description: e.target.value })}
-                  className="w-full p-3 rounded-xl border border-gray-300 text-xs font-medium focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-
               <div className="flex justify-end gap-3 pt-4 border-t">
-                <Button type="button" variant="outline" onClick={() => setCampaignModalOpen(false)} className="rounded-xl font-bold">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setCampaignModalOpen(false)}
+                  className="rounded-xl font-bold"
+                >
                   Cancel
                 </Button>
                 <Button

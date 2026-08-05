@@ -21,6 +21,7 @@ import {
   Loader2,
   Flame,
   ArrowLeft,
+  Package,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -35,10 +36,12 @@ interface CampaignItem {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  status: string;
   visibility: string;
   discountType: string;
   discountValue?: number | null;
   priority: number;
+  targetScope: string;
   viewsCount: number;
   salesCount: number;
   revenueGenerated: number;
@@ -50,6 +53,7 @@ export default function VendorCampaignsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
+  const [storeProducts, setStoreProducts] = useState<any[]>([]);
   const [stats, setStats] = useState({
     totalCampaigns: 0,
     activeCampaigns: 0,
@@ -72,22 +76,33 @@ export default function VendorCampaignsPage() {
     discountType: "PERCENTAGE",
     discountValue: 20,
     priority: 0,
+    targetScope: "PRODUCT",
     visibility: "PUBLIC",
     isActive: true,
+    productIds: [] as string[],
   });
 
   const fetchCampaigns = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/vendor/campaigns");
-      if (!res.ok) {
-        const err = await res.json();
+      const [campRes, prodRes] = await Promise.all([
+        fetch("/api/vendor/campaigns"),
+        fetch("/api/vendor/products"),
+      ]);
+
+      if (!campRes.ok) {
+        const err = await campRes.json();
         throw new Error(err.error || "Failed to load campaigns");
       }
-      const data = await res.json();
+      const data = await campRes.json();
       setCampaigns(data.campaigns || []);
       if (data.stats) setStats(data.stats);
+
+      if (prodRes && prodRes.ok) {
+        const pData = await prodRes.json();
+        setStoreProducts(pData.products || pData || []);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -112,14 +127,29 @@ export default function VendorCampaignsPage() {
       discountType: "PERCENTAGE",
       discountValue: 20,
       priority: 0,
+      targetScope: "PRODUCT",
       visibility: "PUBLIC",
       isActive: true,
+      productIds: [],
     });
     setModalOpen(true);
   };
 
-  const handleOpenEditModal = (c: CampaignItem) => {
+  const handleOpenEditModal = async (c: CampaignItem) => {
     setEditingCampaign(c);
+    let linkedProductIds: string[] = [];
+
+    try {
+      const res = await fetch(`/api/vendor/campaigns/${c.id}`);
+      if (res.ok) {
+        const details = await res.json();
+        const cps = details.campaign?.campaignProducts || [];
+        linkedProductIds = cps.map((cp: any) => cp.productId);
+      }
+    } catch {
+      // best effort
+    }
+
     setFormData({
       name: c.name,
       type: c.type,
@@ -130,11 +160,21 @@ export default function VendorCampaignsPage() {
       endDate: c.endDate.split("T")[0],
       discountType: c.discountType,
       discountValue: c.discountValue || 0,
-      priority: c.priority,
-      visibility: c.visibility,
+      priority: c.priority || 0,
+      targetScope: c.targetScope || "PRODUCT",
+      visibility: c.visibility || "PUBLIC",
       isActive: c.isActive,
+      productIds: linkedProductIds,
     });
     setModalOpen(true);
+  };
+
+  const toggleProductSelect = (pid: string) => {
+    if (formData.productIds.includes(pid)) {
+      setFormData({ ...formData, productIds: formData.productIds.filter((id) => id !== pid) });
+    } else {
+      setFormData({ ...formData, productIds: [...formData.productIds, pid] });
+    }
   };
 
   const handleSaveCampaign = async (e: React.FormEvent) => {
@@ -222,7 +262,7 @@ export default function VendorCampaignsPage() {
                 </h1>
               </div>
               <p className="text-sm text-gray-500">
-                Create and manage promotional campaigns, flash sales, and seasonal discounts for your products.
+                Create and manage promotional campaigns, flash sales, priority discounts, and product assignments.
               </p>
             </div>
             <Button
@@ -264,7 +304,7 @@ export default function VendorCampaignsPage() {
                 <span>Campaign Revenue</span>
                 <DollarSign className="h-4 w-4 text-emerald-600" />
               </div>
-              <p className="text-3xl font-extrabold text-gray-900">${stats.totalRevenue.toFixed(2)}</p>
+              <p className="text-3xl font-extrabold text-gray-900">GH₵{stats.totalRevenue.toFixed(2)}</p>
             </div>
           </div>
 
@@ -314,12 +354,12 @@ export default function VendorCampaignsPage() {
                         type="button"
                         onClick={() => handleToggleActive(c)}
                         className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${
-                          c.isActive
+                          c.isActive && c.status === "ACTIVE"
                             ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
                             : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                         }`}
                       >
-                        {c.isActive ? "● Active" : "○ Inactive"}
+                        {c.isActive ? `● ${c.status || "Active"}` : "○ Inactive"}
                       </button>
                     </div>
 
@@ -337,7 +377,7 @@ export default function VendorCampaignsPage() {
                           {c.discountType === "PERCENTAGE"
                             ? `${c.discountValue}% OFF`
                             : c.discountType === "FIXED"
-                            ? `$${c.discountValue} OFF`
+                            ? `GH₵${c.discountValue} OFF`
                             : "No Direct Discount"}
                         </strong>
                       </div>
@@ -345,11 +385,12 @@ export default function VendorCampaignsPage() {
                         <span className="text-gray-400 font-bold text-[10px] uppercase block">Products</span>
                         <strong className="text-gray-900 font-extrabold text-sm">{c.productsCount} linked</strong>
                       </div>
-                      <div className="col-span-2 pt-2 border-t border-gray-200 flex items-center gap-1.5 text-gray-500">
-                        <Calendar className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
-                        <span>
+                      <div className="col-span-2 pt-2 border-t border-gray-200 flex items-center justify-between text-gray-500">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
                           {new Date(c.startDate).toLocaleDateString()} — {new Date(c.endDate).toLocaleDateString()}
                         </span>
+                        <span className="font-bold text-gray-700">P{c.priority}</span>
                       </div>
                     </div>
                   </div>
@@ -387,9 +428,9 @@ export default function VendorCampaignsPage() {
         </main>
       </div>
 
-      {/* Modal Dialog for Create/Edit Campaign */}
+      {/* Modal Dialog for Create/Edit Campaign with Product Assignment */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-xl border border-gray-200 my-8">
             <div className="flex items-center justify-between border-b pb-4">
               <h2 className="text-xl font-extrabold text-gray-900">
@@ -474,7 +515,7 @@ export default function VendorCampaignsPage() {
                     className="w-full h-10 px-3 rounded-xl border border-gray-300 bg-white text-sm font-medium focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="PERCENTAGE">Percentage (%)</option>
-                    <option value="FIXED">Fixed Amount ($)</option>
+                    <option value="FIXED">Fixed Amount (GH₵)</option>
                     <option value="NONE">No Price Discount</option>
                   </select>
                 </div>
@@ -496,6 +537,82 @@ export default function VendorCampaignsPage() {
                   </div>
                 )}
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                    Priority (Higher wins)
+                  </label>
+                  <Input
+                    type="number"
+                    min="0"
+                    value={formData.priority}
+                    onChange={(e) => setFormData({ ...formData, priority: Number(e.target.value) })}
+                    className="rounded-xl"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase text-gray-700 mb-1">
+                    Scope
+                  </label>
+                  <select
+                    value={formData.targetScope}
+                    onChange={(e) => setFormData({ ...formData, targetScope: e.target.value })}
+                    className="w-full h-10 px-3 rounded-xl border border-gray-300 bg-white text-sm font-medium focus:ring-2 focus:ring-emerald-500"
+                  >
+                    <option value="PRODUCT">Selected Products</option>
+                    <option value="CATEGORY">Category Wide</option>
+                    <option value="BRAND">Brand Wide</option>
+                    <option value="STORE">Entire Store</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Requirement 10: Assign Products to Campaign Join Table */}
+              {formData.targetScope === "PRODUCT" && storeProducts.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold uppercase text-gray-700">
+                      Assign Store Products ({formData.productIds.length} Selected)
+                    </label>
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, productIds: storeProducts.map((p) => p.id) })}
+                        className="text-emerald-700 font-bold hover:underline"
+                      >
+                        Select All
+                      </button>
+                      <span className="text-gray-300">|</span>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, productIds: [] })}
+                        className="text-red-600 font-bold hover:underline"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="max-h-36 overflow-y-auto border rounded-xl p-2 space-y-1 bg-gray-50">
+                    {storeProducts.map((p) => {
+                      const isSel = formData.productIds.includes(p.id);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => toggleProductSelect(p.id)}
+                          className={`p-2 rounded-lg text-xs font-medium cursor-pointer flex items-center justify-between ${
+                            isSel ? "bg-emerald-100 text-emerald-800 font-bold" : "hover:bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          <span className="truncate max-w-[80%]">{p.name} (GH₵{p.price})</span>
+                          <span>{isSel ? "✓" : "+"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

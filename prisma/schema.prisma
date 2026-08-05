@@ -529,35 +529,45 @@ model SupportTicket {
 }
 
 model MarketingCampaign {
-  id               String            @id @default(uuid())
-  storeId          String
-  store            Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
-  name             String
-  slug             String
-  type             String            @default("FLASH_SALE") // "FLASH_SALE" | "BLACK_FRIDAY" | "CLEARANCE" | "SEASONAL" | "NEW_ARRIVAL" | "PROMOTION"
-  description      String?
-  banner           String?
-  badge            String?           // e.g. "BLACK FRIDAY 30% OFF"
-  color            String?           // e.g. "#EF4444"
-  startDate        DateTime          @default(now())
-  endDate          DateTime
-  isActive         Boolean           @default(true)
-  visibility       String            @default("PUBLIC") // "PUBLIC" | "UNLISTED"
-  discountType     String            @default("PERCENTAGE") // "PERCENTAGE" | "FIXED" | "NONE"
-  discountValue    Float?            // e.g. 30 for 30% off or 15 for $15 off
-  priority         Int               @default(0)
-  maxUses          Int?
-  usedCount        Int               @default(0)
-  viewsCount       Int               @default(0)
-  salesCount       Int               @default(0)
-  revenueGenerated Float             @default(0)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  deletedAt        DateTime?
+  id                     String            @id @default(uuid())
+  storeId                String
+  store                  Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  name                   String
+  slug                   String
+  type                   String            @default("FLASH_SALE") // "FLASH_SALE" | "BLACK_FRIDAY" | "CLEARANCE" | "SEASONAL" | "NEW_ARRIVAL" | "PROMOTION"
+  description            String?
+  banner                 String?
+  badge                  String?           // e.g. "BLACK FRIDAY 30% OFF"
+  color                  String?           // e.g. "#EF4444"
+  startDate              DateTime          @default(now())
+  endDate                DateTime
+  isActive               Boolean           @default(true)
+  status                 String            @default("ACTIVE") // "DRAFT" | "SCHEDULED" | "ACTIVE" | "PAUSED" | "EXPIRED" | "CANCELLED"
+  visibility             String            @default("PUBLIC") // "PUBLIC" | "UNLISTED"
+  discountType           String            @default("PERCENTAGE") // "PERCENTAGE" | "FIXED" | "NONE"
+  discountValue          Float?            // e.g. 30 for 30% off or 15 for $15 off
+  priority               Int               @default(0)
+  targetScope            String            @default("PRODUCT") // "PRODUCT" | "CATEGORY" | "BRAND" | "STORE" | "MARKETPLACE"
+  targetCategories       Json?             // Array of category names or IDs
+  targetBrands           Json?             // Array of brand names
+  perCustomerLimit       Int?
+  minimumOrderValue      Float?
+  maximumDiscount        Float?
+  eligibleCustomerGroups Json?             // Array of group names e.g. ["ALL", "VIP"]
+  maxUses                Int?
+  usedCount              Int               @default(0)
+  viewsCount             Int               @default(0)
+  salesCount             Int               @default(0)
+  revenueGenerated       Float             @default(0)
+  createdAt              DateTime          @default(now())
+  updatedAt              DateTime          @updatedAt
+  deletedAt              DateTime?
 
   campaignProducts CampaignProduct[]
 
   @@unique([storeId, slug])
+  @@index([storeId, isActive, startDate, endDate])
+  @@index([priority])
 }
 
 model CampaignProduct {
@@ -566,9 +576,12 @@ model CampaignProduct {
   campaign   MarketingCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   productId  String
   product    Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  assignedBy String?
   createdAt  DateTime          @default(now())
 
   @@unique([campaignId, productId])
+  @@index([productId])
+  @@index([campaignId])
 }
 
 model RefundPolicy {

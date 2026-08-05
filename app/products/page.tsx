@@ -189,12 +189,17 @@ function ProductsContent() {
                 rating={product.rating}
                 reviews={product.numReviews}
                 price={product.price}
-                originalPrice={product.compareAtPrice || undefined}
-                discount={product.compareAtPrice && product.compareAtPrice > product.price ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100) : undefined}
+                originalPrice={product.originalPrice}
+                isDiscounted={product.isDiscounted}
+                discountPercent={product.discountPercent}
+                amountSaved={product.amountSaved}
+                campaignBadge={product.campaignBadge}
+                campaignColor={product.campaignColor}
+                campaignName={product.campaignName}
                 image={product.images}
                 inStock={product.stock > 0}
                 imagesCount={Array.isArray(product.images) ? product.images.length : 1}
-                campaigns={product.campaigns}
+                isBestSeller={product.isBestSeller}
               />
             ))}
           </div>

@@ -146,8 +146,13 @@ export class OrderRepository {
       return created;
     });
 
-    // 6. Increment campaign stats outside the transaction (non-blocking, best-effort)
-    // Group by campaignId to batch the increments
+    // 6. Queue non-blocking background Best Seller score recalculation & increment campaign stats
+    const { queueProductBestSellerRecalculation } = await import("@/modules/catalog/best-seller-calculator");
+
+    for (const { item } of pricedItems) {
+      queueProductBestSellerRecalculation(item.productId);
+    }
+
     const campaignStatMap = new Map<string, { qty: number; revenue: number }>();
     for (const { item, pricing } of pricedItems) {
       if (pricing.campaignId) {

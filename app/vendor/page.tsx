@@ -196,7 +196,7 @@ export default function VendorDashboardPage() {
                     </h3>
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-600">Today's Sales</span>
+                        <span className="text-gray-600">Today&apos;s Sales</span>
                         <span className="font-bold text-emerald-600">${(stats.todaySales || 0).toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">

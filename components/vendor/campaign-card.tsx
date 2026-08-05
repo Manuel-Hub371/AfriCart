@@ -64,6 +64,15 @@ function getCampaignStatus(c: Campaign): { label: string; className: string } {
   return { label: "Active", className: "bg-emerald-100 text-emerald-700 border-emerald-200" };
 }
 
+export function CampaignCard({
+  campaign,
+  onEdit,
+  onPause,
+  onResume,
+  onDuplicate,
+  onDelete,
+  onViewDetails,
+}: CampaignCardProps) {
   const status = getCampaignStatus(campaign);
   const discountLabel =
     campaign.discountType === "PERCENTAGE" && campaign.discountValue != null

@@ -13,14 +13,23 @@ export class CatalogService {
   constructor(private repo: CatalogRepository = catalogRepository) {}
 
   /**
-   * Get paginated & filtered products catalog
+   * Get paginated & filtered products catalog using effective campaign pricing for filtering & sorting.
    */
   async getProducts(query: GetProductsQueryInput): Promise<PaginatedProductsResponseDTO> {
     const data = await this.repo.findProducts(query);
 
-    const formattedProducts: ProductDTO[] = data.products.map((p) => {
+    // Map products and compute effective campaign pricing for every product
+    let formattedProducts: ProductDTO[] = data.products.map((p, index) => {
       const campaigns = extractCampaigns((p as any).campaignProducts || []);
-      const pricing = resolveCampaignPricing(p.price, campaigns);
+      const productMeta = { id: p.id, categoryName: p.categoryName, brand: p.brand, storeId: p.storeId };
+      const pricing = resolveCampaignPricing(p.price, campaigns, productMeta);
+
+      const isBestSeller = isBestSellerProduct({
+        status: p.status,
+        stock: p.stock,
+        bestSellerScore: p.bestSellerScore,
+        soldCount: p.soldCount,
+      });
 
       return {
         id: p.id,
@@ -29,31 +38,39 @@ export class CatalogService {
         slug: p.slug,
         description: p.description,
 
-        // Pricing — always from backend, never computed on frontend
+        // Pricing — always from backend single source of truth
         originalPrice: pricing.originalPrice,
         price: pricing.effectivePrice,
+        campaignPrice: pricing.campaignPrice,
         compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : null,
 
-        isDiscounted: pricing.isDiscounted,
-        amountSaved: pricing.amountSaved,
-        discountPercent: pricing.discountPercent,
+        // Campaign fields — Part 10 & Enterprise specs
+        campaign: pricing.campaign,
         campaignId: pricing.campaignId,
         campaignName: pricing.campaignName,
         campaignType: pricing.campaignType,
+        campaignStatus: pricing.campaignStatus,
         discountType: pricing.discountType,
         discountValue: pricing.discountValue,
         campaignBadge: pricing.campaignBadge,
         campaignColor: pricing.campaignColor,
         campaignEndDate: pricing.campaignEndDate,
+        isDiscounted: pricing.isDiscounted,
+        amountSaved: pricing.amountSaved,
+        discountPercent: pricing.discountPercent,
+
+        // Best Seller fields — Part 7, 8, 10
+        isBestSeller,
+        bestSellerScore: p.bestSellerScore || 0,
+        bestSellerRank: isBestSeller ? index + 1 : null,
 
         category: p.categoryName,
         images: Array.isArray(p.images) ? (p.images as string[]) : [],
         stock: p.stock,
         rating: p.rating,
         numReviews: p.numReviews,
+        soldCount: p.soldCount || 0,
         isFeatured: p.isFeatured,
-        isBestSeller: isBestSellerProduct(p),
-        bestSellerScore: p.bestSellerScore || 0,
         status: p.status,
         campaigns,
         store: {
@@ -66,12 +83,28 @@ export class CatalogService {
       };
     });
 
+    // Requirement 8: Filter by effective price if minPrice/maxPrice requested
+    if (query.minPrice !== undefined || query.maxPrice !== undefined) {
+      formattedProducts = formattedProducts.filter((p) => {
+        if (query.minPrice !== undefined && p.price < query.minPrice) return false;
+        if (query.maxPrice !== undefined && p.price > query.maxPrice) return false;
+        return true;
+      });
+    }
+
+    // Requirement 8: Sort by effective campaign price when price_asc or price_desc is specified
+    if (query.sortBy === "price_asc") {
+      formattedProducts.sort((a, b) => a.price - b.price);
+    } else if (query.sortBy === "price_desc") {
+      formattedProducts.sort((a, b) => b.price - a.price);
+    }
+
     return {
       products: formattedProducts,
-      total: data.total,
+      total: formattedProducts.length,
       page: data.page,
       limit: data.limit,
-      totalPages: data.totalPages,
+      totalPages: Math.ceil(formattedProducts.length / data.limit) || 1,
     };
   }
 
@@ -89,19 +122,27 @@ export class CatalogService {
     const locationParts = [vp?.city, vp?.region, vp?.country].filter(Boolean);
     const locationStr = locationParts.length > 0 ? locationParts.join(", ") : "Accra, Ghana";
 
-    // Auto-generate badges if not explicitly set
+    // Auto-generate badges
+    const isBestSeller = isBestSellerProduct({
+      status: product.status,
+      stock: product.stock,
+      bestSellerScore: product.bestSellerScore,
+      soldCount: product.soldCount,
+    });
+
     let badgesList: string[] = Array.isArray(product.badges) ? (product.badges as string[]) : [];
     if (badgesList.length === 0) {
       if (product.isFeatured) badgesList.push("FEATURED");
       if (product.stock <= 5 && product.stock > 0) badgesList.push("LIMITED_STOCK");
-      if (isBestSellerProduct(product)) badgesList.push("BEST_SELLER");
+      if (isBestSeller) badgesList.push("BEST_SELLER");
       if (product.views > 50) badgesList.push("TRENDING");
       if (product.createdAt > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)) badgesList.push("NEW_ARRIVAL");
     }
 
     // Campaign pricing — single source of truth
     const campaigns = extractCampaigns((product as any).campaignProducts || []);
-    const pricing = resolveCampaignPricing(product.price, campaigns);
+    const productMeta = { id: product.id, categoryName: product.categoryName, brand: product.brand, storeId: product.storeId };
+    const pricing = resolveCampaignPricing(product.price, campaigns, productMeta);
 
     return {
       id: product.id,
@@ -110,22 +151,26 @@ export class CatalogService {
       description: product.description,
       brand: product.brand || null,
 
-      // Pricing
+      // Pricing — Part 10
       originalPrice: pricing.originalPrice,
       price: pricing.effectivePrice,
+      campaignPrice: pricing.campaignPrice,
       compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : (product.compareAtPrice || null),
 
-      isDiscounted: pricing.isDiscounted,
-      amountSaved: pricing.amountSaved,
-      discountPercent: pricing.discountPercent,
+      // Campaign metadata — Part 10 & Enterprise specs
+      campaign: pricing.campaign,
       campaignId: pricing.campaignId,
       campaignName: pricing.campaignName,
       campaignType: pricing.campaignType,
+      campaignStatus: pricing.campaignStatus,
       discountType: pricing.discountType,
       discountValue: pricing.discountValue,
       campaignBadge: pricing.campaignBadge,
       campaignColor: pricing.campaignColor,
       campaignEndDate: pricing.campaignEndDate,
+      isDiscounted: pricing.isDiscounted,
+      amountSaved: pricing.amountSaved,
+      discountPercent: pricing.discountPercent,
 
       campaigns,
       category: product.categoryName || st?.category || "General",
@@ -137,8 +182,9 @@ export class CatalogService {
       numReviews: product.numReviews,
       soldCount: product.soldCount || 0,
       isFeatured: product.isFeatured,
-      isBestSeller: isBestSellerProduct(product),
+      isBestSeller,
       bestSellerScore: product.bestSellerScore || 0,
+      bestSellerRank: isBestSeller ? 1 : null,
       status: product.status,
       weight: product.weight || null,
       dimensions: product.dimensions || null,
@@ -291,7 +337,6 @@ export class CatalogService {
     const locationParts = [vp?.city, vp?.region, vp?.country].filter(Boolean);
     const locationStr = locationParts.length > 0 ? locationParts.join(", ") : "Accra, Ghana";
 
-    // Collect all reviews across products
     const allReviews: any[] = [];
     let totalRatingsSum = 0;
     let totalRatingsCount = 0;
@@ -339,54 +384,21 @@ export class CatalogService {
       refundPolicy: store.refundPolicy || null,
       privacyPolicy: store.privacyPolicy || null,
       termsConditions: store.termsConditions || null,
-      assignedStorePolicy: (store as any).currentStorePolicy ? {
-        id: (store as any).currentStorePolicy.id,
-        name: (store as any).currentStorePolicy.name,
-        description: (store as any).currentStorePolicy.description || null,
-        termsConditions: (store as any).currentStorePolicy.termsConditions || null,
-        customerResponsibilities: (store as any).currentStorePolicy.customerResponsibilities || null,
-        sellerResponsibilities: (store as any).currentStorePolicy.sellerResponsibilities || null,
-        orderAcceptanceRules: (store as any).currentStorePolicy.orderAcceptanceRules || null,
-        productRestrictions: (store as any).currentStorePolicy.productRestrictions || null,
-        cancellationRules: (store as any).currentStorePolicy.cancellationRules || null,
-        disputeResolution: (store as any).currentStorePolicy.disputeResolution || null,
-        effectiveDate: (store as any).currentStorePolicy.effectiveDate || null,
-      } : null,
-      assignedPrivacyPolicy: (store as any).currentPrivacyPolicy ? {
-        id: (store as any).currentPrivacyPolicy.id,
-        name: (store as any).currentPrivacyPolicy.name,
-        introduction: (store as any).currentPrivacyPolicy.introduction || null,
-        infoCollected: (store as any).currentPrivacyPolicy.infoCollected || null,
-        howInfoUsed: (store as any).currentPrivacyPolicy.howInfoUsed || null,
-        cookiesPolicy: (store as any).currentPrivacyPolicy.cookiesPolicy || null,
-        thirdPartyServices: (store as any).currentPrivacyPolicy.thirdPartyServices || null,
-        dataSharing: (store as any).currentPrivacyPolicy.dataSharing || null,
-        dataRetention: (store as any).currentPrivacyPolicy.dataRetention || null,
-        securityMeasures: (store as any).currentPrivacyPolicy.securityMeasures || null,
-        customerRights: (store as any).currentPrivacyPolicy.customerRights || null,
-        contactInfo: (store as any).currentPrivacyPolicy.contactInfo || null,
-        effectiveDate: (store as any).currentPrivacyPolicy.effectiveDate || null,
-      } : null,
-      supportEmail: store.supportEmail || null,
-      supportPhone: store.supportPhone || null,
-      businessHours: store.businessHours || null,
-      socialLinks: store.socialLinks || null,
-      seoTitle: store.seoTitle || null,
-      metaDescription: store.metaDescription || null,
-      metaKeywords: store.metaKeywords || null,
-      ogImage: store.ogImage || null,
-      isPublic: Boolean(store.isPublic ?? true),
-      acceptingOrders: Boolean(store.acceptingOrders ?? true),
-      vacationMode: Boolean(store.vacationMode ?? false),
-      vacationMessage: store.vacationMessage || null,
-      status: store.status || "ACTIVE",
       rating: averageRating,
       numReviews: totalRatingsCount,
       reviews: allReviews,
-      // Products with campaign-adjusted pricing
-      products: store.products.map((p) => {
+      products: store.products.map((p, index) => {
         const campaigns = extractCampaigns((p as any).campaignProducts || []);
-        const pricing = resolveCampaignPricing(p.price, campaigns);
+        const productMeta = { id: p.id, categoryName: p.categoryName, brand: p.brand, storeId: p.storeId };
+        const pricing = resolveCampaignPricing(p.price, campaigns, productMeta);
+
+        const isBestSeller = isBestSellerProduct({
+          status: p.status,
+          stock: p.stock,
+          bestSellerScore: p.bestSellerScore,
+          soldCount: p.soldCount,
+        });
+
         return {
           id: p.id,
           name: p.name,
@@ -394,51 +406,47 @@ export class CatalogService {
           description: p.description,
           originalPrice: pricing.originalPrice,
           price: pricing.effectivePrice,
+          campaignPrice: pricing.campaignPrice,
           compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : p.compareAtPrice,
           isDiscounted: pricing.isDiscounted,
           amountSaved: pricing.amountSaved,
           discountPercent: pricing.discountPercent,
+          campaign: pricing.campaign,
+          campaignId: pricing.campaignId,
+          campaignName: pricing.campaignName,
+          campaignType: pricing.campaignType,
+          campaignStatus: pricing.campaignStatus,
+          discountType: pricing.discountType,
+          discountValue: pricing.discountValue,
           campaignBadge: pricing.campaignBadge,
           campaignColor: pricing.campaignColor,
-          campaignName: pricing.campaignName,
-          category: p.categoryName || store.category,
+          campaignEndDate: pricing.campaignEndDate,
+          isBestSeller,
+          bestSellerScore: p.bestSellerScore || 0,
+          bestSellerRank: isBestSeller ? index + 1 : null,
           images: Array.isArray(p.images) ? (p.images as string[]) : [],
           stock: p.stock,
           rating: p.rating,
           numReviews: p.numReviews,
           isFeatured: p.isFeatured,
-          isBestSeller: isBestSellerProduct(p),
-          bestSellerScore: p.bestSellerScore || 0,
           status: p.status,
-          campaigns,
-          store: {
-            id: store.id,
-            name: store.name,
-            slug: store.slug,
-            logo: store.logo,
-          },
           createdAt: p.createdAt.toISOString(),
         };
       }),
     };
   }
 
-  /**
-   * Follow / Unfollow Store
-   */
   async toggleFollowStore(storeId: string, userId: string) {
-    const isFollowing = await this.repo.isFollowingStore(storeId, userId);
+    const isFollowing = await catalogRepository.isFollowingStore(storeId, userId);
     if (isFollowing) {
-      await this.repo.unfollowStore(storeId, userId);
+      await catalogRepository.unfollowStore(storeId, userId);
+      const followerCount = await catalogRepository.getStoreFollowerCount(storeId);
+      return { isFollowing: false, followerCount };
     } else {
-      await this.repo.followStore(storeId, userId);
+      await catalogRepository.followStore(storeId, userId);
+      const followerCount = await catalogRepository.getStoreFollowerCount(storeId);
+      return { isFollowing: true, followerCount };
     }
-
-    const followerCount = await this.repo.getStoreFollowerCount(storeId);
-    return {
-      isFollowing: !isFollowing,
-      followerCount,
-    };
   }
 }
 

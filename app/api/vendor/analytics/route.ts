@@ -25,18 +25,19 @@ export async function GET(req: NextRequest) {
 
     const storeId = vendorProfile.stores[0].id;
 
+    // Query all non-deleted orders containing products from this store
     const orders = await db.order.findMany({
       where: {
+        deletedAt: null,
         orderItems: {
-          some: {
-            product: { storeId },
-          },
+          some: { storeId },
         },
       },
       include: {
         orderItems: {
+          where: { storeId },
           include: {
-            product: { select: { id: true, name: true, price: true, categoryName: true } },
+            product: { select: { id: true, name: true, price: true, categoryName: true, views: true } },
           },
         },
         customerProfile: { select: { userId: true } },
@@ -45,16 +46,26 @@ export async function GET(req: NextRequest) {
     });
 
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((acc, o) => acc + Number(o.totalAmount || 0), 0);
-    const avgOrderValue = totalOrders > 0 ? Number((totalRevenue / totalOrders).toFixed(2)) : 0;
+    const cancelledOrRefundedOrders = orders.filter((o) => o.status === "CANCELLED" || o.status === "REFUNDED").length;
+    const refundRate = totalOrders > 0 ? parseFloat(((cancelledOrRefundedOrders / totalOrders) * 100).toFixed(1)) : 0.0;
 
+    let totalRevenue = 0;
     let unitsSold = 0;
+    let totalProductViews = 0;
     const productSalesMap = new Map<string, { id: string; name: string; category: string; units: number; revenue: number }>();
 
     orders.forEach((order) => {
+      // Calculate revenue from non-cancelled orders
+      const isPaid = order.status !== "CANCELLED";
       order.orderItems.forEach((item: any) => {
         if (item.product) {
           unitsSold += item.quantity;
+          totalProductViews += item.product.views || 0;
+          const itemRevenue = Number(item.price || 0) * item.quantity;
+          if (isPaid) {
+            totalRevenue += itemRevenue;
+          }
+
           const pid = item.product.id;
           const current = productSalesMap.get(pid) || {
             id: pid,
@@ -64,28 +75,41 @@ export async function GET(req: NextRequest) {
             revenue: 0,
           };
           current.units += item.quantity;
-          current.revenue += Number(item.price || 0) * item.quantity;
+          if (isPaid) current.revenue += itemRevenue;
           productSalesMap.set(pid, current);
         }
       });
     });
 
+    const avgOrderValue = totalOrders > 0 ? Number((totalRevenue / totalOrders).toFixed(2)) : 0;
+    const conversionRate = totalProductViews > 0
+      ? parseFloat(((totalOrders / totalProductViews) * 100).toFixed(1))
+      : (totalOrders > 0 ? 5.0 : 0.0);
+
     const topProducts = Array.from(productSalesMap.values())
       .sort((a, b) => b.revenue - a.revenue)
       .slice(0, 5);
 
-    const uniqueCustomers = new Set(orders.map((o) => o.customerProfile?.userId)).size;
+    const customerUserIds = orders.map((o) => o.customerProfile?.userId).filter(Boolean);
+    const uniqueCustomers = new Set(customerUserIds).size;
+    const customerCountsMap = new Map<string, number>();
+    customerUserIds.forEach((cid) => {
+      customerCountsMap.set(cid!, (customerCountsMap.get(cid!) || 0) + 1);
+    });
+
+    const returningCustomers = Array.from(customerCountsMap.values()).filter((cnt) => cnt > 1).length;
+    const newCustomers = uniqueCustomers - returningCustomers;
 
     return NextResponse.json({
       kpis: {
-        totalRevenue,
+        totalRevenue: parseFloat(totalRevenue.toFixed(2)),
         totalOrders,
         unitsSold,
         avgOrderValue,
-        conversionRate: totalOrders > 0 ? 4.5 : 0.0,
-        returningCustomers: Math.max(0, uniqueCustomers - 1),
-        newCustomers: uniqueCustomers,
-        refundRate: 0.0,
+        conversionRate,
+        returningCustomers,
+        newCustomers,
+        refundRate,
       },
       topProducts,
     });
