@@ -1,4 +1,5 @@
-import { SignJWT, jwtVerify } from "jose";
+import { SignJWT } from "jose/jwt/sign";
+import { jwtVerify } from "jose/jwt/verify";
 
 const JWT_SECRET = process.env.JWT_SECRET || "africart_super_secret_jwt_key_at_least_32_characters_long_for_security_12345!";
 const secretKey = new TextEncoder().encode(JWT_SECRET);
