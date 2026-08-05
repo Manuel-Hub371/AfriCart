@@ -202,12 +202,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ slug:
                   reviews={p.numReviews || 0}
                   price={p.price}
                   originalPrice={p.originalPrice}
-                  isDiscounted={Boolean(p.isDiscounted ?? (p.discountPercent && p.discountPercent > 0))}
-                  discountPercent={p.discountPercent ?? 0}
-                  amountSaved={p.amountSaved ?? 0}
-                  campaignBadge={p.campaignBadge}
-                  campaignColor={p.campaignColor}
-                  campaignName={p.campaignName}
+                  discount={p.discountPercent}
                   image={p.images}
                   inStock={p.stock > 0}
                   imagesCount={Array.isArray(p.images) ? p.images.length : 1}

@@ -15,31 +15,13 @@ import { Plus, Loader2 } from "lucide-react";
 import type { Product } from "@/components/vendor/product-card";
 
 // Map API product → UI Product shape
-function toUIProduct(p: any, campaignMap: Map<string, any> = new Map()): Product {
+function toUIProduct(p: any): Product {
   const stock: number = p.stock ?? 0;
   let status: Product["status"] = "published";
   if (p.status === "DRAFT") status = "draft";
   else if (p.status === "OUT_OF_STOCK" || stock === 0) status = "out-of-stock";
   else if (stock > 0 && stock <= 10) status = "low-stock";
   else if (p.status === "ACTIVE") status = "published";
-
-  // Resolve active campaign from assigned campaignIds
-  const now = Date.now();
-  let activeCampaign: any = null;
-  let bestDiscount = 0;
-  for (const cid of (p.campaignIds || [])) {
-    const c = campaignMap.get(cid);
-    if (!c || !c.isActive || !c.endDate) continue;
-    if (new Date(c.endDate).getTime() < now) continue;
-    const disc =
-      c.discountType === "PERCENTAGE" && c.discountValue ? (p.price * c.discountValue) / 100 :
-      c.discountType === "FIXED" && c.discountValue ? c.discountValue : 0;
-    if (disc > bestDiscount) { bestDiscount = disc; activeCampaign = c; }
-  }
-
-  const effectivePrice = activeCampaign ? Math.max(0, p.price - bestDiscount) : p.price;
-  const discountPercent = activeCampaign && p.price > 0
-    ? Math.round((bestDiscount / p.price) * 100) : 0;
 
   return {
     id: p.id,
@@ -60,12 +42,6 @@ function toUIProduct(p: any, campaignMap: Map<string, any> = new Map()): Product
     lastUpdated: p.updatedAt
       ? new Date(p.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })
       : "—",
-    // Campaign fields
-    campaignId: activeCampaign?.id ?? null,
-    campaignName: activeCampaign?.name ?? null,
-    isDiscounted: Boolean(activeCampaign && discountPercent > 0),
-    discountPercent,
-    effectivePrice,
   };
 }
 
@@ -85,29 +61,18 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch products + campaigns in parallel
+  // Fetch products from API
   const fetchProducts = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [productsRes, campaignsRes] = await Promise.all([
-        fetch("/api/vendor/products"),
-        fetch("/api/vendor/campaigns"),
-      ]);
-      if (!productsRes.ok) {
-        const data = await productsRes.json();
+      const res = await fetch("/api/vendor/products");
+      if (!res.ok) {
+        const data = await res.json();
         throw new Error(data.error ?? "Failed to load products");
       }
-      const productsData = await productsRes.json();
-      const campaignsData = campaignsRes.ok ? await campaignsRes.json() : { campaigns: [] };
-
-      // Build a fast lookup map: campaignId → campaign object
-      const campaignMap = new Map<string, any>();
-      for (const c of (campaignsData.campaigns ?? [])) {
-        campaignMap.set(c.id, c);
-      }
-
-      setAllProducts((productsData.products ?? []).map((p: any) => toUIProduct(p, campaignMap)));
+      const data = await res.json();
+      setAllProducts((data.products ?? []).map(toUIProduct));
     } catch (e: any) {
       setError(e.message);
     } finally {

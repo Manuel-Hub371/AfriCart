@@ -1,3 +1,3 @@
-import StoreDetailsPage from "@/frontend/app/stores/[id]/page";
+import StoreDetailsPage from "@/app/stores/[id]/page";
 
 export default StoreDetailsPage;

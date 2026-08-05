@@ -595,17 +595,16 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                         rating={product.rating || 5}
                         reviews={product.numReviews || 0}
                         price={product.price}
-                        originalPrice={product.originalPrice ?? product.compareAtPrice ?? undefined}
-                        isDiscounted={product.isDiscounted ?? false}
-                        discountPercent={product.discountPercent ?? 0}
-                        amountSaved={product.amountSaved ?? 0}
-                        campaignBadge={product.campaignBadge}
-                        campaignColor={product.campaignColor}
-                        campaignName={product.campaignName}
+                        originalPrice={product.compareAtPrice || undefined}
+                        discount={
+                          product.compareAtPrice && product.compareAtPrice > product.price
+                            ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+                            : undefined
+                        }
                         image={product.images}
                         inStock={product.stock > 0}
                         imagesCount={Array.isArray(product.images) ? product.images.length : 1}
-                        isBestSeller={product.isBestSeller ?? false}
+                        campaigns={product.campaigns}
                       />
                     ))}
                   </div>
@@ -683,17 +682,16 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                         rating={product.rating || 5}
                         reviews={product.numReviews || 0}
                         price={product.price}
-                        originalPrice={product.originalPrice ?? product.compareAtPrice ?? undefined}
-                        isDiscounted={product.isDiscounted ?? false}
-                        discountPercent={product.discountPercent ?? 0}
-                        amountSaved={product.amountSaved ?? 0}
-                        campaignBadge={product.campaignBadge}
-                        campaignColor={product.campaignColor}
-                        campaignName={product.campaignName}
+                        originalPrice={product.compareAtPrice || undefined}
+                        discount={
+                          product.compareAtPrice && product.compareAtPrice > product.price
+                            ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+                            : undefined
+                        }
                         image={product.images}
                         inStock={product.stock > 0}
                         imagesCount={Array.isArray(product.images) ? product.images.length : 1}
-                        isBestSeller={product.isBestSeller ?? false}
+                        campaigns={product.campaigns}
                       />
                     ))}
                   </div>
@@ -719,17 +717,16 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                         rating={product.rating || 5}
                         reviews={product.numReviews || 0}
                         price={product.price}
-                        originalPrice={product.originalPrice ?? product.compareAtPrice ?? undefined}
-                        isDiscounted={product.isDiscounted ?? false}
-                        discountPercent={product.discountPercent ?? 0}
-                        amountSaved={product.amountSaved ?? 0}
-                        campaignBadge={product.campaignBadge}
-                        campaignColor={product.campaignColor}
-                        campaignName={product.campaignName}
+                        originalPrice={product.compareAtPrice || undefined}
+                        discount={
+                          product.compareAtPrice && product.compareAtPrice > product.price
+                            ? Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)
+                            : undefined
+                        }
                         image={product.images}
                         inStock={product.stock > 0}
                         imagesCount={Array.isArray(product.images) ? product.images.length : 1}
-                        isBestSeller={product.isBestSeller ?? false}
+                        campaigns={product.campaigns}
                       />
                     ))}
                   </div>
