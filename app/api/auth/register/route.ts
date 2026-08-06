@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, withDbRetry } from "@/lib/db";
 import { hashPassword, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
 import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
 
@@ -38,10 +38,11 @@ export async function POST(req: Request) {
     // Hash the password
     const passwordHash = await hashPassword(password);
 
-    // Create user and profile in transaction
-    const newUser = await db.$transaction(async (tx) => {
-      // Self-healing CUSTOMER role resolution
-      const role = await ensureRole(tx, "CUSTOMER");
+    // Create user and profile in transaction with retry
+    const newUser = await withDbRetry(() =>
+      db.$transaction(async (tx) => {
+        // Self-healing CUSTOMER role resolution
+        const role = await ensureRole(tx, "CUSTOMER");
 
       // Create User account
       const user = await tx.user.create({
@@ -87,7 +88,8 @@ export async function POST(req: Request) {
       });
 
       return user;
-    });
+    })
+    );
 
     const roles = ["CUSTOMER"];
     const permissions = getPermissionsForRoles(roles);

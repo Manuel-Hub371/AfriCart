@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
-import { db } from "@/lib/db";
+import { db, withDbRetry } from "@/lib/db";
 import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
 
 /**
@@ -73,8 +73,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "You already have a vendor profile" }, { status: 400 });
     }
 
-    // Upgrade customer to vendor in transaction
-    const result = await db.$transaction(async (tx) => {
+    // Upgrade customer to vendor in transaction with retry
+    const result = await withDbRetry(() =>
+      db.$transaction(async (tx) => {
       const user = await tx.user.findUnique({
         where: { id: userId },
         include: {
@@ -144,7 +145,8 @@ export async function POST(req: Request) {
       });
 
       return { user, store };
-    });
+    })
+    );
 
     // Re-read roles and permissions
     const updatedUser = await db.user.findUnique({
