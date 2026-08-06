@@ -111,9 +111,14 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Registration API error:", error);
-    if (error?.code === "P1001" || error?.message?.includes("Can't reach database server")) {
+    if (
+      error?.code === "P1000" ||
+      error?.code === "P1001" ||
+      error?.message?.includes("Authentication failed") ||
+      error?.message?.includes("Can't reach database server")
+    ) {
       return NextResponse.json(
-        { message: "Cannot connect to database. Please ensure DATABASE_URL environment setting is set correctly on Render." },
+        { message: "Invalid database credentials. Please copy the Internal Database URL directly from your Render Database Dashboard into DATABASE_URL." },
         { status: 503 }
       );
     }
