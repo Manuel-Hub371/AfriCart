@@ -122,6 +122,12 @@ export async function POST(req: Request) {
         { status: 503 }
       );
     }
+    if (error?.code === "P2021" || error?.message?.includes("does not exist")) {
+      return NextResponse.json(
+        { message: "Database tables are not initialized. Please set Render Build Command to: npm install && npx prisma generate && npx prisma db push --skip-generate && npm run build" },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ message: error.message || "Registration failed" }, { status: 500 });
   }
 }
