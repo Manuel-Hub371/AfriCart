@@ -50,10 +50,10 @@ export function PopularStores() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {stores.map((store) => {
               const isLogoUrl = Boolean(
-                store.logo && (store.logo.startsWith("http") || store.logo.startsWith("/"))
+                store.logo && (store.logo.startsWith("http") || store.logo.startsWith("/") || store.logo.startsWith("data:image/"))
               );
               const isBannerUrl = Boolean(
-                store.banner && (store.banner.startsWith("http") || store.banner.startsWith("/"))
+                store.banner && (store.banner.startsWith("http") || store.banner.startsWith("/") || store.banner.startsWith("data:image/"))
               );
               const storeHref = `/stores/${store.slug || store.id}`;
 

@@ -249,8 +249,8 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
     );
   }
 
-  const isBannerUrl = Boolean(store.banner && (store.banner.startsWith("http") || store.banner.startsWith("/")));
-  const isLogoUrl = Boolean(store.logo && (store.logo.startsWith("http") || store.logo.startsWith("/")));
+  const isBannerUrl = Boolean(store.banner && (store.banner.startsWith("http") || store.banner.startsWith("/") || store.banner.startsWith("data:image/")));
+  const isLogoUrl = Boolean(store.logo && (store.logo.startsWith("http") || store.logo.startsWith("/") || store.logo.startsWith("data:image/")));
 
   const joinedYear = store.createdAt ? new Date(store.createdAt).getFullYear() : new Date().getFullYear();
 

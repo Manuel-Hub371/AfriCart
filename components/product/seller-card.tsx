@@ -38,7 +38,7 @@ export function SellerCard({
   const router = useRouter();
   const [isStartingChat, setIsStartingChat] = useState(false);
 
-  const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/")));
+  const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/") || logo.startsWith("data:image/")));
 
   const handleContactSeller = async () => {
     if (!storeId) return;

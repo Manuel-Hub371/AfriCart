@@ -48,8 +48,8 @@ export function StoreHeader({
   const [followersCountState, setFollowersCountState] = useState(followers);
   const [isTogglingFollow, setIsTogglingFollow] = useState(false);
 
-  const isBannerUrl = Boolean(bannerImage && (bannerImage.startsWith("http") || bannerImage.startsWith("/")));
-  const isLogoUrl = Boolean(logoUrl && (logoUrl.startsWith("http") || logoUrl.startsWith("/")));
+  const isBannerUrl = Boolean(bannerImage && (bannerImage.startsWith("http") || bannerImage.startsWith("/") || bannerImage.startsWith("data:image/")));
+  const isLogoUrl = Boolean(logoUrl && (logoUrl.startsWith("http") || logoUrl.startsWith("/") || logoUrl.startsWith("data:image/")));
 
   const handleFollowStore = async () => {
     if (!storeId || isTogglingFollow) return;

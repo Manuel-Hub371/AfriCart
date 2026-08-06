@@ -52,8 +52,8 @@ export function StoreCard({
   const [isTogglingFollow, setIsTogglingFollow] = useState(false);
 
   const realProductCount = productCount ?? products ?? 0;
-  const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/")));
-  const isBannerUrl = Boolean(banner && (banner.startsWith("http") || banner.startsWith("/")));
+  const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/") || logo.startsWith("data:image/")));
+  const isBannerUrl = Boolean(banner && (banner.startsWith("http") || banner.startsWith("/") || banner.startsWith("data:image/")));
   const storeHref = `/stores/${slug || id}`;
 
   const handleFollowToggle = async (e: React.MouseEvent) => {

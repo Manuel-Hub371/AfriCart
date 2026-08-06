@@ -37,8 +37,8 @@ export function FeaturedStoreCard({
 }: FeaturedStoreCardProps) {
   const realProductCount = productCount ?? products ?? 0;
   const realFollowerCount = followerCount ?? followers ?? 0;
-  const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/")));
-  const isBannerUrl = Boolean(banner && (banner.startsWith("http") || banner.startsWith("/")));
+  const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/") || logo.startsWith("data:image/")));
+  const isBannerUrl = Boolean(banner && (banner.startsWith("http") || banner.startsWith("/") || banner.startsWith("data:image/")));
   const storeHref = `/stores/${slug || id}`;
 
   return (
