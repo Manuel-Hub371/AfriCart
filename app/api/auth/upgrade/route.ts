@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { verifyToken, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
 import { db } from "@/lib/db";
-import { getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
+import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
 
 /**
  * Generate an SEO-friendly unique slug for a store
@@ -85,13 +85,8 @@ export async function POST(req: Request) {
       });
       if (!user) throw new Error("User account not found");
 
-      // Find VENDOR role
-      const vendorRole = await tx.role.findUnique({
-        where: { name: "VENDOR" }
-      });
-      if (!vendorRole) {
-        throw new Error("System is not initialized. VENDOR role missing.");
-      }
+      // Self-healing VENDOR role resolution
+      const vendorRole = await ensureRole(tx, "VENDOR");
 
       // 1. Add VENDOR role to User (keep existing customer role)
       const userHasVendorRole = user.userRoles.some(ur => ur.role.name === "VENDOR");
@@ -189,7 +184,13 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("Upgrade API error:", error);
-    return NextResponse.json({ message: error.message || "Failed to upgrade profile" }, { status: 500 });
+    console.error("Upgrade vendor error:", error);
+    if (error?.code === "P1001" || error?.message?.includes("Can't reach database server")) {
+      return NextResponse.json(
+        { message: "Cannot connect to database. Please ensure DATABASE_URL environment setting is set correctly on Render." },
+        { status: 503 }
+      );
+    }
+    return NextResponse.json({ message: error.message || "Failed to upgrade account to vendor" }, { status: 500 });
   }
 }

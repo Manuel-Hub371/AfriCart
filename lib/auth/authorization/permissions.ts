@@ -111,3 +111,22 @@ export async function initializeRolesAndPermissions() {
     console.error("Failed to initialize roles and permissions in DB:", error);
   }
 }
+
+/**
+ * Self-healing helper to ensure a specific role exists in the database within a transaction
+ */
+export async function ensureRole(tx: any, roleName: string) {
+  let role = await tx.role.findUnique({
+    where: { name: roleName }
+  });
+  if (!role) {
+    role = await tx.role.create({
+      data: {
+        name: roleName,
+        description: `${roleName} Role`
+      }
+    });
+  }
+  return role;
+}
+

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
-import { initializeRolesAndPermissions, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
+import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
 
 export async function POST(req: Request) {
   try {
@@ -16,9 +16,6 @@ export async function POST(req: Request) {
     if (password !== confirmPassword) {
       return NextResponse.json({ message: "Passwords do not match" }, { status: 400 });
     }
-
-    // Ensure roles and permissions are initialized in DB
-    await initializeRolesAndPermissions();
 
     // Check duplicate email
     const existingUserByEmail = await db.user.findFirst({
@@ -43,14 +40,8 @@ export async function POST(req: Request) {
 
     // Create user and profile in transaction
     const newUser = await db.$transaction(async (tx) => {
-      // Find CUSTOMER role
-      const role = await tx.role.findUnique({
-        where: { name: "CUSTOMER" }
-      });
-
-      if (!role) {
-        throw new Error("CUSTOMER role not found in database");
-      }
+      // Self-healing CUSTOMER role resolution
+      const role = await ensureRole(tx, "CUSTOMER");
 
       // Create User account
       const user = await tx.user.create({
@@ -117,7 +108,13 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("Registration error:", error);
+    console.error("Registration API error:", error);
+    if (error?.code === "P1001" || error?.message?.includes("Can't reach database server")) {
+      return NextResponse.json(
+        { message: "Cannot connect to database. Please ensure DATABASE_URL environment setting is set correctly on Render." },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ message: error.message || "Registration failed" }, { status: 500 });
   }
 }

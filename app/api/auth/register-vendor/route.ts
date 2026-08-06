@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { hashPassword, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
-import { initializeRolesAndPermissions, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
+import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
 
 /**
  * Generate an SEO-friendly unique slug for a store
@@ -46,9 +46,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Required registration fields are missing" }, { status: 400 });
     }
 
-    // Ensure roles and permissions are initialized
-    await initializeRolesAndPermissions();
-
     // Check duplicate email
     const existingUserByEmail = await db.user.findFirst({
       where: { email, deletedAt: null }
@@ -80,13 +77,9 @@ export async function POST(req: Request) {
 
     // Create everything in transaction
     const result = await db.$transaction(async (tx) => {
-      // Find roles
-      const customerRole = await tx.role.findUnique({ where: { name: "CUSTOMER" } });
-      const vendorRole = await tx.role.findUnique({ where: { name: "VENDOR" } });
-
-      if (!customerRole || !vendorRole) {
-        throw new Error("Required system roles not configured in DB");
-      }
+      // Self-healing role resolution
+      const customerRole = await ensureRole(tx, "CUSTOMER");
+      const vendorRole = await ensureRole(tx, "VENDOR");
 
       // 1. Create User
       const user = await tx.user.create({
@@ -198,6 +191,12 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Vendor registration error:", error);
+    if (error?.code === "P1001" || error?.message?.includes("Can't reach database server")) {
+      return NextResponse.json(
+        { message: "Cannot connect to database. Please ensure DATABASE_URL environment setting is set correctly on Render." },
+        { status: 503 }
+      );
+    }
     return NextResponse.json({ message: error.message || "Registration failed" }, { status: 500 });
   }
 }

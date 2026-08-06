@@ -164,6 +164,13 @@ export async function POST(req: Request) {
       });
     }
 
+    if (error?.code === "P1001" || error?.message?.includes("Can't reach database server")) {
+      return NextResponse.json(
+        { message: "Cannot connect to database. Please ensure DATABASE_URL environment setting is set correctly on Render." },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json({ message: "An internal server error occurred" }, { status: 500 });
   }
 }
