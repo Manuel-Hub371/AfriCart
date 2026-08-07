@@ -34,15 +34,17 @@ import {
   Sparkles,
   Award,
   FileText,
-  ExternalLink
+  ExternalLink,
+  Tag
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
 export default function StoreDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const storeId = resolvedParams.id;
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [store, setStore] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -50,7 +52,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
 
   // Active Navigation Tab
   const [activeTab, setActiveTab] = useState<
-    "products" | "featured" | "about" | "policies" | "shipping" | "privacy" | "reviews"
+    "products" | "featured" | "deals" | "about" | "policies" | "shipping" | "privacy" | "reviews"
   >("products");
 
   // Follow & Share States
@@ -200,6 +202,19 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
 
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
+  useEffect(() => {
+    const tabParam = searchParams?.get("tab");
+    if (tabParam === "deals") {
+      setActiveTab("deals");
+    } else if (tabParam === "featured") {
+      setActiveTab("featured");
+    } else if (tabParam === "about") {
+      setActiveTab("about");
+    } else if (tabParam === "reviews") {
+      setActiveTab("reviews");
+    }
+  }, [searchParams]);
+
   // Featured Products
   const featuredProducts = useMemo(() => {
     if (!store?.products) return [];
@@ -212,6 +227,20 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
     return store.products
       .filter((p: any) => (p.status === "ACTIVE" || p.status === "published") && p.stock > 0 && (p.soldCount || 0) > 0)
       .sort((a: any, b: any) => (b.bestSellerScore || 0) - (a.bestSellerScore || 0) || (b.soldCount || 0) - (a.soldCount || 0));
+  }, [store]);
+
+  // Vendor-Specific Active Deals — single source of truth promotional offers
+  const storeDeals = useMemo(() => {
+    if (!store?.products) return [];
+    return store.products
+      .filter(
+        (p: any) =>
+          (p.status === "ACTIVE" || p.status === "published") &&
+          p.stock > 0 &&
+          p.isDiscounted &&
+          (p.amountSaved || 0) > 0
+      )
+      .sort((a: any, b: any) => (b.discountPercent || 0) - (a.discountPercent || 0) || (b.amountSaved || 0) - (a.amountSaved || 0));
   }, [store]);
 
   if (isLoading) {
@@ -390,6 +419,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
               {[
                 { id: "products", label: `Products (${store.products?.length || 0})` },
                 { id: "featured", label: "Featured & Best Sellers" },
+                { id: "deals", label: `Deals (${storeDeals.length})` },
                 { id: "about", label: "About" },
                 { id: "reviews", label: `Reviews (${store.numReviews || 0})` },
               ].map((tab) => (
@@ -742,7 +772,74 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
             </div>
           )}
 
-          {/* 5. ABOUT TAB (Single Source of Truth) */}
+          {/* 5. VENDOR DEALS TAB (Vendor Specific Promotional Offers) */}
+          {activeTab === "deals" && (
+            <div className="space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4">
+                <div>
+                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
+                    <Tag className="h-6 w-6 text-orange-500" />
+                    Special Store Deals & Promotions
+                  </h2>
+                  <p className="text-gray-600 text-sm mt-1">
+                    Exclusive limited-time discounts and active promotional offers from <strong className="text-gray-900">{store.name}</strong>.
+                  </p>
+                </div>
+
+                {storeDeals.length > 0 && (
+                  <Badge className="bg-orange-500 text-white font-extrabold text-xs px-3 py-1 rounded-full self-start md:self-auto shadow-xs">
+                    🔥 {storeDeals.length} Active Deal{storeDeals.length === 1 ? "" : "s"}
+                  </Badge>
+                )}
+              </div>
+
+              {storeDeals.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {storeDeals.map((product: any) => (
+                    <ProductCard
+                      key={product.id}
+                      id={product.id}
+                      name={product.name}
+                      brand={product.brand}
+                      storeName={store.name}
+                      verified={store.verified}
+                      rating={product.rating || 5}
+                      reviews={product.numReviews || 0}
+                      price={product.price}
+                      originalPrice={product.originalPrice}
+                      isDiscounted={product.isDiscounted}
+                      discountPercent={product.discountPercent}
+                      amountSaved={product.amountSaved}
+                      campaignBadge={product.campaignBadge}
+                      campaignColor={product.campaignColor}
+                      campaignName={product.campaignName}
+                      image={product.images}
+                      inStock={product.stock > 0}
+                      imagesCount={Array.isArray(product.images) ? product.images.length : 1}
+                      isBestSeller={product.isBestSeller}
+                    />
+                  ))}
+                </div>
+              ) : (
+                /* Store Deals Empty State */
+                <div className="bg-white rounded-3xl border border-gray-200 p-16 text-center space-y-4 max-w-lg mx-auto shadow-sm">
+                  <Tag className="h-16 w-16 text-gray-300 mx-auto" />
+                  <h3 className="text-2xl font-extrabold text-gray-900">No Active Deals Right Now</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    This store doesn't have any active deals or promotional offers right now. Check back later for new offers, or browse all available products from <strong>{store.name}</strong>.
+                  </p>
+                  <Button
+                    onClick={() => setActiveTab("products")}
+                    className="gradient-primary text-white font-bold rounded-xl px-6 py-2.5 shadow-md mt-2"
+                  >
+                    Browse All Store Products
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 6. ABOUT TAB (Single Source of Truth) */}
           {activeTab === "about" && (
             <div className="space-y-8">
               {/* About Store & Business Overview */}
