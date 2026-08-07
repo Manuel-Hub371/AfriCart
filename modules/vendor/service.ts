@@ -68,6 +68,7 @@ function toVendorStoreDTO(store: any): VendorStoreDTO {
     logo: store.logo ?? null,
     banner: store.banner ?? null,
     category: store.category,
+    businessType: store.businessType ?? "Retailer",
     email: store.email ?? null,
     phone: store.phone ?? null,
     website: store.website ?? null,

@@ -190,6 +190,7 @@ model VendorProfile {
   user                     User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   businessName             String
   businessCategory         String
+  businessType             String?            @default("Retailer")
   country                  String
   region                   String
   city                     String
@@ -219,6 +220,7 @@ model Store {
   logo            String?
   banner          String?
   category        String
+  businessType    String?       @default("Retailer")
 
   // Contact & Location
   email           String?
@@ -276,6 +278,11 @@ model Store {
   privacyPolicies  PrivacyPolicy[]  @relation("PrivacyPolicies")
   marketingCampaigns MarketingCampaign[]
   followers        StoreFollow[]
+
+  @@index([category])
+  @@index([city])
+  @@index([region])
+  @@index([businessType])
 }
 
 model Category {

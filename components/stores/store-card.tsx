@@ -23,6 +23,7 @@ interface StoreCardProps {
   followerCount?: number;
   isFollowing?: boolean;
   category?: string;
+  businessType?: string;
   location?: string;
   slug?: string;
 }
@@ -41,6 +42,7 @@ export function StoreCard({
   followerCount,
   isFollowing = false,
   category = "General",
+  businessType = "Retailer",
   location = "Ghana",
   slug,
 }: StoreCardProps) {
@@ -147,9 +149,16 @@ export function StoreCard({
                   )}
                 </div>
               </Link>
-              <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-100 font-semibold">
-                {category}
-              </Badge>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-100 font-semibold">
+                  {category}
+                </Badge>
+                {businessType && (
+                  <Badge variant="outline" className="text-xs bg-slate-50 text-slate-700 border-slate-200 font-bold">
+                    {businessType}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {/* Store Description */}

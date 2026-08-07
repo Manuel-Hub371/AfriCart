@@ -1,6 +1,15 @@
 import { db } from "@/lib/db";
 import { GetProductsQueryInput } from "./dto";
 
+export interface FindStoresFilter {
+  search?: string;
+  category?: string;
+  location?: string;
+  businessType?: string;
+  sortBy?: "rating" | "products" | "newest" | "name";
+  userId?: string;
+}
+
 export class CatalogRepository {
   /**
    * Find paginated & filtered active products
@@ -154,20 +163,86 @@ export class CatalogRepository {
   }
 
   /**
-   * Find stores catalog list
+   * Find stores catalog list with multi-attribute filtering (Category, Location, Business Type)
    */
-  async findStores(search?: string, userId?: string) {
-    const where: any = { deletedAt: null };
+  async findStores(filters?: FindStoresFilter | string, userId?: string) {
+    const opts: FindStoresFilter = typeof filters === "string" ? { search: filters, userId } : (filters || {});
+    const search = opts.search?.trim();
+    const category = opts.category?.trim();
+    const location = opts.location?.trim();
+    const businessType = opts.businessType?.trim();
+    const currentUserId = opts.userId || userId;
+
+    const where: any = { deletedAt: null, isPublic: true, status: "ACTIVE" };
+    const andConditions: any[] = [];
+
     if (search) {
-      where.OR = [
-        { name: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-        { category: { contains: search, mode: "insensitive" } },
-      ];
+      andConditions.push({
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+          { category: { contains: search, mode: "insensitive" } },
+          { businessType: { contains: search, mode: "insensitive" } },
+          { city: { contains: search, mode: "insensitive" } },
+          { region: { contains: search, mode: "insensitive" } },
+        ],
+      });
     }
+
+    if (category && category.toLowerCase() !== "all") {
+      andConditions.push({
+        category: { contains: category, mode: "insensitive" },
+      });
+    }
+
+    if (location && location.toLowerCase() !== "all") {
+      andConditions.push({
+        OR: [
+          { city: { contains: location, mode: "insensitive" } },
+          { region: { contains: location, mode: "insensitive" } },
+          { country: { contains: location, mode: "insensitive" } },
+          { address: { contains: location, mode: "insensitive" } },
+        ],
+      });
+    }
+
+    if (businessType && businessType.toLowerCase() !== "all") {
+      andConditions.push({
+        businessType: { contains: businessType, mode: "insensitive" },
+      });
+    }
+
+    if (andConditions.length > 0) {
+      where.AND = andConditions;
+    }
+
+    let orderBy: any = { createdAt: "desc" };
+    if (opts.sortBy === "name") {
+      orderBy = { name: "asc" };
+    } else if (opts.sortBy === "products") {
+      orderBy = { products: { _count: "desc" } };
+    }
+
     return db.store.findMany({
       where,
       include: {
+        vendorProfile: {
+          select: {
+            identityVerified: true,
+            businessVerified: true,
+            city: true,
+            region: true,
+            country: true,
+          },
+        },
+        products: {
+          where: { deletedAt: null, status: "ACTIVE" },
+          select: {
+            id: true,
+            rating: true,
+            numReviews: true,
+          },
+        },
         _count: {
           select: {
             products: {
@@ -176,9 +251,9 @@ export class CatalogRepository {
             followers: true,
           },
         },
-        followers: userId ? { where: { userId }, select: { id: true } } : false,
+        followers: currentUserId ? { where: { userId: currentUserId }, select: { id: true } } : false,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     });
   }
 

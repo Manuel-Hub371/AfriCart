@@ -6,6 +6,7 @@ export interface UpdateStoreInput {
   slug?: string;
   description?: string;
   category?: string;
+  businessType?: string;
   logo?: string;
   banner?: string;
   email?: string;
@@ -45,6 +46,7 @@ export interface VendorStoreDTO {
   logo: string | null;
   banner: string | null;
   category: string;
+  businessType: string | null;
   email: string | null;
   phone: string | null;
   website: string | null;

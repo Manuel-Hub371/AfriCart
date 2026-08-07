@@ -131,8 +131,16 @@ export interface StoreCatalogDTO {
   logo: string | null;
   banner: string | null;
   category: string;
+  businessType: string;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  location: string;
+  rating: number;
+  numReviews: number;
   productCount: number;
   followerCount: number;
+  verified: boolean;
   isFollowing?: boolean;
   createdAt: string;
 }

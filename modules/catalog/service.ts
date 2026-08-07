@@ -313,21 +313,57 @@ export class CatalogService {
   /**
    * Get list of active vendor stores
    */
-  async getStores(query?: string, userId?: string): Promise<StoreCatalogDTO[]> {
-    const stores = await this.repo.findStores(query, userId);
-    return stores.map((s) => ({
-      id: s.id,
-      name: s.name,
-      slug: s.slug,
-      description: s.description,
-      logo: s.logo,
-      banner: s.banner,
-      category: s.category,
-      productCount: s._count.products,
-      followerCount: s._count.followers,
-      isFollowing: Array.isArray((s as any).followers) && (s as any).followers.length > 0,
-      createdAt: s.createdAt.toISOString(),
-    }));
+  async getStores(filters?: any, userId?: string): Promise<StoreCatalogDTO[]> {
+    const stores = await this.repo.findStores(filters, userId);
+    
+    let result = stores.map((s: any) => {
+      const vp = s.vendorProfile;
+      const city = s.city || vp?.city;
+      const region = s.region || vp?.region;
+      const country = s.country || vp?.country || "Ghana";
+      const locationParts = [city, region, country].filter(Boolean);
+      const locationStr = locationParts.length > 0 ? locationParts.join(", ") : "Accra, Ghana";
+
+      let totalRatingSum = 0;
+      let totalRatingCount = 0;
+      if (Array.isArray(s.products)) {
+        s.products.forEach((p: any) => {
+          if (p.rating) {
+            totalRatingSum += Number(p.rating);
+            totalRatingCount += 1;
+          }
+        });
+      }
+      const averageRating = totalRatingCount > 0 ? Number((totalRatingSum / totalRatingCount).toFixed(1)) : 5.0;
+
+      return {
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        description: s.description,
+        logo: s.logo,
+        banner: s.banner,
+        category: s.category || "General Marketplace",
+        businessType: s.businessType || "Retailer",
+        city: city || null,
+        region: region || null,
+        country: country || "Ghana",
+        location: locationStr,
+        rating: averageRating,
+        numReviews: totalRatingCount,
+        productCount: s._count?.products || 0,
+        followerCount: s._count?.followers || 0,
+        verified: Boolean(vp?.identityVerified || vp?.businessVerified),
+        isFollowing: Array.isArray(s.followers) && s.followers.length > 0,
+        createdAt: s.createdAt.toISOString(),
+      };
+    });
+
+    if (filters && typeof filters === "object" && filters.sortBy === "rating") {
+      result.sort((a, b) => b.rating - a.rating || b.productCount - a.productCount);
+    }
+
+    return result;
   }
 
   /**

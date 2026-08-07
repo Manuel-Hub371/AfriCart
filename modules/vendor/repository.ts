@@ -38,6 +38,7 @@ export class VendorRepository {
         ...(input.slug !== undefined && { slug: input.slug }),
         ...(input.description !== undefined && { description: input.description }),
         ...(input.category !== undefined && { category: input.category }),
+        ...(input.businessType !== undefined && { businessType: input.businessType }),
         ...(input.logo !== undefined && { logo: input.logo }),
         ...(input.banner !== undefined && { banner: input.banner }),
         ...(input.email !== undefined && { email: input.email }),

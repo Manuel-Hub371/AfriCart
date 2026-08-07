@@ -13,6 +13,7 @@ export function StoreProfileForm({ onSave, initialData }: StoreProfileFormProps)
   const [storeName, setStoreName] = useState(initialData?.name || "");
   const [storeDescription, setStoreDescription] = useState(initialData?.description || "");
   const [storeCategory, setStoreCategory] = useState(initialData?.category || "electronics");
+  const [businessType, setBusinessType] = useState(initialData?.businessType || "Retailer");
   const [storeStatus, setStoreStatus] = useState(initialData?.status === "INACTIVE" ? "inactive" : "active");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,6 +22,7 @@ export function StoreProfileForm({ onSave, initialData }: StoreProfileFormProps)
       setStoreName(initialData.name || "");
       setStoreDescription(initialData.description || "");
       setStoreCategory(initialData.category || "electronics");
+      setBusinessType(initialData.businessType || "Retailer");
       setStoreStatus(initialData.status === "INACTIVE" ? "inactive" : "active");
     }
   }, [initialData]);
@@ -35,6 +37,7 @@ export function StoreProfileForm({ onSave, initialData }: StoreProfileFormProps)
       name: storeName,
       description: storeDescription,
       category: storeCategory,
+      businessType,
       status: storeStatus === "active" ? "ACTIVE" : "INACTIVE",
     });
     setIsSubmitting(false);
@@ -93,26 +96,49 @@ export function StoreProfileForm({ onSave, initialData }: StoreProfileFormProps)
         </div>
       </div>
 
-      {/* Store Category */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Store Primary Category <span className="text-red-500">*</span>
-        </label>
-        <select
-          value={storeCategory}
-          onChange={(e) => setStoreCategory(e.target.value)}
-          className="w-full h-12 px-4 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
-        >
-          <option value="electronics">Electronics & Gadgets</option>
-          <option value="fashion">Fashion & Apparel</option>
-          <option value="home">Home & Living</option>
-          <option value="beauty">Beauty & Personal Care</option>
-          <option value="sports">Sports & Fitness</option>
-          <option value="books">Books & Education</option>
-          <option value="food">Food & Groceries</option>
-          <option value="automotive">Automotive</option>
-          <option value="other">General Marketplace</option>
-        </select>
+      {/* Store Category & Business Type */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Store Primary Category <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={storeCategory}
+            onChange={(e) => setStoreCategory(e.target.value)}
+            className="w-full h-12 px-4 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
+          >
+            <option value="Electronics">Electronics & Gadgets</option>
+            <option value="Fashion">Fashion & Apparel</option>
+            <option value="Home & Living">Home & Living</option>
+            <option value="Beauty & Personal Care">Beauty & Personal Care</option>
+            <option value="Groceries & Food">Food & Groceries</option>
+            <option value="Pharmacy & Health">Pharmacy & Health</option>
+            <option value="Furniture">Furniture</option>
+            <option value="Sports & Outdoor">Sports & Outdoor</option>
+            <option value="Books & Stationery">Books & Stationery</option>
+            <option value="Automotive">Automotive</option>
+            <option value="General Marketplace">General Marketplace</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Business Type <span className="text-red-500">*</span>
+          </label>
+          <select
+            value={businessType}
+            onChange={(e) => setBusinessType(e.target.value)}
+            className="w-full h-12 px-4 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
+          >
+            <option value="Retailer">Retailer (Retail Store)</option>
+            <option value="Wholesaler">Wholesaler (Wholesale Supplier)</option>
+            <option value="Manufacturer">Manufacturer (Direct Brand)</option>
+            <option value="Distributor">Distributor (Authorized Dealer)</option>
+            <option value="Pharmacy">Pharmacy / Healthcare</option>
+            <option value="Restaurant">Restaurant / Food Provider</option>
+            <option value="Service Provider">Service Provider</option>
+          </select>
+        </div>
       </div>
 
       {/* Store Status */}
