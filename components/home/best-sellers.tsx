@@ -70,7 +70,7 @@ export function BestSellers() {
                 image={product.images}
                 inStock={product.stock > 0}
                 imagesCount={Array.isArray(product.images) ? product.images.length : 1}
-                isBestSeller={product.isBestSeller ?? true}
+                isBestSeller={Boolean(product.isBestSeller)}
               />
             ))}
           </div>

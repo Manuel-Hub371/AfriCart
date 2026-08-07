@@ -1,4 +1,5 @@
 import { vendorRepository } from "./repository";
+import { isBestSellerProduct } from "@/modules/catalog/best-seller-calculator";
 import { domainEvents, EVENT_TOPICS } from "@/lib/events";
 import {
   UpdateStoreInput,
@@ -15,6 +16,14 @@ const LOW_STOCK_THRESHOLD = 10;
  * Map raw Prisma product to VendorProductDTO (no raw model leaking)
  */
 function toVendorProductDTO(product: any): VendorProductDTO {
+  const soldCount = product.soldCount ?? 0;
+  const isBestSeller = isBestSellerProduct({
+    status: product.status,
+    stock: product.stock,
+    bestSellerScore: product.bestSellerScore,
+    soldCount,
+  });
+
   return {
     id: product.id,
     storeId: product.storeId,
@@ -35,6 +44,10 @@ function toVendorProductDTO(product: any): VendorProductDTO {
     views: product.views ?? 0,
     rating: Number(product.rating ?? 0),
     numReviews: product.numReviews ?? 0,
+    soldCount,
+    unitsSold: soldCount,
+    isBestSeller,
+    bestSellerScore: product.bestSellerScore ?? 0,
     isFeatured: product.isFeatured ?? false,
     status: product.status,
     createdAt: product.createdAt instanceof Date ? product.createdAt.toISOString() : product.createdAt,

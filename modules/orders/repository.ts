@@ -221,13 +221,21 @@ export class OrderRepository {
           some: { storeId },
         },
       },
+      include: {
+        orderItems: true,
+      },
     });
 
     if (!order) {
       throw { code: "ORDER_NOT_FOUND", message: "Order not found for this store", status: 404 };
     }
 
-    return db.order.update({
+    const previousStatus = String(order.status);
+    const targetStatus = String(status);
+    const isNowCancelledOrRefunded = targetStatus === "CANCELLED" || targetStatus === "REFUNDED" || targetStatus === "RETURNED";
+    const wasNotCancelledOrRefunded = previousStatus !== "CANCELLED" && previousStatus !== "REFUNDED" && previousStatus !== "RETURNED";
+
+    const updatedOrder = await db.order.update({
       where: { id: orderId },
       data: { status },
       include: {
@@ -239,6 +247,36 @@ export class OrderRepository {
         },
       },
     });
+
+    // If order was cancelled or refunded, adjust product stock and soldCount
+    if (isNowCancelledOrRefunded && wasNotCancelledOrRefunded) {
+      const { queueProductBestSellerRecalculation } = await import("@/modules/catalog/best-seller-calculator");
+
+      for (const item of order.orderItems) {
+        const prod = await db.product.findUnique({
+          where: { id: item.productId },
+          select: { id: true, stock: true, soldCount: true, status: true },
+        });
+        if (prod) {
+          const newSoldCount = Math.max(0, (prod.soldCount || 0) - item.quantity);
+          const newStock = (prod.stock || 0) + item.quantity;
+          const newStatus = prod.status === "OUT_OF_STOCK" && newStock > 0 ? "ACTIVE" : prod.status;
+
+          await db.product.update({
+            where: { id: item.productId },
+            data: {
+              soldCount: newSoldCount,
+              stock: newStock,
+              status: newStatus,
+            },
+          });
+
+          queueProductBestSellerRecalculation(item.productId);
+        }
+      }
+    }
+
+    return updatedOrder;
   }
 }
 

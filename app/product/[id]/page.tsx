@@ -190,6 +190,8 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                     badges={product.badges}
                     campaigns={product.campaigns}
                     verified={true}
+                    isBestSeller={product.isBestSeller}
+                    bestSellerRank={product.bestSellerRank}
                   />
 
                   {/* Pricing, Discounts & Stock Warning */}

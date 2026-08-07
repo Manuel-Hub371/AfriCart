@@ -42,7 +42,7 @@ export interface OrderDTO {
   customerProfileId: string;
   customerName?: string;
   customerEmail?: string;
-  status: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  status: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED" | "RETURNED";
   totalAmount: number;
   shippingAddress: ShippingAddressInput | null;
   paymentMethod: string | null;
@@ -53,7 +53,7 @@ export interface OrderDTO {
 }
 
 export interface UpdateOrderStatusInput {
-  status: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+  status: "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED" | "RETURNED";
 }
 
 // Validation Parsers

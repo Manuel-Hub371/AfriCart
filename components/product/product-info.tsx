@@ -16,6 +16,8 @@ interface ProductInfoProps {
   badges?: string[];
   campaigns?: any[];
   verified?: boolean;
+  isBestSeller?: boolean;
+  bestSellerRank?: number | null;
 }
 
 export function ProductInfo({
@@ -31,6 +33,8 @@ export function ProductInfo({
   badges = [],
   campaigns = [],
   verified = true,
+  isBestSeller = false,
+  bestSellerRank,
 }: ProductInfoProps) {
   const badgeColorMap: Record<string, string> = {
     BEST_SELLER: "bg-emerald-100 text-emerald-800 border-emerald-200",
@@ -56,6 +60,13 @@ export function ProductInfo({
           <Badge variant="outline" className="bg-gray-50 text-gray-700 font-bold">
             {category} {subcategory ? `> ${subcategory}` : ""}
           </Badge>
+        )}
+
+        {/* Dynamic System Best Seller Badge */}
+        {isBestSeller && (
+          <span className="font-extrabold uppercase text-[10px] tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2.5 py-0.5 rounded-full shadow-xs">
+            🔥 {bestSellerRank ? `#${bestSellerRank} Best Seller` : "Best Seller"} {category ? `in ${category}` : ""}
+          </span>
         )}
 
         {/* Database Marketing Campaign Badges */}

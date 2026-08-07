@@ -4,17 +4,18 @@ import { db } from "@/lib/db";
  * Enterprise Best Seller Ranking Engine
  *
  * System-controlled automated ranking engine.
- * Decoupled from checkout transactions; statistics are updated in real-time on `Product`,
- * while composite rankings & scores are calculated by an asynchronous background worker.
+ * Decoupled from checkout transactions; statistics are updated on `Product`,
+ * while composite rankings & scores are calculated automatically.
  *
- * Ranking Factors:
- * 1. Total Units Sold (soldCount × 10)
- * 2. Completed Orders (delivered order items × 5)
- * 3. Sales Velocity (recent 30-day units sold × 8)
- * 4. Average Rating (rating × 6)
- * 5. Number of Customer Reviews (numReviews × 3)
- * 6. Refund/Cancellation Penalty (refunded/cancelled items × -15)
- * 7. Product Availability (stock > 0 and status === 'ACTIVE')
+ * Ranking Rules:
+ * 1. ZERO SALES MANDATORY RULE: If soldCount <= 0, product can NEVER be a Best Seller.
+ * 2. Units Sold (soldCount × 100) — Primary signal
+ * 3. Sales Velocity (30-day units sold × 50) — Recency signal
+ * 4. Completed Orders (order count × 20) — Order frequency
+ * 5. Average Rating (rating × 5) — Quality supporting signal
+ * 6. Customer Reviews (numReviews × 2) — Review volume supporting signal
+ * 7. Refund/Cancellation Penalty (refunds/cancellations × -30) — Negative signal
+ * 8. Product Availability (stock > 0 and status === 'ACTIVE') — Mandatory eligibility
  */
 
 export interface BestSellerScoreParams {
@@ -29,30 +30,36 @@ export interface BestSellerScoreParams {
 }
 
 export function calculateBestSellerScore(params: BestSellerScoreParams): number {
+  // Eligibility: Must be ACTIVE and in stock
   if (params.status !== "ACTIVE" && params.status !== "published") return 0;
-  if ((params.stock ?? 1) <= 0) return 0;
+  if ((params.stock ?? 0) <= 0) return 0;
 
+  // ZERO SALES MANDATORY RULE: A product with zero completed sales must NEVER be classified as a Best Seller
   const sold = Math.max(0, params.soldCount || 0);
+  if (sold <= 0) return 0;
+
   const completed = Math.max(0, params.completedOrders || 0);
   const velocity = Math.max(0, params.recent30DaysUnits || 0);
   const rating = Math.max(0, params.rating || 0);
   const reviews = Math.max(0, params.numReviews || 0);
   const refunds = Math.max(0, params.refundCount || 0);
 
-  const unitsScore = sold * 10;
-  const ordersScore = completed * 5;
-  const velocityScore = velocity * 8;
-  const ratingScore = rating * 6;
-  const reviewScore = reviews * 3;
-  const refundPenalty = refunds * 15;
+  // Primary: Units Sold + Sales Velocity + Completed Orders
+  const salesScore = (sold * 100) + (velocity * 50) + (completed * 20);
 
-  const rawScore = unitsScore + ordersScore + velocityScore + ratingScore + reviewScore - refundPenalty;
+  // Secondary supporting signals: Quality rating & review volume
+  const qualityScore = (rating * 5) + (reviews * 2);
+
+  // Negative signal: Refund / cancellation penalty
+  const refundPenalty = refunds * 30;
+
+  const rawScore = salesScore + qualityScore - refundPenalty;
   return Math.max(0, Math.round(rawScore * 100) / 100);
 }
 
 /**
  * Evaluates whether a product qualifies for the Best Seller badge.
- * Fully system-controlled based on calculated bestSellerScore and active availability.
+ * Fully system-controlled based on calculated bestSellerScore, sales, and active availability.
  */
 export function isBestSellerProduct(product: {
   status?: string;
@@ -64,23 +71,24 @@ export function isBestSellerProduct(product: {
   if (product.status !== "ACTIVE" && product.status !== "published") return false;
   if ((product.stock ?? 0) <= 0) return false;
 
-  const score = product.bestSellerScore ?? 0;
+  // ZERO SALES RULE
   const sold = product.soldCount ?? 0;
+  if (sold <= 0) return false;
+
+  const score = product.bestSellerScore ?? 0;
   const rank = product.bestSellerRank;
 
-  if (rank && rank <= 10) return true;
-  return score >= 15 || sold > 0;
+  if (rank && rank <= 20) return true;
+  return score >= 100;
 }
 
 /**
- * Background worker task: Recalculates Best Seller scores and ranks for all products in PostgreSQL.
- * Designed for asynchronous cron / worker execution.
+ * Background worker task: Recalculates Best Seller scores for all active products in PostgreSQL.
  */
 export async function updateAllBestSellerScores(): Promise<void> {
   try {
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
 
-    // Batch query active products with order item metrics
     const products = await db.product.findMany({
       where: { deletedAt: null, status: "ACTIVE" },
       select: {
@@ -93,7 +101,7 @@ export async function updateAllBestSellerScores(): Promise<void> {
         orderItems: {
           select: {
             quantity: true,
-            order: { select: { status: true, createdAt: true } },
+            order: { select: { status: true, paymentStatus: true, createdAt: true } },
           },
         },
       },
@@ -106,14 +114,15 @@ export async function updateAllBestSellerScores(): Promise<void> {
 
       for (const item of p.orderItems) {
         const orderStatus = item.order?.status;
-        if (orderStatus === "DELIVERED" || orderStatus === "COMPLETED") {
+        const paymentStatus = item.order?.paymentStatus;
+
+        if ((orderStatus === "DELIVERED" || orderStatus === "SHIPPED" || orderStatus === "PROCESSING" || orderStatus === "COMPLETED") && paymentStatus === "PAID") {
           completedOrders += 1;
+          if (item.order?.createdAt && new Date(item.order.createdAt) >= thirtyDaysAgo) {
+            recent30DaysUnits += item.quantity;
+          }
         } else if (orderStatus === "CANCELLED" || orderStatus === "REFUNDED") {
           refundCount += 1;
-        }
-
-        if (item.order?.createdAt && new Date(item.order.createdAt) >= thirtyDaysAgo) {
-          recent30DaysUnits += item.quantity;
         }
       }
 
@@ -131,19 +140,14 @@ export async function updateAllBestSellerScores(): Promise<void> {
       return { id: p.id, score };
     });
 
-    // Sort products by score descending
-    scoredProducts.sort((a, b) => b.score - a.score);
-
-    // Batch update scores in PostgreSQL
-    for (let index = 0; index < scoredProducts.length; index++) {
-      const p = scoredProducts[index];
+    for (const p of scoredProducts) {
       await db.product.update({
         where: { id: p.id },
         data: { bestSellerScore: p.score },
       });
     }
   } catch (error) {
-    console.error("Failed to run background Best Seller score worker:", error);
+    console.error("Failed to update Best Seller scores:", error);
   }
 }
 
@@ -153,6 +157,8 @@ export async function updateAllBestSellerScores(): Promise<void> {
 export function queueProductBestSellerRecalculation(productId: string): void {
   setTimeout(async () => {
     try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
       const product = await db.product.findUnique({
         where: { id: productId },
         select: {
@@ -162,14 +168,41 @@ export function queueProductBestSellerRecalculation(productId: string): void {
           numReviews: true,
           stock: true,
           status: true,
+          orderItems: {
+            select: {
+              quantity: true,
+              order: { select: { status: true, paymentStatus: true, createdAt: true } },
+            },
+          },
         },
       });
       if (!product) return;
 
+      let completedOrders = 0;
+      let recent30DaysUnits = 0;
+      let refundCount = 0;
+
+      for (const item of product.orderItems) {
+        const orderStatus = item.order?.status;
+        const paymentStatus = item.order?.paymentStatus;
+
+        if ((orderStatus === "DELIVERED" || orderStatus === "SHIPPED" || orderStatus === "PROCESSING" || orderStatus === "COMPLETED") && paymentStatus === "PAID") {
+          completedOrders += 1;
+          if (item.order?.createdAt && new Date(item.order.createdAt) >= thirtyDaysAgo) {
+            recent30DaysUnits += item.quantity;
+          }
+        } else if (orderStatus === "CANCELLED" || orderStatus === "REFUNDED") {
+          refundCount += 1;
+        }
+      }
+
       const score = calculateBestSellerScore({
         soldCount: product.soldCount || 0,
+        completedOrders,
+        recent30DaysUnits,
         rating: product.rating || 0,
         numReviews: product.numReviews || 0,
+        refundCount,
         stock: product.stock,
         status: product.status,
       });

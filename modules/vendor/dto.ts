@@ -126,6 +126,10 @@ export interface VendorProductDTO {
   views: number;
   rating: number;
   numReviews: number;
+  soldCount: number;
+  unitsSold: number;
+  isBestSeller: boolean;
+  bestSellerScore: number;
   isFeatured: boolean;
   status: string;
   createdAt: string;

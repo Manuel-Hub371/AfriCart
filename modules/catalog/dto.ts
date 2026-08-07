@@ -80,6 +80,10 @@ export interface ProductDTO {
   isBestSeller: boolean;
   bestSellerScore: number;
   bestSellerRank: number | null;
+  unitsSold: number;
+  salesVelocity?: number;
+  averageRating: number;
+  reviewCount: number;
 
   category: string | null;
   images: string[];

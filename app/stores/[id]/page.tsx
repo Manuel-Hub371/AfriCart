@@ -206,12 +206,12 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
     return store.products.filter((p: any) => p.isFeatured && (p.status === "ACTIVE" || p.status === "published"));
   }, [store]);
 
-  // Best Sellers
+  // Best Sellers — calculated from actual store sales
   const bestSellers = useMemo(() => {
     if (!store?.products) return [];
     return store.products
-      .filter((p: any) => (p.status === "ACTIVE" || p.status === "published") && p.stock > 0)
-      .sort((a: any, b: any) => (b.bestSellerScore || 0) - (a.bestSellerScore || 0) || (b.numReviews || 0) - (a.numReviews || 0));
+      .filter((p: any) => (p.status === "ACTIVE" || p.status === "published") && p.stock > 0 && (p.soldCount || 0) > 0)
+      .sort((a: any, b: any) => (b.bestSellerScore || 0) - (a.bestSellerScore || 0) || (b.soldCount || 0) - (a.soldCount || 0));
   }, [store]);
 
   if (isLoading) {
