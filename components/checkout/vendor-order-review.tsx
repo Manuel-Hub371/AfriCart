@@ -92,11 +92,11 @@ export default function VendorOrderReview({
                 </span>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-900">
-                    ${product.price}
+                    GH₵{product.price}
                   </span>
                   {product.originalPrice > product.price && (
                     <span className="text-sm text-gray-400 line-through">
-                      ${product.originalPrice}
+                      GH₵{product.originalPrice}
                     </span>
                   )}
                 </div>
@@ -106,7 +106,7 @@ export default function VendorOrderReview({
             {/* Item Total */}
             <div className="text-right">
               <span className="font-semibold text-gray-900">
-                ${product.price * product.quantity}
+                GH₵{product.price * product.quantity}
               </span>
             </div>
           </div>

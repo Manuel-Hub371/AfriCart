@@ -101,7 +101,7 @@ export function computeDiscountAmount(basePrice: number, c: any): number {
   if (c.discountType === "PERCENTAGE") {
     const pct = Math.min(100, Math.max(0, c.discountValue));
     rawDiscount = basePrice * (pct / 100);
-  } else if (c.discountType === "FIXED") {
+  } else if (c.discountType === "FIXED" || c.discountType === "FIXED_AMOUNT") {
     rawDiscount = Math.min(basePrice, Math.max(0, c.discountValue));
   }
 
@@ -156,7 +156,7 @@ export function formatDiscountBadge(c: any): string {
   if (c.discountType === "PERCENTAGE" && c.discountValue) {
     return `${Math.round(c.discountValue)}% OFF`;
   }
-  if (c.discountType === "FIXED" && c.discountValue) {
+  if ((c.discountType === "FIXED" || c.discountType === "FIXED_AMOUNT") && c.discountValue) {
     return `GH₵${c.discountValue} OFF`;
   }
   return c.name || "PROMO";

@@ -1,4 +1,5 @@
 import { shoppingRepository, ShoppingRepository } from "./repository";
+import { resolveCampaignPricing, extractCampaigns } from "@/lib/campaign-pricing";
 import {
   AddToCartInput,
   UpdateCartItemInput,
@@ -18,22 +19,39 @@ export class ShoppingService {
     const profile = await this.repo.ensureCustomerProfile(userId);
     const rawItems = await this.repo.findCart(profile.id);
 
-    const items: CartItemDTO[] = rawItems.map((item) => ({
-      id: item.id,
-      productId: item.productId,
-      quantity: item.quantity,
-      variantInfo: item.variantInfo,
-      product: {
+    const items: CartItemDTO[] = rawItems.map((item) => {
+      const campaigns = extractCampaigns((item.product as any).campaignProducts || []);
+      const productMeta = {
         id: item.product.id,
-        name: item.product.name,
-        slug: item.product.slug,
-        price: item.product.price,
-        compareAtPrice: item.product.compareAtPrice,
-        image: Array.isArray(item.product.images) && item.product.images.length > 0 ? (item.product.images[0] as string) : null,
-        stock: item.product.stock,
-        storeName: item.product.store.name,
-      },
-    }));
+        categoryName: item.product.categoryName,
+        brand: item.product.brand,
+        storeId: item.product.storeId,
+      };
+      const pricing = resolveCampaignPricing(item.product.price, campaigns, productMeta);
+
+      return {
+        id: item.id,
+        productId: item.productId,
+        quantity: item.quantity,
+        variantInfo: item.variantInfo,
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+          slug: item.product.slug,
+          price: pricing.effectivePrice,
+          originalPrice: pricing.originalPrice,
+          compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : (item.product.compareAtPrice || null),
+          discountAmount: pricing.amountSaved,
+          discountPercent: pricing.discountPercent,
+          isDiscounted: pricing.isDiscounted,
+          campaignBadge: pricing.campaignBadge,
+          campaignName: pricing.campaignName,
+          image: Array.isArray(item.product.images) && item.product.images.length > 0 ? (item.product.images[0] as string) : null,
+          stock: item.product.stock,
+          storeName: item.product.store.name,
+        },
+      };
+    });
 
     const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
     const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);

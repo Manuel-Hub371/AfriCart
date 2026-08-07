@@ -28,6 +28,9 @@ export class ShoppingRepository {
         product: {
           include: {
             store: { select: { name: true, slug: true } },
+            campaignProducts: {
+              include: { campaign: true },
+            },
           },
         },
       },

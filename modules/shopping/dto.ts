@@ -20,8 +20,14 @@ export interface CartItemDTO {
     id: string;
     name: string;
     slug: string;
-    price: number;
+    price: number; // Effective campaign price
+    originalPrice: number;
     compareAtPrice: number | null;
+    discountAmount: number;
+    discountPercent: number;
+    isDiscounted: boolean;
+    campaignBadge: string | null;
+    campaignName: string | null;
     image: string | null;
     stock: number;
     storeName: string;
