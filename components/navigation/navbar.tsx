@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { Search, ShoppingCart, Bell, User, Menu, X, Heart, Package, Store } from "lucide-react";
+import { Search, ShoppingCart, Bell, User, Menu, X, Heart, Package, Store, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth/context";
@@ -123,6 +123,14 @@ export function Navbar() {
               >
                 Products
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 transition-all duration-300 group-hover:w-full"></span>
+              </Link>
+              <Link
+                href="/deals"
+                className="px-4 py-2 text-orange-600 hover:text-orange-700 font-extrabold transition-all duration-200 rounded-lg hover:bg-orange-50 relative group flex items-center gap-1.5"
+              >
+                <Tag className="h-4 w-4 text-orange-500" />
+                Deals
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/stores"
@@ -377,6 +385,14 @@ export function Navbar() {
               className="block px-4 py-3 text-gray-700 hover:bg-green-50 rounded-xl font-medium transition-all duration-200 hover:pl-6"
             >
               Products
+            </Link>
+            <Link
+              href="/deals"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-4 py-3 text-orange-600 font-extrabold hover:bg-orange-50 rounded-xl transition-all duration-200 hover:pl-6 flex items-center gap-2"
+            >
+              <Tag className="h-4 w-4 text-orange-500" />
+              Deals & Promotions
             </Link>
             <Link
               href="/stores"
