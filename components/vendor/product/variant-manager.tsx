@@ -23,18 +23,53 @@ export interface GeneratedVariant {
 interface VariantManagerProps {
   basePrice?: number;
   baseStock?: number;
+  initialVariants?: GeneratedVariant[];
   onVariantsChange?: (variants: GeneratedVariant[]) => void;
 }
 
 export default function VariantManager({
   basePrice = 0,
   baseStock = 0,
+  initialVariants = [],
   onVariantsChange,
 }: VariantManagerProps) {
   const [hasVariants, setHasVariants] = useState(false);
   const [groups, setGroups] = useState<VariantOptionGroup[]>([]);
   // Track raw comma-input per group id
   const [inputMap, setInputMap] = useState<Record<string, string>>({});
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Initialize option groups from initialVariants on mount/load
+  useEffect(() => {
+    if (initialVariants && initialVariants.length > 0 && !isInitialized) {
+      const groupMap: Record<string, Set<string>> = {};
+      initialVariants.forEach((v) => {
+        const attrs = v.attributes || (v as any).options || {};
+        if (attrs && typeof attrs === "object") {
+          Object.entries(attrs).forEach(([attrName, attrVal]) => {
+            if (attrName && attrVal) {
+              if (!groupMap[attrName]) {
+                groupMap[attrName] = new Set();
+              }
+              groupMap[attrName].add(String(attrVal));
+            }
+          });
+        }
+      });
+
+      const parsedGroups: VariantOptionGroup[] = Object.entries(groupMap).map(([name, valSet], idx) => ({
+        id: `init-${idx}-${name}`,
+        name,
+        values: Array.from(valSet),
+      }));
+
+      if (parsedGroups.length > 0) {
+        setHasVariants(true);
+        setGroups(parsedGroups);
+      }
+      setIsInitialized(true);
+    }
+  }, [initialVariants, isInitialized]);
 
   const addGroup = () => {
     const id = Date.now().toString();

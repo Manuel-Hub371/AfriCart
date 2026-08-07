@@ -118,6 +118,7 @@ export interface VendorProductDTO {
   images: string[];
   stock: number;
   weight: number | null;
+  dimensions?: Record<string, any> | null;
   specifications?: Record<string, any> | null;
   variants?: any[];
   shippingPolicyIds?: string[];

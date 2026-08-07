@@ -351,7 +351,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               </div>
 
               <div id="section-media">
-                <MediaUploader onImagesChange={setImages} />
+                <MediaUploader initialImages={images} onImagesChange={setImages} />
               </div>
 
               <div id="section-category">
@@ -379,6 +379,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
               <div id="section-variants">
                 <VariantManager
+                  initialVariants={variants}
                   basePrice={productData.price}
                   baseStock={productData.stock}
                   onVariantsChange={setVariants}
