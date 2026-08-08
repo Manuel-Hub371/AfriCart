@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ProductStatusBadge } from "./product-status-badge";
 import { InventoryIndicator } from "./inventory-indicator";
 import { ProductActionsMenu } from "./product-actions-menu";
-import { Star, Eye, ShoppingCart, DollarSign } from "lucide-react";
+import { Star, Eye, ShoppingCart, DollarSign, Package } from "lucide-react";
 
 export interface Product {
   id: string;
@@ -35,12 +35,9 @@ interface ProductCardProps {
   onAction: (action: string, productId: string) => void;
 }
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
-
 export function ProductCard({ product, isSelected, onSelect, onAction }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [imgSrc, setImgSrc] = useState(product.image || FALLBACK_IMAGE);
+  const [imgSrc, setImgSrc] = useState(product.image || "");
 
   return (
     <Card
@@ -80,12 +77,18 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
 
       {/* Product Image */}
       <div className="relative aspect-square bg-gray-100 overflow-hidden">
-        <img
-          src={imgSrc}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          onError={() => setImgSrc(FALLBACK_IMAGE)}
-        />
+        {imgSrc ? (
+          <img
+            src={imgSrc}
+            alt={product.name}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImgSrc("")}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
+            <Package className="w-12 h-12 stroke-[1.5]" />
+          </div>
+        )}
         {/* Status Badge Overlay */}
         <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 flex-wrap">
           <ProductStatusBadge status={product.status} />

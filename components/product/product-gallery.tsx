@@ -1,15 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { ChevronLeft, ChevronRight, ZoomIn, X, Play } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, X, Play, Package } from "lucide-react";
 
 interface ProductGalleryProps {
   images: string[];
   activeVariantImage?: string | null;
 }
-
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80";
 
 export function ProductGallery({ images, activeVariantImage }: ProductGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -18,8 +15,8 @@ export function ProductGallery({ images, activeVariantImage }: ProductGalleryPro
 
   // Clean image URLs list
   const validImages = Array.isArray(images) && images.length > 0
-    ? images.map((img) => (typeof img === "string" && (img.startsWith("http") || img.startsWith("/")) ? img : FALLBACK_IMAGE))
-    : [FALLBACK_IMAGE];
+    ? images.filter((img) => typeof img === "string" && (img.startsWith("http") || img.startsWith("/") || img.startsWith("data:")))
+    : [];
 
   // If active variant has a specific image, ensure it is displayed
   useEffect(() => {
@@ -31,7 +28,7 @@ export function ProductGallery({ images, activeVariantImage }: ProductGalleryPro
     }
   }, [activeVariantImage, validImages]);
 
-  const activeMedia = activeVariantImage || validImages[currentImageIndex] || FALLBACK_IMAGE;
+  const activeMedia = activeVariantImage || validImages[currentImageIndex] || "";
   const isVideo = activeMedia.endsWith(".mp4") || activeMedia.includes("/video/");
 
   const nextImage = () => {
@@ -80,15 +77,20 @@ export function ProductGallery({ images, activeVariantImage }: ProductGalleryPro
             controls
             className="w-full h-full object-cover"
           />
-        ) : (
+        ) : activeMedia ? (
           <img
             src={activeMedia}
             alt="Product view"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={(e) => {
-              e.currentTarget.src = FALLBACK_IMAGE;
+              e.currentTarget.style.display = "none";
             }}
           />
+        ) : (
+          <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 gap-2">
+            <Package className="w-16 h-16 stroke-[1.5]" />
+            <span className="text-xs text-gray-400 font-medium">No Image Uploaded</span>
+          </div>
         )}
 
         {/* Zoom Button */}
@@ -157,7 +159,7 @@ export function ProductGallery({ images, activeVariantImage }: ProductGalleryPro
                     alt={`Thumbnail ${index + 1}`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
-                      e.currentTarget.src = FALLBACK_IMAGE;
+                      e.currentTarget.style.display = "none";
                     }}
                   />
                 )}

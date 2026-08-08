@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Heart, ShoppingCart, Star, Eye, CheckCircle, Images, Zap } from "lucide-react";
+import { Heart, ShoppingCart, Star, Eye, CheckCircle, Images, Zap, Package } from "lucide-react";
 import Link from "next/link";
 
 interface ProductCardProps {
@@ -35,8 +35,7 @@ interface ProductCardProps {
   isBestSeller?: boolean;
 }
 
-const FALLBACK_PRODUCT_IMAGE =
-  "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600&auto=format&fit=crop&q=80";
+
 
 export function ProductCard({
   id,
@@ -83,7 +82,7 @@ export function ProductCard({
         return image;
       }
     }
-    return FALLBACK_PRODUCT_IMAGE;
+    return "";
   };
 
   const [imgSrc, setImgSrc] = useState<string>(getPrimaryImage());
@@ -119,12 +118,18 @@ export function ProductCard({
       <div>
         <Link href={`/product/${id}`}>
           <div className="relative aspect-square bg-gray-100 overflow-hidden">
-            <img
-              src={imgSrc}
-              alt={name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              onError={() => setImgSrc(FALLBACK_PRODUCT_IMAGE)}
-            />
+            {imgSrc ? (
+              <img
+                src={imgSrc}
+                alt={name}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={() => setImgSrc("")}
+              />
+            ) : (
+              <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
+                <Package className="w-12 h-12 stroke-[1.5]" />
+              </div>
+            )}
 
             {/* Top-Left: Marketing Campaign Badges & Discount — all from API */}
             <div className="absolute top-2 left-2 flex flex-col items-start gap-1 z-10 max-w-[70%]">

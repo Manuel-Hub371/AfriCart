@@ -49,7 +49,7 @@ export default function ReviewsPage() {
           customerName: r.customerName || "Customer",
           rating: r.rating,
           productName: r.productName || "Product",
-          productImage: r.productImage || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop",
+          productImage: r.productImage || "",
           reviewTitle: `${r.rating} Star Customer Feedback`,
           reviewContent: r.comment || "No written comment provided.",
           reviewDate: new Date(r.createdAt).toLocaleDateString("en-US", {

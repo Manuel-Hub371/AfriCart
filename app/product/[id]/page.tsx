@@ -127,7 +127,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
   const galleryImages = Array.isArray(product.images) && product.images.length > 0
     ? product.images
-    : ["https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80"];
+    : [];
 
   const storeInfo = product.store || {};
 

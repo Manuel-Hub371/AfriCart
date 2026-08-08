@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer/footer";
 import { EmptyCart } from "@/components/cart/empty-cart";
 import { Button } from "@/components/ui/button";
-import { ShoppingBag, ArrowLeft, Trash2, Plus, Minus, Store } from "lucide-react";
+import { ShoppingBag, ArrowLeft, Trash2, Plus, Minus, Store, Package } from "lucide-react";
 import Link from "next/link";
 
 export default function CartPage() {
@@ -138,13 +138,17 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {cartData.items.map((item: any) => {
-              const imgUrl = item.product.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&auto=format&fit=crop&q=80";
+              const imgUrl = item.product.image || "";
               const isDiscounted = item.product.isDiscounted && item.product.originalPrice > item.product.price;
 
               return (
                 <div key={item.id} className="bg-white rounded-2xl border p-6 flex flex-col sm:flex-row gap-6 items-center">
-                  <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50">
-                    <img src={imgUrl} alt={item.product.name} className="w-full h-full object-cover" />
+                  <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center">
+                    {imgUrl ? (
+                      <img src={imgUrl} alt={item.product.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <Package className="w-8 h-8 text-gray-300" />
+                    )}
                   </div>
 
                   <div className="flex-1 min-w-0 space-y-2 text-center sm:text-left">
