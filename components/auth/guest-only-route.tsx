@@ -21,13 +21,19 @@ export function GuestOnlyRoute({ children }: GuestOnlyRouteProps) {
 
     // If user is already authenticated, redirect to their dashboard
     if (isAuthenticated && user) {
-      const redirectTo = getUserDashboard(user.role);
+      const isAdmin = user.role === "admin" || (Array.isArray(user.roles) && user.roles.includes("ADMIN"));
+      const redirectTo = isAdmin ? "/admin" : getUserDashboard(user.role);
       
       // Check if there's a stored redirect URL
       const storedRedirect = sessionStorage.getItem("redirectAfterLogin");
+      sessionStorage.removeItem("redirectAfterLogin");
+
       if (storedRedirect) {
-        sessionStorage.removeItem("redirectAfterLogin");
-        router.push(storedRedirect);
+        if (isAdmin) {
+          router.push(storedRedirect.startsWith("/admin") ? storedRedirect : "/admin");
+        } else {
+          router.push(storedRedirect);
+        }
       } else {
         router.push(redirectTo);
       }

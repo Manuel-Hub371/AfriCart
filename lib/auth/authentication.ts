@@ -147,7 +147,7 @@ export function formatUserResponse(user: any, rawRoles: string[], permissions: s
     permissions,
     storeName: store?.name || undefined,
     storeStatus: hasVendorProfile 
-      ? (user.vendorProfile.verificationStatus === "VERIFIED" ? "approved" : "pending") 
+      ? (store?.status === "ACTIVE" || user.vendorProfile.identityVerificationStatus === "VERIFIED" ? "approved" : "pending") 
       : undefined,
     createdAt: user.createdAt.toISOString()
   };

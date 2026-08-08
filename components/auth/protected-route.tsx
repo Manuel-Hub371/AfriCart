@@ -91,8 +91,9 @@ export function ProtectedRoute({
   return <>{children}</>;
 }
 
-function getUserDashboard(role: UserRole): string {
-  switch (role) {
+function getUserDashboard(role: UserRole | string): string {
+  const r = String(role || "").toLowerCase();
+  switch (r) {
     case "customer":
       return "/";
     case "vendor":

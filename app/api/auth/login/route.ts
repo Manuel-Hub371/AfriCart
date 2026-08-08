@@ -62,12 +62,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Email and password are required" }, { status: 400 });
     }
 
+    const cleanEmail = email.trim().toLowerCase();
+
     // Find user (support both email and phone lookup)
     const user = await db.user.findFirst({
       where: {
         OR: [
-          { email: email },
-          { phone: email }
+          { email: cleanEmail },
+          { phone: email.trim() }
         ],
         deletedAt: null
       },
@@ -145,6 +147,8 @@ export async function POST(req: Request) {
     // Create Server-Side Session in Database
     const session = await createServerSession(user.id, userAgent, ipAddress);
 
+    const formattedUser = formatUserResponse(user, roles, permissions);
+
     // Generate cookies with embedded sessionId
     await setAuthCookies({
       userId: user.id,
@@ -153,12 +157,13 @@ export async function POST(req: Request) {
       firstName: user.firstName || user.email.split("@")[0],
       lastName: user.lastName || "",
       roles,
+      role: formattedUser.role,
       permissions
     });
 
     return NextResponse.json({
       success: true,
-      user: formatUserResponse(user, roles, permissions)
+      user: formattedUser
     });
 
   } catch (error: any) {

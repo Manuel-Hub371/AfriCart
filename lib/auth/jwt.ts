@@ -11,6 +11,7 @@ export interface JWTPayload {
   firstName: string;
   lastName: string;
   roles: string[];
+  role?: string;
   permissions: string[];
 }
 
