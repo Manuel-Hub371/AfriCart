@@ -52,6 +52,9 @@ export default function AddProductPage() {
   const [availableCampaigns, setAvailableCampaigns] = useState<CampaignOption[]>([]);
   const [selectedCampaignIds, setSelectedCampaignIds] = useState<string[]>([]);
   const [isFeatured, setIsFeatured] = useState<boolean>(false);
+  const [seoTitle, setSeoTitle] = useState<string>("");
+  const [seoDescription, setSeoDescription] = useState<string>("");
+  const [seoKeywords, setSeoKeywords] = useState<string>("");
   const [weight, setWeight] = useState<number>(0);
   const [dimensions, setDimensions] = useState<{ length?: number; width?: number; height?: number }>({});
   const [saving, setSaving] = useState(false);
@@ -126,6 +129,9 @@ export default function AddProductPage() {
           returnPolicyId: selectedReturnPolicyId,
           warrantyPolicyId: selectedWarrantyPolicyId,
           campaignIds: selectedCampaignIds,
+          seoTitle: seoTitle.trim() || undefined,
+          seoDescription: seoDescription.trim() || undefined,
+          seoKeywords: seoKeywords.trim() || undefined,
           isFeatured,
           status,
         }),
@@ -316,7 +322,14 @@ export default function AddProductPage() {
               </div>
 
               <div id="section-seo">
-                <SeoCard />
+                <SeoCard
+                  seoTitle={seoTitle}
+                  seoDescription={seoDescription}
+                  seoKeywords={seoKeywords}
+                  onChangeSeoTitle={setSeoTitle}
+                  onChangeSeoDescription={setSeoDescription}
+                  onChangeSeoKeywords={setSeoKeywords}
+                />
               </div>
             </div>
 

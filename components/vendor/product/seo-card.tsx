@@ -4,9 +4,23 @@ import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
-export default function SeoCard() {
-  const [seoTitle, setSeoTitle] = useState("");
-  const [metaDesc, setMetaDesc] = useState("");
+interface SeoCardProps {
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  onChangeSeoTitle?: (val: string) => void;
+  onChangeSeoDescription?: (val: string) => void;
+  onChangeSeoKeywords?: (val: string) => void;
+}
+
+export default function SeoCard({
+  seoTitle = "",
+  seoDescription = "",
+  seoKeywords = "",
+  onChangeSeoTitle,
+  onChangeSeoDescription,
+  onChangeSeoKeywords,
+}: SeoCardProps) {
   const [urlSlug, setUrlSlug] = useState("");
 
   return (
@@ -23,7 +37,7 @@ export default function SeoCard() {
           </label>
           <Input
             value={seoTitle}
-            onChange={(e) => setSeoTitle(e.target.value)}
+            onChange={(e) => onChangeSeoTitle?.(e.target.value)}
             placeholder="Enter SEO title"
             maxLength={60}
           />
@@ -38,15 +52,30 @@ export default function SeoCard() {
             Meta Description
           </label>
           <textarea
-            value={metaDesc}
-            onChange={(e) => setMetaDesc(e.target.value)}
+            value={seoDescription}
+            onChange={(e) => onChangeSeoDescription?.(e.target.value)}
             placeholder="Brief description for search engines"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
             rows={3}
             maxLength={160}
           />
           <p className="text-xs text-gray-500 mt-1">
-            {metaDesc.length}/160 characters (optimal: 150-160)
+            {seoDescription.length}/160 characters (optimal: 150-160)
+          </p>
+        </div>
+
+        {/* SEO Keywords */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Keywords / Meta Tags
+          </label>
+          <Input
+            value={seoKeywords}
+            onChange={(e) => onChangeSeoKeywords?.(e.target.value)}
+            placeholder="electronics, smartphone, tech"
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Comma-separated search keywords
           </p>
         </div>
 
@@ -88,7 +117,7 @@ export default function SeoCard() {
               https://afriCart.com/product/{urlSlug || "product-name"}
             </div>
             <div className="text-gray-600 text-sm">
-              {metaDesc ||
+              {seoDescription ||
                 "This is how your product will appear in search engine results. Add a meta description to improve click-through rates."}
             </div>
           </div>

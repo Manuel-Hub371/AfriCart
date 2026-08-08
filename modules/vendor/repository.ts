@@ -145,107 +145,187 @@ export class VendorRepository {
   async createVendorProduct(storeId: string, input: VendorProductInput) {
     const slug = `${input.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now().toString(36)}`;
 
-    const product = await db.product.create({
-      data: {
-        storeId,
-        name: input.name,
-        brand: input.brand || null,
-        slug,
-        description: input.description || null,
-        price: input.price,
-        compareAtPrice: input.compareAtPrice || null,
-        categoryName: input.categoryName || null,
-        images: input.images || [],
-        weight: input.weight || null,
-        refundPolicyId: input.refundPolicyId || null,
-        returnPolicyId: input.returnPolicyId || null,
-        warrantyPolicyId: input.warrantyPolicyId || null,
-        ...(input.specifications && { specifications: input.specifications }),
-        isFeatured: Boolean(input.isFeatured),
-        status: input.status || "ACTIVE",
-      },
-    });
-
-    if (Array.isArray(input.variants) && input.variants.length > 0) {
-      await db.productVariant.createMany({
-        data: input.variants.map((v: any, index: number) => ({
-          productId: product.id,
-          sku: v.sku || `${product.slug}-VAR-${index + 1}`,
-          price: v.price ? Number(v.price) : input.price,
-          compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
-          stock: v.stock !== undefined ? Number(v.stock) : input.stock,
-          weight: v.weight ? Number(v.weight) : null,
-          attributes: v.attributes || v.options || {},
-          images: Array.isArray(v.images) ? v.images : (v.image ? [v.image] : []),
-        })),
+    return db.$transaction(async (tx) => {
+      const product = await tx.product.create({
+        data: {
+          storeId,
+          name: input.name,
+          brand: input.brand || null,
+          slug,
+          description: input.description || null,
+          price: input.price,
+          compareAtPrice: input.compareAtPrice || null,
+          categoryName: input.categoryName || null,
+          images: input.images || [],
+          stock: input.stock ?? 0,
+          weight: input.weight || null,
+          refundPolicyId: input.refundPolicyId || null,
+          returnPolicyId: input.returnPolicyId || null,
+          warrantyPolicyId: input.warrantyPolicyId || null,
+          seoTitle: input.seoTitle || null,
+          seoDescription: input.seoDescription || null,
+          seoKeywords: input.seoKeywords || null,
+          ...(input.specifications && { specifications: input.specifications }),
+          isFeatured: Boolean(input.isFeatured),
+          status: input.status || "ACTIVE",
+        },
       });
-    }
 
-    if (input.shippingPolicyIds) {
-      await this.setProductShippingPolicies(product.id, input.shippingPolicyIds);
-    }
-    if (input.campaignIds) {
-      await this.setProductCampaigns(product.id, input.campaignIds);
-    }
-
-    queueProductBestSellerRecalculation(product.id);
-
-    return product;
-  }
-
-  /**
-   * Update existing vendor product with ownership check
-   */
-  async updateVendorProduct(productId: string, storeId: string, input: Partial<VendorProductInput>) {
-    const updated = await db.product.updateMany({
-      where: { id: productId, storeId, deletedAt: null },
-      data: {
-        ...(input.name && { name: input.name }),
-        ...(input.brand !== undefined && { brand: input.brand }),
-        ...(input.description !== undefined && { description: input.description }),
-        ...(input.price !== undefined && { price: input.price }),
-        ...(input.compareAtPrice !== undefined && { compareAtPrice: input.compareAtPrice }),
-        ...(input.categoryName !== undefined && { categoryName: input.categoryName }),
-        ...(input.images !== undefined && { images: input.images }),
-        ...(input.stock !== undefined && { stock: input.stock }),
-        ...(input.weight !== undefined && { weight: input.weight }),
-        ...(input.refundPolicyId !== undefined && { refundPolicyId: input.refundPolicyId }),
-        ...(input.returnPolicyId !== undefined && { returnPolicyId: input.returnPolicyId }),
-        ...(input.warrantyPolicyId !== undefined && { warrantyPolicyId: input.warrantyPolicyId }),
-        ...(input.specifications !== undefined && { specifications: input.specifications }),
-        ...(input.isFeatured !== undefined && { isFeatured: input.isFeatured }),
-        ...(input.status && { status: input.status }),
-      },
-    });
-
-    if (Array.isArray(input.variants)) {
-      await db.productVariant.deleteMany({ where: { productId } });
-      if (input.variants.length > 0) {
-        await db.productVariant.createMany({
+      if (Array.isArray(input.variants) && input.variants.length > 0) {
+        await tx.productVariant.createMany({
           data: input.variants.map((v: any, index: number) => ({
-            productId,
-            sku: v.sku || `VAR-${index + 1}`,
-            price: v.price ? Number(v.price) : (input.price || 0),
+            productId: product.id,
+            sku: v.sku || `${product.slug}-VAR-${index + 1}`,
+            price: v.price ? Number(v.price) : input.price,
             compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
-            stock: v.stock !== undefined ? Number(v.stock) : (input.stock || 0),
+            stock: v.stock !== undefined ? Number(v.stock) : input.stock,
             weight: v.weight ? Number(v.weight) : null,
             attributes: v.attributes || v.options || {},
             images: Array.isArray(v.images) ? v.images : (v.image ? [v.image] : []),
           })),
         });
       }
-    }
 
-    if (input.shippingPolicyIds !== undefined) {
-      await this.setProductShippingPolicies(productId, input.shippingPolicyIds);
-    }
-    if (input.campaignIds !== undefined) {
-      await this.setProductCampaigns(productId, input.campaignIds);
-    }
+      if (input.shippingPolicyIds && input.shippingPolicyIds.length > 0) {
+        await tx.productShipping.deleteMany({ where: { productId: product.id } });
+        await tx.productShipping.createMany({
+          data: input.shippingPolicyIds.map((spId) => ({
+            productId: product.id,
+            shippingPolicyId: spId,
+          })),
+          skipDuplicates: true,
+        });
+      }
 
-    queueProductBestSellerRecalculation(productId);
+      if (input.campaignIds && input.campaignIds.length > 0) {
+        await tx.campaignProduct.deleteMany({ where: { productId: product.id } });
+        await tx.campaignProduct.createMany({
+          data: input.campaignIds.map((cId) => ({
+            productId: product.id,
+            campaignId: cId,
+          })),
+          skipDuplicates: true,
+        });
+      }
 
-    return updated;
+      queueProductBestSellerRecalculation(product.id);
+
+      return product;
+    });
+  }
+
+  /**
+   * Update existing vendor product with ownership check
+   */
+  async updateVendorProduct(productId: string, storeId: string, input: Partial<VendorProductInput>) {
+    return db.$transaction(async (tx) => {
+      const updated = await tx.product.updateMany({
+        where: { id: productId, storeId, deletedAt: null },
+        data: {
+          ...(input.name && { name: input.name }),
+          ...(input.brand !== undefined && { brand: input.brand }),
+          ...(input.description !== undefined && { description: input.description }),
+          ...(input.price !== undefined && { price: input.price }),
+          ...(input.compareAtPrice !== undefined && { compareAtPrice: input.compareAtPrice }),
+          ...(input.categoryName !== undefined && { categoryName: input.categoryName }),
+          ...(input.images !== undefined && { images: input.images }),
+          ...(input.stock !== undefined && { stock: input.stock }),
+          ...(input.weight !== undefined && { weight: input.weight }),
+          ...(input.refundPolicyId !== undefined && { refundPolicyId: input.refundPolicyId }),
+          ...(input.returnPolicyId !== undefined && { returnPolicyId: input.returnPolicyId }),
+          ...(input.warrantyPolicyId !== undefined && { warrantyPolicyId: input.warrantyPolicyId }),
+          ...(input.specifications !== undefined && { specifications: input.specifications }),
+          ...(input.seoTitle !== undefined && { seoTitle: input.seoTitle }),
+          ...(input.seoDescription !== undefined && { seoDescription: input.seoDescription }),
+          ...(input.seoKeywords !== undefined && { seoKeywords: input.seoKeywords }),
+          ...(input.isFeatured !== undefined && { isFeatured: input.isFeatured }),
+          ...(input.status && { status: input.status }),
+        },
+      });
+
+      // Non-destructive variant reconciliation
+      if (Array.isArray(input.variants)) {
+        const existingVariants = await tx.productVariant.findMany({ where: { productId } });
+        const existingById = new Map(existingVariants.map((v) => [v.id, v]));
+        const existingBySku = new Map(existingVariants.map((v) => [v.sku, v]));
+        const keepIds = new Set<string>();
+
+        for (let i = 0; i < input.variants.length; i++) {
+          const v = input.variants[i];
+          const sku = v.sku || `VAR-${i + 1}`;
+          const existing = (v.id && existingById.get(v.id)) || (sku && existingBySku.get(sku));
+
+          if (existing) {
+            keepIds.add(existing.id);
+            await tx.productVariant.update({
+              where: { id: existing.id },
+              data: {
+                sku,
+                price: v.price ? Number(v.price) : (input.price || 0),
+                compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
+                stock: v.stock !== undefined ? Number(v.stock) : (input.stock || 0),
+                weight: v.weight ? Number(v.weight) : null,
+                attributes: v.attributes || v.options || {},
+                images: Array.isArray(v.images) ? v.images : (v.image ? [v.image] : []),
+              },
+            });
+          } else {
+            const created = await tx.productVariant.create({
+              data: {
+                productId,
+                sku,
+                price: v.price ? Number(v.price) : (input.price || 0),
+                compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
+                stock: v.stock !== undefined ? Number(v.stock) : (input.stock || 0),
+                weight: v.weight ? Number(v.weight) : null,
+                attributes: v.attributes || v.options || {},
+                images: Array.isArray(v.images) ? v.images : (v.image ? [v.image] : []),
+              },
+            });
+            keepIds.add(created.id);
+          }
+        }
+
+        // Delete unreferenced removed variants safely
+        const toRemove = existingVariants.filter((ev) => !keepIds.has(ev.id));
+        for (const rv of toRemove) {
+          const orderItemCount = await tx.orderItem.count({ where: { variantId: rv.id } });
+          if (orderItemCount === 0) {
+            await tx.productVariant.delete({ where: { id: rv.id } });
+          }
+        }
+      }
+
+      if (input.shippingPolicyIds !== undefined) {
+        await tx.productShipping.deleteMany({ where: { productId } });
+        if (input.shippingPolicyIds.length > 0) {
+          await tx.productShipping.createMany({
+            data: input.shippingPolicyIds.map((spId) => ({
+              productId,
+              shippingPolicyId: spId,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      if (input.campaignIds !== undefined) {
+        await tx.campaignProduct.deleteMany({ where: { productId } });
+        if (input.campaignIds.length > 0) {
+          await tx.campaignProduct.createMany({
+            data: input.campaignIds.map((cId) => ({
+              productId,
+              campaignId: cId,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
+      queueProductBestSellerRecalculation(productId);
+
+      return updated;
+    });
   }
 
   /**

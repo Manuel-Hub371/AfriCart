@@ -56,6 +56,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [availableCampaigns, setAvailableCampaigns] = useState<CampaignOption[]>([]);
   const [selectedCampaignIds, setSelectedCampaignIds] = useState<string[]>([]);
   const [isFeatured, setIsFeatured] = useState<boolean>(false);
+  const [seoTitle, setSeoTitle] = useState<string>("");
+  const [seoDescription, setSeoDescription] = useState<string>("");
+  const [seoKeywords, setSeoKeywords] = useState<string>("");
   const [weight, setWeight] = useState<number>(0);
   const [dimensions, setDimensions] = useState<{ length?: number; width?: number; height?: number }>({});
   const [saving, setSaving] = useState(false);
@@ -112,6 +115,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           });
           setImages(Array.isArray(p.images) ? p.images : []);
           setWeight(p.weight || 0);
+          if (p.seoTitle) setSeoTitle(p.seoTitle);
+          if (p.seoDescription) setSeoDescription(p.seoDescription);
+          if (p.seoKeywords) setSeoKeywords(p.seoKeywords);
           if (p.dimensions) setDimensions(p.dimensions);
           if (Array.isArray(p.shippingPolicyIds)) {
             setSelectedPolicyIds(p.shippingPolicyIds);
@@ -178,6 +184,9 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           returnPolicyId: selectedReturnPolicyId,
           warrantyPolicyId: selectedWarrantyPolicyId,
           campaignIds: selectedCampaignIds,
+          seoTitle: seoTitle.trim() || undefined,
+          seoDescription: seoDescription.trim() || undefined,
+          seoKeywords: seoKeywords.trim() || undefined,
           isFeatured,
           status: newStatus,
         }),
@@ -420,7 +429,14 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               </div>
 
               <div id="section-seo">
-                <SeoCard />
+                <SeoCard
+                  seoTitle={seoTitle}
+                  seoDescription={seoDescription}
+                  seoKeywords={seoKeywords}
+                  onChangeSeoTitle={setSeoTitle}
+                  onChangeSeoDescription={setSeoDescription}
+                  onChangeSeoKeywords={setSeoKeywords}
+                />
               </div>
             </div>
 

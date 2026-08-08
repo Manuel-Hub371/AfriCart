@@ -100,6 +100,9 @@ export interface VendorProductInput {
   returnPolicyId?: string | null;
   warrantyPolicyId?: string | null;
   campaignIds?: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
   isFeatured?: boolean;
   status?: "ACTIVE" | "DRAFT" | "OUT_OF_STOCK";
 }
@@ -130,6 +133,9 @@ export interface VendorProductDTO {
   returnPolicyId?: string | null;
   warrantyPolicyId?: string | null;
   campaignIds?: string[];
+  seoTitle?: string | null;
+  seoDescription?: string | null;
+  seoKeywords?: string | null;
   views: number;
   rating: number;
   numReviews: number;
@@ -222,6 +228,9 @@ export const VendorProductSchema = {
         returnPolicyId: data.returnPolicyId ? String(data.returnPolicyId) : null,
         warrantyPolicyId: data.warrantyPolicyId ? String(data.warrantyPolicyId) : null,
         campaignIds: Array.isArray(data.campaignIds) ? data.campaignIds : [],
+        seoTitle: data.seoTitle ? String(data.seoTitle).trim() : undefined,
+        seoDescription: data.seoDescription ? String(data.seoDescription).trim() : undefined,
+        seoKeywords: data.seoKeywords ? String(data.seoKeywords).trim() : undefined,
         isFeatured: Boolean(data.isFeatured),
         status: ["ACTIVE", "DRAFT", "OUT_OF_STOCK"].includes(data.status) ? data.status : "ACTIVE",
       } as VendorProductInput,

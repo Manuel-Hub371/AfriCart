@@ -389,9 +389,12 @@ model Product {
   returnPolicy     ReturnPolicy?   @relation(fields: [returnPolicyId], references: [id], onDelete: SetNull)
   warrantyPolicyId String?
   warrantyPolicy   WarrantyPolicy? @relation(fields: [warrantyPolicyId], references: [id], onDelete: SetNull)
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
-  deletedAt       DateTime?
+  seoTitle         String?
+  seoDescription   String?
+  seoKeywords      String?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
 
   variants         ProductVariant[]
   questions        ProductQuestion[]
