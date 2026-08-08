@@ -56,6 +56,8 @@ export default function VendorRegistrationPage() {
   }, [router]);
 
   const [formData, setFormData] = useState({
+    password: "",
+    confirmPassword: "",
     storeName: "",
     storeDescription: "",
     storeCategory: "",
@@ -135,17 +137,24 @@ export default function VendorRegistrationPage() {
     setError(null);
     
     try {
+      const categorySlugs = (formData.storeCategory || "electronics-gadget")
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       await registerVendor({
         firstName: vendorRegData.firstName,
         lastName: vendorRegData.lastName,
         email: vendorRegData.email,
         phone: vendorRegData.phone,
-        password: vendorRegData.password,
-        confirmPassword: vendorRegData.confirmPassword,
+        password: vendorRegData.password || formData.password,
+        confirmPassword: vendorRegData.confirmPassword || formData.confirmPassword,
         
         storeName: formData.storeName,
         storeDescription: formData.storeDescription,
-        storeCategory: formData.storeCategory,
+        storeCategory: categorySlugs[0] || "electronics-gadget",
+        storeCategories: categorySlugs,
+        storeCategorySlugs: categorySlugs,
         storeLogo: storeLogoUrl.startsWith("blob:") ? undefined : storeLogoUrl || undefined,
         storeBanner: storeBannerUrl.startsWith("blob:") ? undefined : storeBannerUrl || undefined,
 
@@ -160,7 +169,9 @@ export default function VendorRegistrationPage() {
         city: formData.city,
         streetAddress: formData.streetAddress,
         postalCode: formData.postalCode,
-        payoutMethod: formData.payoutMethod,
+        idDocumentUrl: idDocumentUrl.startsWith("blob:") ? undefined : idDocumentUrl || undefined,
+        businessCertificateUrl: businessCertificateUrl.startsWith("blob:") ? undefined : businessCertificateUrl || undefined,
+        payoutMethod: formData.payoutMethod || "MOBILE_MONEY",
         acceptTerms: formData.acceptTerms,
         acceptVendorPolicy: formData.acceptSellerAgreement,
       });

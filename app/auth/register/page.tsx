@@ -80,8 +80,6 @@ function RegisterContent() {
         lastName: formData.lastName,
         email: formData.email,
         phone: formData.phone,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword
       }));
       router.push("/auth/vendor-registration");
       return;

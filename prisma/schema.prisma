@@ -59,6 +59,7 @@ model User {
   notifications           Notification[]
   supportTickets          SupportTicket[]
   storeFollows            StoreFollow[]
+  reviewedVerifications   VendorVerification[] @relation("ReviewedVerifications")
 }
 
 model Account {
@@ -208,6 +209,38 @@ model VendorProfile {
 
   // Relations
   stores                   Store[]
+  verification             VendorVerification?
+  payoutProfile            VendorPayoutProfile?
+}
+
+model VendorVerification {
+  id                     String        @id @default(uuid())
+  vendorProfileId        String        @unique
+  vendorProfile          VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  registrationNumber     String?
+  taxId                  String?
+  idDocumentUrl          String?
+  businessCertificateUrl String?
+  rejectionReason        String?
+  reviewedAt             DateTime?
+  reviewerId             String?
+  reviewer               User?         @relation("ReviewedVerifications", fields: [reviewerId], references: [id], onDelete: SetNull)
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+}
+
+model VendorPayoutProfile {
+  id              String        @id @default(uuid())
+  vendorProfileId String        @unique
+  vendorProfile   VendorProfile @relation(fields: [vendorProfileId], references: [id], onDelete: Cascade)
+  payoutMethod    String        // "MOBILE_MONEY" | "BANK_TRANSFER" | "PAYPAL"
+  provider        String?       // "MTN", "Vodafone", "AirtelTigo", "Bank Name"
+  accountNumber   String?       // Phone number or Bank Account number
+  accountName     String?       // Account holder name
+  swiftCode       String?       // Bank SWIFT code
+  isVerified      Boolean       @default(false)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model Store {
@@ -252,11 +285,11 @@ model Store {
   ogImage         String?
 
   // Visibility & Operational Status
-  isPublic        Boolean       @default(true)
+  isPublic        Boolean       @default(false)
   acceptingOrders Boolean       @default(true)
   vacationMode    Boolean       @default(false)
   vacationMessage String?
-  status          String        @default("ACTIVE") // "ACTIVE" | "VACATION" | "PAUSED"
+  status          String        @default("PENDING_APPROVAL") // "PENDING_APPROVAL" | "ACTIVE" | "VACATION" | "PAUSED" | "REJECTED"
 
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt

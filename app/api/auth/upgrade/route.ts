@@ -49,13 +49,29 @@ export async function POST(req: Request) {
 
     const body = await req.json();
     const {
-      storeName, storeDescription, storeCategory,
+      storeName, storeDescription, storeCategory, storeCategories, storeCategorySlugs,
       businessType, businessName, registrationNumber, taxId,
-      country, region, city, streetAddress, postalCode
+      country, region, city, streetAddress, postalCode,
+      idDocumentUrl, businessCertificateUrl,
+      payoutMethod, payoutProvider, payoutAccountNumber, payoutAccountName
     } = body;
 
     if (!storeName || !businessName || !streetAddress || !city || !region || !country) {
       return NextResponse.json({ message: "Required business fields are missing" }, { status: 400 });
+    }
+
+    // Category Slugs Validation
+    const rawCategories: string[] = Array.isArray(storeCategories) && storeCategories.length > 0
+      ? storeCategories
+      : Array.isArray(storeCategorySlugs) && storeCategorySlugs.length > 0
+      ? storeCategorySlugs
+      : (typeof storeCategory === "string" && storeCategory.trim() ? storeCategory.split(",").map((s) => s.trim()) : ["electronics-gadget"]);
+
+    const categorySlugs = Array.from(new Set(rawCategories));
+    for (const slug of categorySlugs) {
+      if (!isValidStoreCategorySlug(slug)) {
+        return NextResponse.json({ message: `Invalid store category slug: ${slug}` }, { status: 400 });
+      }
     }
 
     // Check duplicate store name
@@ -106,7 +122,8 @@ export async function POST(req: Request) {
         data: {
           userId: user.id,
           businessName,
-          businessCategory: storeCategory,
+          businessCategory: categorySlugs[0] || "electronics-gadget",
+          businessType: businessType || "Retailer",
           country,
           region,
           city,
@@ -116,25 +133,37 @@ export async function POST(req: Request) {
         }
       });
 
-      // 3. Generate store slug
-      const slug = await generateUniqueStoreSlug(storeName);
-
-      // Parse and validate multi-category selection
-      const rawCategories: string[] = Array.isArray(body.storeCategories) && body.storeCategories.length > 0
-        ? body.storeCategories
-        : Array.isArray(body.storeCategorySlugs) && body.storeCategorySlugs.length > 0
-        ? body.storeCategorySlugs
-        : [storeCategory || "electronics-gadget"];
-
-      const validSlugs = Array.from(
-        new Set(rawCategories.map((c) => (isValidStoreCategorySlug(c) ? c : mapLegacyCategoryToOfficialSlug(c))))
-      );
-
-      const categoryRecords = await tx.storeCategory.findMany({
-        where: { slug: { in: validSlugs } },
+      // 3. Create Vendor Verification Model
+      await tx.vendorVerification.create({
+        data: {
+          vendorProfileId: vendorProfile.id,
+          registrationNumber: registrationNumber || null,
+          taxId: taxId || null,
+          idDocumentUrl: idDocumentUrl || null,
+          businessCertificateUrl: businessCertificateUrl || null,
+        }
       });
 
-      // 4. Create Store with multi-category assignments
+      // 4. Create Vendor Payout Profile Model
+      await tx.vendorPayoutProfile.create({
+        data: {
+          vendorProfileId: vendorProfile.id,
+          payoutMethod: payoutMethod || "MOBILE_MONEY",
+          provider: payoutProvider || null,
+          accountNumber: payoutAccountNumber || null,
+          accountName: payoutAccountName || null,
+        }
+      });
+
+      // 5. Fetch matching StoreCategory records
+      const categoryRecords = await tx.storeCategory.findMany({
+        where: { slug: { in: categorySlugs } },
+      });
+
+      // 6. Generate store slug
+      const slug = await generateUniqueStoreSlug(storeName);
+
+      // 7. Create Store with multi-category assignments (Default PENDING_APPROVAL, isPublic false)
       const store = await tx.store.create({
         data: {
           vendorProfileId: vendorProfile.id,
@@ -142,6 +171,14 @@ export async function POST(req: Request) {
           slug,
           description: storeDescription || null,
           category: categoryRecords[0]?.name || "Electronics & Gadget",
+          businessType: businessType || "Retailer",
+          country,
+          region,
+          city,
+          address: streetAddress,
+          postalCode: postalCode || null,
+          status: "PENDING_APPROVAL",
+          isPublic: false,
           categories: {
             create: categoryRecords.map((c) => ({
               storeCategoryId: c.id,
@@ -150,7 +187,7 @@ export async function POST(req: Request) {
         },
       });
 
-      // 5. Write Audit Log
+      // 8. Write Audit Log
       await tx.auditLog.create({
         data: {
           actorId: user.id,

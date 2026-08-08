@@ -44,24 +44,31 @@ export interface RegisterCustomerData {
 
 export interface RegisterVendorData extends RegisterCustomerData {
   storeName: string;
-  storeDescription: string;
-  storeCategory: string;
+  storeDescription?: string;
+  storeCategory?: string;
+  storeCategories?: string[];
+  storeCategorySlugs?: string[];
   storeLogo?: string;
   storeBanner?: string;
-  businessType: string;
+  businessType?: string;
   businessName: string;
   registrationNumber?: string;
   taxId?: string;
-  businessEmail: string;
-  businessPhone: string;
+  businessEmail?: string;
+  businessPhone?: string;
   country: string;
   region: string;
   city: string;
   streetAddress: string;
   postalCode?: string;
-  payoutMethod: string;
-  acceptTerms: boolean;
-  acceptVendorPolicy: boolean;
+  idDocumentUrl?: string;
+  businessCertificateUrl?: string;
+  payoutMethod?: string;
+  payoutProvider?: string;
+  payoutAccountNumber?: string;
+  payoutAccountName?: string;
+  acceptTerms?: boolean;
+  acceptVendorPolicy?: boolean;
 }
 
 export interface AuthResponse {

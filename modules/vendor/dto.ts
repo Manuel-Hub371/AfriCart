@@ -247,3 +247,91 @@ export const UpdateStockSchema = {
     };
   },
 };
+
+export const RegisterVendorPayloadSchema = {
+  safeParse: (data: any) => {
+    if (!data || typeof data !== "object") {
+      return { success: false as const, error: "Invalid registration payload" };
+    }
+
+    const {
+      firstName, lastName, email, phone, password,
+      storeName, storeDescription, storeCategory, storeCategories, storeCategorySlugs,
+      businessName, businessType, registrationNumber, taxId,
+      country, region, city, streetAddress, postalCode,
+      idDocumentUrl, businessCertificateUrl,
+      payoutMethod, payoutProvider, payoutAccountNumber, payoutAccountName
+    } = data;
+
+    if (!firstName || typeof firstName !== "string" || !firstName.trim()) {
+      return { success: false as const, error: "First name is required" };
+    }
+    if (!lastName || typeof lastName !== "string" || !lastName.trim()) {
+      return { success: false as const, error: "Last name is required" };
+    }
+    if (!email || typeof email !== "string" || !email.includes("@")) {
+      return { success: false as const, error: "Valid email address is required" };
+    }
+    if (!password || typeof password !== "string" || password.length < 8) {
+      return { success: false as const, error: "Password must be at least 8 characters" };
+    }
+    if (!storeName || typeof storeName !== "string" || !storeName.trim()) {
+      return { success: false as const, error: "Store name is required" };
+    }
+    if (!businessName || typeof businessName !== "string" || !businessName.trim()) {
+      return { success: false as const, error: "Business name is required" };
+    }
+    if (!streetAddress || typeof streetAddress !== "string" || !streetAddress.trim()) {
+      return { success: false as const, error: "Street address is required" };
+    }
+    if (!city || typeof city !== "string" || !city.trim()) {
+      return { success: false as const, error: "City is required" };
+    }
+    if (!region || typeof region !== "string" || !region.trim()) {
+      return { success: false as const, error: "Region is required" };
+    }
+    if (!country || typeof country !== "string" || !country.trim()) {
+      return { success: false as const, error: "Country is required" };
+    }
+
+    // Category Slugs Validation
+    const rawCategories: string[] = Array.isArray(storeCategories) && storeCategories.length > 0
+      ? storeCategories
+      : Array.isArray(storeCategorySlugs) && storeCategorySlugs.length > 0
+      ? storeCategorySlugs
+      : (typeof storeCategory === "string" && storeCategory.trim() ? storeCategory.split(",").map((s) => s.trim()) : []);
+
+    if (rawCategories.length === 0) {
+      return { success: false as const, error: "At least one store category is required" };
+    }
+
+    return {
+      success: true as const,
+      data: {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone ? String(phone).trim() : null,
+        password: String(password),
+        storeName: storeName.trim(),
+        storeDescription: storeDescription ? String(storeDescription).trim() : null,
+        categorySlugs: Array.from(new Set(rawCategories)),
+        businessName: businessName.trim(),
+        businessType: businessType ? String(businessType).trim() : "Retailer",
+        registrationNumber: registrationNumber ? String(registrationNumber).trim() : null,
+        taxId: taxId ? String(taxId).trim() : null,
+        country: country.trim(),
+        region: region.trim(),
+        city: city.trim(),
+        streetAddress: streetAddress.trim(),
+        postalCode: postalCode ? String(postalCode).trim() : null,
+        idDocumentUrl: idDocumentUrl ? String(idDocumentUrl).trim() : null,
+        businessCertificateUrl: businessCertificateUrl ? String(businessCertificateUrl).trim() : null,
+        payoutMethod: payoutMethod ? String(payoutMethod).trim() : "MOBILE_MONEY",
+        payoutProvider: payoutProvider ? String(payoutProvider).trim() : null,
+        payoutAccountNumber: payoutAccountNumber ? String(payoutAccountNumber).trim() : null,
+        payoutAccountName: payoutAccountName ? String(payoutAccountName).trim() : null,
+      },
+    };
+  },
+};
