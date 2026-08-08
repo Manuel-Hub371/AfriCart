@@ -97,8 +97,8 @@ export async function POST(req: Request) {
 
     userIdForLog = user.id;
 
-    // Verify Password
-    const passwordMatch = await comparePassword(password, user.passwordHash);
+    // Verify Password (handle copy-paste trailing space gracefully)
+    const passwordMatch = await comparePassword(password.trim(), user.passwordHash) || await comparePassword(password, user.passwordHash);
     
     // Log in LoginHistory
     await db.loginHistory.create({
