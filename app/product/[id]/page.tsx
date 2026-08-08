@@ -111,24 +111,19 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
   // Dynamic overrides based on selected variant
   // When a variant is selected, use variant pricing (no campaign adjustment for variants)
+  // Dynamic overrides based on selected variant
   const activePrice = selectedVariant?.price ?? product.price;
-  const activeComparePrice = selectedVariant?.compareAtPrice ?? product.compareAtPrice;
   const activeStock = selectedVariant?.stock ?? product.stock;
   const activeSku = selectedVariant?.sku || product.slug || product.id.slice(0, 8).toUpperCase();
   const activeVariantImage = selectedVariant?.images && selectedVariant.images.length > 0 ? selectedVariant.images[0] : null;
 
   const inStock = Boolean(activeStock > 0);
 
-  // Use API-provided campaign pricing when no variant selected;
-  // fall back to compare-at-price calculation for variant overrides
-  const isDiscounted = !selectedVariant ? (product.isDiscounted ?? false) : (activeComparePrice != null && activeComparePrice > activePrice);
-  const discountPercent = !selectedVariant
-    ? (product.discountPercent ?? 0)
-    : (activeComparePrice && activeComparePrice > activePrice
-        ? Math.round(((activeComparePrice - activePrice) / activeComparePrice) * 100)
-        : 0);
-  const amountSaved = !selectedVariant ? (product.amountSaved ?? 0) : (activeComparePrice ? activeComparePrice - activePrice : 0);
-  const originalPriceForDisplay = !selectedVariant ? product.originalPrice : activeComparePrice;
+  // Use API-provided campaign pricing
+  const isDiscounted = product.isDiscounted ?? false;
+  const discountPercent = product.discountPercent ?? 0;
+  const amountSaved = product.amountSaved ?? 0;
+  const originalPriceForDisplay = product.originalPrice;
 
   const galleryImages = Array.isArray(product.images) && product.images.length > 0
     ? product.images
@@ -140,7 +135,6 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
   const specificationsData: Record<string, string> = {
     ...(product.brand && { "Brand": product.brand }),
     ...(product.category && { "Category": product.category }),
-    ...(product.subcategoryName && { "Subcategory": product.subcategoryName }),
     ...(activeSku && { "SKU": activeSku }),
     ...(product.weight && { "Weight": `${product.weight} kg` }),
     ...(product.dimensions && (product.dimensions.length || product.dimensions.width || product.dimensions.height) && {
@@ -181,7 +175,6 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
                     name={product.name}
                     brand={product.brand}
                     category={product.category}
-                    subcategory={product.subcategoryName}
                     sku={activeSku}
                     rating={product.rating || 5.0}
                     reviews={product.numReviews || 0}

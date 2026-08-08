@@ -365,9 +365,7 @@ model Product {
   description     String?
   brand           String?
   price           Float
-  compareAtPrice  Float?
   categoryName    String?
-  subcategoryName String?
   categoryId      String?
   category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   images          Json?            // Array of image URLs
@@ -449,7 +447,6 @@ model ProductVariant {
   product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   sku            String?
   price          Float?
-  compareAtPrice Float?
   stock          Int      @default(0)
   attributes     Json     // e.g. { Color: "Black", Size: "L", Material: "Cotton" }
   images         Json?    // Variant-specific image URLs array

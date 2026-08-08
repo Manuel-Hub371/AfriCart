@@ -22,7 +22,6 @@ export interface CartItemDTO {
     slug: string;
     price: number; // Effective campaign price
     originalPrice: number;
-    compareAtPrice: number | null;
     discountAmount: number;
     discountPercent: number;
     isDiscounted: boolean;
@@ -54,7 +53,6 @@ export interface WishlistItemDTO {
     name: string;
     slug: string;
     price: number;
-    compareAtPrice: number | null;
     image: string | null;
     stock: number;
     rating: number;

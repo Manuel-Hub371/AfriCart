@@ -69,7 +69,6 @@ export async function GET(
         originalPrice: pricing.originalPrice,
         price: pricing.effectivePrice,
         campaignPrice: pricing.campaignPrice,
-        compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : null,
 
         campaign: pricing.campaign,
         campaignId: pricing.campaignId,

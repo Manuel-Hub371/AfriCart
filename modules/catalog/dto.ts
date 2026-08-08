@@ -58,8 +58,6 @@ export interface ProductDTO {
   price: number;
   /** Discounted effective campaign price or null */
   campaignPrice: number | null;
-  /** Legacy compareAtPrice field */
-  compareAtPrice: number | null;
 
   // Campaign pricing fields — Part 10
   campaign: any | null;

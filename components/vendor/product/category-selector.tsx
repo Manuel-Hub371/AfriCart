@@ -1,107 +1,71 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Lock } from "lucide-react";
 
 interface CategorySelectorProps {
   category?: string;
+  vendorCategories?: string[];
   onCategoryChange?: (category: string) => void;
 }
 
 export default function CategorySelector({
   category = "",
+  vendorCategories = [],
   onCategoryChange,
 }: CategorySelectorProps) {
-  const [subcategory, setSubcategory] = useState("");
+  const isSingleCategory = vendorCategories.length === 1;
 
-  const categories = [
-    {
-      name: "Electronics",
-      subcategories: ["Phones", "Computers", "Cameras", "Audio"],
-    },
-    {
-      name: "Fashion",
-      subcategories: ["Men", "Women", "Kids", "Accessories"],
-    },
-    {
-      name: "Home & Garden",
-      subcategories: ["Furniture", "Decor", "Kitchen", "Garden"],
-    },
-    {
-      name: "Beauty",
-      subcategories: ["Skincare", "Makeup", "Haircare", "Fragrances"],
-    },
-    {
-      name: "Groceries",
-      subcategories: ["Fresh Foods", "Spices", "Snacks", "Beverages"],
-    },
-    {
-      name: "Other",
-      subcategories: ["General"],
-    },
-  ];
-
-  const selectedCategory = categories.find((c) => c.name === category);
+  // Auto-select single category if vendor only has 1 authorized category
+  useEffect(() => {
+    if (isSingleCategory && vendorCategories[0] && category !== vendorCategories[0]) {
+      onCategoryChange?.(vendorCategories[0]);
+    }
+  }, [isSingleCategory, vendorCategories, category, onCategoryChange]);
 
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-6">Category</h2>
 
       <div className="space-y-4">
-        {/* Category */}
+        {/* Category Selection */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Category <span className="text-red-600">*</span>
+            Store Category <span className="text-red-600">*</span>
           </label>
-          <select
-            value={category}
-            onChange={(e) => {
-              onCategoryChange?.(e.target.value);
-              setSubcategory("");
-            }}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
-          >
-            <option value="">Select category</option>
-            {categories.map((cat) => (
-              <option key={cat.name} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
 
-        {/* Subcategory */}
-        {selectedCategory && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Subcategory
-            </label>
+          {isSingleCategory ? (
+            <div className="flex items-center justify-between px-3 py-2.5 bg-gray-100 border border-gray-300 rounded-lg text-sm text-gray-800 font-medium">
+              <span>{vendorCategories[0]}</span>
+              <span className="flex items-center gap-1.5 text-xs text-gray-500 bg-white px-2 py-0.5 rounded border border-gray-200">
+                <Lock className="w-3 h-3 text-emerald-600" /> Locked to Store
+              </span>
+            </div>
+          ) : (
             <select
-              value={subcategory}
-              onChange={(e) => setSubcategory(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm"
+              value={category}
+              onChange={(e) => onCategoryChange?.(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
             >
-              <option value="">Select subcategory</option>
-              {selectedCategory.subcategories.map((sub) => (
-                <option key={sub} value={sub}>
-                  {sub}
+              <option value="">Select authorized category</option>
+              {vendorCategories.map((catName) => (
+                <option key={catName} value={catName}>
+                  {catName}
                 </option>
               ))}
             </select>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Selected Path */}
         {category && (
-          <div className="flex items-center gap-2 pt-2">
-            <Badge variant="secondary">{category}</Badge>
-            {subcategory && (
-              <>
-                <span className="text-gray-400">→</span>
-                <Badge variant="secondary">{subcategory}</Badge>
-              </>
-            )}
+          <div className="flex items-center gap-2 pt-1">
+            <span className="text-xs text-gray-500">Selected Product Category:</span>
+            <Badge variant="secondary" className="bg-emerald-50 text-emerald-800 border border-emerald-200">
+              {category}
+            </Badge>
           </div>
         )}
       </div>

@@ -42,7 +42,6 @@ export class CatalogService {
         originalPrice: pricing.originalPrice,
         price: pricing.effectivePrice,
         campaignPrice: pricing.campaignPrice,
-        compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : null,
 
         // Campaign fields — Part 10 & Enterprise specs
         campaign: pricing.campaign,
@@ -158,7 +157,6 @@ export class CatalogService {
       originalPrice: pricing.originalPrice,
       price: pricing.effectivePrice,
       campaignPrice: pricing.campaignPrice,
-      compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : (product.compareAtPrice || null),
 
       // Campaign metadata — Part 10 & Enterprise specs
       campaign: pricing.campaign,
@@ -177,7 +175,6 @@ export class CatalogService {
 
       campaigns,
       category: product.categoryName || st?.category || "General",
-      subcategoryName: product.subcategoryName || null,
       images: Array.isArray(product.images) ? (product.images as string[]) : [],
       stock: product.stock,
       views: product.views,
@@ -246,7 +243,6 @@ export class CatalogService {
         id: v.id,
         sku: v.sku,
         price: v.price,
-        compareAtPrice: v.compareAtPrice,
         stock: v.stock,
         attributes: v.attributes,
         images: v.images,
@@ -462,7 +458,6 @@ export class CatalogService {
           originalPrice: pricing.originalPrice,
           price: pricing.effectivePrice,
           campaignPrice: pricing.campaignPrice,
-          compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : p.compareAtPrice,
           isDiscounted: pricing.isDiscounted,
           amountSaved: pricing.amountSaved,
           discountPercent: pricing.discountPercent,

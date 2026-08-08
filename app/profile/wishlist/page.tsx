@@ -112,11 +112,6 @@ export default function WishlistPage() {
                       <span className="text-xl font-bold text-emerald-600">
                         ${item.product.price}
                       </span>
-                      {item.product.compareAtPrice && (
-                        <span className="text-sm text-gray-400 line-through">
-                          ${item.product.compareAtPrice}
-                        </span>
-                      )}
                     </div>
 
                     {item.product.stock <= 0 && (

@@ -53,7 +53,6 @@ export default function PublishPanel({
   const mainImage = images && images.length > 0 ? images[0] : null;
   const name = productData.name?.trim() || "Untitled Product";
   const price = productData.price || 0;
-  const compareAtPrice = productData.compareAtPrice || 0;
   const category = productData.category || "General";
   const stock = productData.stock ?? 0;
 
@@ -107,11 +106,6 @@ export default function PublishPanel({
               <span className="text-xl font-extrabold text-emerald-600">
                 ${price.toFixed(2)}
               </span>
-              {compareAtPrice > price && (
-                <span className="text-xs text-gray-400 line-through font-medium">
-                  ${compareAtPrice.toFixed(2)}
-                </span>
-              )}
             </div>
             <div className="flex items-center justify-between pt-2 border-t">
               <span className="text-xs text-gray-500 font-medium">

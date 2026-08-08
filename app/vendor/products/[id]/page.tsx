@@ -51,7 +51,6 @@ export default function ProductWorkspacePage({ params }: ProductWorkspaceProps) 
   const [stockInput, setStockInput] = useState<number>(0);
   const [lowStockThreshold, setLowStockThreshold] = useState<number>(10);
   const [priceInput, setPriceInput] = useState<number>(0);
-  const [comparePriceInput, setComparePriceInput] = useState<number>(0);
   const [isFeatured, setIsFeatured] = useState<boolean>(false);
   const [statusInput, setStatusInput] = useState<string>("ACTIVE");
   const [metaTitle, setMetaTitle] = useState<string>("");
@@ -76,7 +75,6 @@ export default function ProductWorkspacePage({ params }: ProductWorkspaceProps) 
       setProduct(p);
       setStockInput(p.stock ?? 0);
       setPriceInput(p.price ?? 0);
-      setComparePriceInput(p.compareAtPrice ?? 0);
       setIsFeatured(p.isFeatured ?? false);
       setStatusInput(p.status ?? "ACTIVE");
       setMetaTitle(p.metaTitle || p.name || "");
@@ -266,11 +264,6 @@ export default function ProductWorkspacePage({ params }: ProductWorkspaceProps) 
                 <div>
                   <p className="text-xs text-gray-400 font-bold uppercase">Base Price</p>
                   <h3 className="text-2xl font-extrabold text-gray-900">${product.price.toFixed(2)}</h3>
-                  {product.compareAtPrice && product.compareAtPrice > product.price && (
-                    <p className="text-xs text-emerald-600 font-bold">
-                      Save ${(product.compareAtPrice - product.price).toFixed(2)} ({Math.round(((product.compareAtPrice - product.price) / product.compareAtPrice) * 100)}% OFF)
-                    </p>
-                  )}
                 </div>
               </div>
 
@@ -461,22 +454,11 @@ export default function ProductWorkspacePage({ params }: ProductWorkspaceProps) 
                         className="bg-white rounded-xl text-sm"
                       />
                     </div>
-                    <div className="space-y-1">
-                      <label className="font-bold text-gray-900 text-sm">Compare-At Sale Price ($)</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={comparePriceInput}
-                        onChange={(e) => setComparePriceInput(Number(e.target.value))}
-                        className="bg-white rounded-xl text-sm"
-                      />
-                      <p className="text-xs text-gray-400">Set higher than regular price to display a discount strike-through</p>
-                    </div>
                   </div>
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-end pt-2">
                     <Button
-                      onClick={() => handleUpdateProduct({ price: priceInput, compareAtPrice: comparePriceInput })}
+                      onClick={() => handleUpdateProduct({ price: priceInput })}
                       disabled={isSaving}
                       className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-6"
                     >

@@ -32,7 +32,7 @@ export function ProductGrid({ products = [], totalProducts = 0, showCount = true
             // Effective (campaign-adjusted) price from API
             price={product.price}
             // Original base price for strikethrough
-            originalPrice={product.originalPrice ?? product.compareAtPrice ?? undefined}
+            originalPrice={product.originalPrice ?? undefined}
             // Campaign pricing fields — all from backend, never recomputed on frontend
             isDiscounted={product.isDiscounted ?? false}
             discountPercent={product.discountPercent ?? 0}

@@ -87,7 +87,6 @@ export interface VendorProductInput {
   brand?: string;
   description?: string;
   price: number;
-  compareAtPrice?: number;
   categoryName?: string;
   images?: string[];
   stock: number;
@@ -120,7 +119,6 @@ export interface VendorProductDTO {
   slug: string;
   description: string | null;
   price: number;
-  compareAtPrice: number | null;
   categoryName: string | null;
   images: string[];
   stock: number;
@@ -205,7 +203,6 @@ export const VendorProductSchema = {
       return { success: false as const, error: "Valid non-negative price is required" };
     }
     const stock = data.stock !== undefined ? parseInt(data.stock, 10) : 0;
-    const compareAtPrice = data.compareAtPrice ? parseFloat(data.compareAtPrice) : undefined;
     const weight = data.weight !== undefined ? parseFloat(data.weight) : undefined;
 
     return {
@@ -215,7 +212,6 @@ export const VendorProductSchema = {
         brand: data.brand ? String(data.brand).trim() : undefined,
         description: data.description ? String(data.description).trim() : undefined,
         price,
-        compareAtPrice: isNaN(compareAtPrice!) ? undefined : compareAtPrice,
         categoryName: data.categoryName ? String(data.categoryName).trim() : undefined,
         images: Array.isArray(data.images) ? data.images : (data.images ? [data.images] : []),
         stock: isNaN(stock) || stock < 0 ? 0 : stock,

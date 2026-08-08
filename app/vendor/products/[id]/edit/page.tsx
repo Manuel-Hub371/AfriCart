@@ -35,10 +35,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     description: "",
     category: "",
     price: 0,
-    compareAtPrice: 0,
     stock: 0,
     status: "ACTIVE",
   });
+  const [vendorCategories, setVendorCategories] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [variants, setVariants] = useState<GeneratedVariant[]>([]);
   const [availablePolicies, setAvailablePolicies] = useState<ShippingPolicyOption[]>([]);
@@ -71,11 +71,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         setLoading(true);
         setFetchError(null);
 
-        // 1. Fetch store policies, campaigns
-        const [policiesRes, campaignsRes, storePoliciesRes] = await Promise.all([
+        // 1. Fetch store policies, campaigns, store details
+        const [policiesRes, campaignsRes, storePoliciesRes, storeRes] = await Promise.all([
           fetch("/api/vendor/shipping-policies"),
           fetch("/api/vendor/campaigns"),
           fetch("/api/vendor/policies"),
+          fetch("/api/vendor/store"),
         ]);
         if (policiesRes.ok) {
           const policiesData = await policiesRes.json();
@@ -93,6 +94,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             setWarrantyPolicies(pData.policies.warranty || []);
           }
         }
+        if (storeRes.ok) {
+          const sData = await storeRes.json();
+          const storeObj = sData.store || sData;
+          const assignedCategories = Array.isArray(storeObj.categories)
+            ? storeObj.categories.map((c: any) => c.name).filter(Boolean)
+            : [];
+          if (assignedCategories.length === 0 && storeObj.category) {
+            assignedCategories.push(storeObj.category);
+          }
+          setVendorCategories(assignedCategories);
+        }
 
         // 2. Fetch product details
         const res = await fetch(`/api/vendor/products/${productId}`);
@@ -107,9 +119,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             name: p.name || "",
             brand: p.brand || "",
             description: p.description || "",
-            category: p.categoryName || "General",
+            category: p.categoryName || "",
             price: p.price || 0,
-            compareAtPrice: p.compareAtPrice || 0,
             stock: p.stock || 0,
             status: p.status || "ACTIVE",
           });
@@ -172,9 +183,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           brand: productData.brand.trim() || undefined,
           description: productData.description.trim() || undefined,
           price: productData.price,
-          compareAtPrice: productData.compareAtPrice > 0 ? productData.compareAtPrice : undefined,
           stock: productData.stock,
-          categoryName: productData.category.trim() || "General",
+          categoryName: productData.category.trim() || undefined,
           images,
           variants,
           weight: weight > 0 ? weight : undefined,
@@ -366,6 +376,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <div id="section-category">
                 <CategorySelector
                   category={productData.category}
+                  vendorCategories={vendorCategories}
                   onCategoryChange={(category) => setProductData((prev) => ({ ...prev, category }))}
                 />
               </div>
@@ -374,8 +385,6 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                 <PricingCard
                   price={productData.price}
                   onPriceChange={(price) => setProductData((prev) => ({ ...prev, price }))}
-                  compareAtPrice={productData.compareAtPrice}
-                  onComparePriceChange={(compareAtPrice) => setProductData((prev) => ({ ...prev, compareAtPrice }))}
                 />
               </div>
 

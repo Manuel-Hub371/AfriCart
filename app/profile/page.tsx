@@ -31,7 +31,6 @@ interface DashboardData {
     id: string;
     name: string;
     price: number;
-    compareAtPrice: number | null;
     rating: number;
     image: string;
     stock: number;
@@ -252,11 +251,6 @@ export default function DashboardPage() {
                           <span className="text-lg font-bold text-emerald-600">
                             ${product.price.toFixed(2)}
                           </span>
-                          {product.compareAtPrice && (
-                            <span className="text-xs text-gray-400 line-through">
-                              ${product.compareAtPrice.toFixed(2)}
-                            </span>
-                          )}
                         </div>
                         {product.rating > 0 && (
                           <div className="flex items-center gap-1">

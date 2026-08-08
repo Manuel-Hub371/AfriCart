@@ -30,11 +30,11 @@ export default function AddProductPage() {
     description: "",
     category: "",
     price: 0,
-    compareAtPrice: 0,
     costPrice: 0,
     stock: 0,
     sku: "",
   });
+  const [vendorCategories, setVendorCategories] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [variants, setVariants] = useState<GeneratedVariant[]>([]);
   const [availablePolicies, setAvailablePolicies] = useState<ShippingPolicyOption[]>([]);
@@ -63,10 +63,11 @@ export default function AddProductPage() {
   useEffect(() => {
     async function loadMarketingData() {
       try {
-        const [policiesRes, campaignsRes, storePoliciesRes] = await Promise.all([
+        const [policiesRes, campaignsRes, storePoliciesRes, storeRes] = await Promise.all([
           fetch("/api/vendor/shipping-policies"),
           fetch("/api/vendor/campaigns"),
           fetch("/api/vendor/policies"),
+          fetch("/api/vendor/store"),
         ]);
         if (policiesRes.ok) {
           const data = await policiesRes.json();
@@ -86,8 +87,22 @@ export default function AddProductPage() {
             setWarrantyPolicies(pData.policies.warranty || []);
           }
         }
+        if (storeRes.ok) {
+          const sData = await storeRes.json();
+          const storeObj = sData.store || sData;
+          const assignedCategories = Array.isArray(storeObj.categories)
+            ? storeObj.categories.map((c: any) => c.name).filter(Boolean)
+            : [];
+          if (assignedCategories.length === 0 && storeObj.category) {
+            assignedCategories.push(storeObj.category);
+          }
+          setVendorCategories(assignedCategories);
+          if (assignedCategories.length === 1) {
+            setProductData((prev) => ({ ...prev, category: assignedCategories[0] }));
+          }
+        }
       } catch (err) {
-        console.error("Failed to fetch marketing data:", err);
+        console.error("Failed to fetch marketing and store data:", err);
       }
     }
     loadMarketingData();
@@ -117,9 +132,8 @@ export default function AddProductPage() {
           brand: productData.brand.trim() || undefined,
           description: productData.description.trim() || undefined,
           price: productData.price,
-          compareAtPrice: productData.compareAtPrice > 0 ? productData.compareAtPrice : undefined,
           stock: productData.stock,
-          categoryName: productData.category.trim() || "General",
+          categoryName: productData.category.trim() || undefined,
           images,
           variants,
           weight: weight > 0 ? weight : undefined,
@@ -260,6 +274,7 @@ export default function AddProductPage() {
               <div id="section-category">
                 <CategorySelector
                   category={productData.category}
+                  vendorCategories={vendorCategories}
                   onCategoryChange={(category) => setProductData((prev) => ({ ...prev, category }))}
                 />
               </div>
@@ -268,8 +283,6 @@ export default function AddProductPage() {
                 <PricingCard
                   price={productData.price}
                   onPriceChange={(price) => setProductData((prev) => ({ ...prev, price }))}
-                  compareAtPrice={productData.compareAtPrice}
-                  onComparePriceChange={(compareAtPrice) => setProductData((prev) => ({ ...prev, compareAtPrice }))}
                 />
               </div>
 

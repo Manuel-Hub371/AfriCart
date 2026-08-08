@@ -32,7 +32,6 @@ function toVendorProductDTO(product: any): VendorProductDTO {
     slug: product.slug,
     description: product.description ?? null,
     price: Number(product.price),
-    compareAtPrice: product.compareAtPrice ? Number(product.compareAtPrice) : null,
     categoryName: product.categoryName ?? null,
     images: product.images ?? [],
     stock: product.stock,
@@ -44,7 +43,6 @@ function toVendorProductDTO(product: any): VendorProductDTO {
           id: v.id,
           sku: v.sku,
           price: v.price ? Number(v.price) : Number(product.price),
-          compareAtPrice: v.compareAtPrice ? Number(v.compareAtPrice) : null,
           stock: v.stock !== undefined ? Number(v.stock) : product.stock,
           attributes: v.attributes || v.options || {},
           images: Array.isArray(v.images) ? v.images : [],
@@ -70,6 +68,21 @@ function toVendorProductDTO(product: any): VendorProductDTO {
     createdAt: product.createdAt instanceof Date ? product.createdAt.toISOString() : product.createdAt,
     updatedAt: product.updatedAt instanceof Date ? product.updatedAt.toISOString() : product.updatedAt,
   };
+}
+
+/**
+ * Helper to resolve allowed category names for a vendor store
+ */
+function getAuthorizedVendorCategoryNames(store: any): string[] {
+  const categoryAssignments = Array.isArray(store.categories) ? store.categories : [];
+  const assignedNames = categoryAssignments
+    .map((ca: any) => ca.storeCategory?.name)
+    .filter((name: any): name is string => typeof name === "string" && Boolean(name.trim()));
+
+  if (assignedNames.length === 0 && store.category) {
+    assignedNames.push(store.category);
+  }
+  return Array.from(new Set(assignedNames));
 }
 
 /**
@@ -206,6 +219,25 @@ export class VendorService {
    */
   async createVendorProduct(userId: string, input: VendorProductInput): Promise<VendorProductDTO> {
     const { store } = await this.resolveVendorStore(userId);
+    const authorizedCategories = getAuthorizedVendorCategoryNames(store);
+
+    if (authorizedCategories.length === 1) {
+      input.categoryName = authorizedCategories[0];
+    } else if (authorizedCategories.length > 1) {
+      if (!input.categoryName || !authorizedCategories.includes(input.categoryName)) {
+        throw {
+          code: "UNAUTHORIZED_CATEGORY",
+          message: `Category "${input.categoryName || "none"}" is not authorized for your store. Allowed categories: ${authorizedCategories.join(", ")}`,
+          status: 403,
+        };
+      }
+    } else if (input.categoryName && authorizedCategories.length > 0 && !authorizedCategories.includes(input.categoryName)) {
+      throw {
+        code: "UNAUTHORIZED_CATEGORY",
+        message: `Category "${input.categoryName}" is not authorized for your store.`,
+        status: 403,
+      };
+    }
 
     const product = await vendorRepository.createVendorProduct(store.id, input);
 
@@ -235,6 +267,19 @@ export class VendorService {
     const existing = await vendorRepository.findVendorProductById(productId, store.id);
     if (!existing) {
       throw { code: "PRODUCT_NOT_FOUND", message: "Product not found", status: 404 };
+    }
+
+    if (input.categoryName !== undefined) {
+      const authorizedCategories = getAuthorizedVendorCategoryNames(store);
+      if (authorizedCategories.length === 1) {
+        input.categoryName = authorizedCategories[0];
+      } else if (authorizedCategories.length > 1 && !authorizedCategories.includes(input.categoryName)) {
+        throw {
+          code: "UNAUTHORIZED_CATEGORY",
+          message: `Category "${input.categoryName}" is not authorized for your store. Allowed categories: ${authorizedCategories.join(", ")}`,
+          status: 403,
+        };
+      }
     }
 
     await vendorRepository.updateVendorProduct(productId, store.id, input);

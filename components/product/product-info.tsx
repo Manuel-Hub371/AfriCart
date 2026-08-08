@@ -7,7 +7,6 @@ interface ProductInfoProps {
   name: string;
   brand?: string | null;
   category?: string | null;
-  subcategory?: string | null;
   sku?: string | null;
   rating?: number;
   reviews?: number;
@@ -24,7 +23,6 @@ export function ProductInfo({
   name,
   brand,
   category,
-  subcategory,
   sku,
   rating = 5.0,
   reviews = 0,
@@ -58,7 +56,7 @@ export function ProductInfo({
 
         {category && (
           <Badge variant="outline" className="bg-gray-50 text-gray-700 font-bold">
-            {category} {subcategory ? `> ${subcategory}` : ""}
+            {category}
           </Badge>
         )}
 

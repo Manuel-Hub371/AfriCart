@@ -6,7 +6,6 @@ export interface VariantItem {
   id: string;
   sku?: string | null;
   price?: number | null;
-  compareAtPrice?: number | null;
   stock: number;
   attributes: Record<string, string>; // e.g. { Color: "Black", Size: "L", Material: "Cotton" }
   images?: string[] | null;

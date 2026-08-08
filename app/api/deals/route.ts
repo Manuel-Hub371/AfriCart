@@ -100,7 +100,6 @@ export async function GET(req: NextRequest) {
           originalPrice: pricing.originalPrice,
           price: pricing.effectivePrice,
           campaignPrice: pricing.campaignPrice,
-          compareAtPrice: pricing.isDiscounted ? pricing.originalPrice : (p.compareAtPrice || null),
 
           // Campaign metadata
           campaign: pricing.campaign,
