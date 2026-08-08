@@ -70,65 +70,6 @@ export default function ShippingCard({
         </Link>
       </div>
 
-      {/* Package Weight & Dimensions */}
-      <div>
-        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-          Package Weight &amp; Dimensions
-        </label>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">Weight (kg)</label>
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="0.5"
-              value={weight || ""}
-              onChange={(e) => onChangeWeight && onChangeWeight(parseFloat(e.target.value) || 0)}
-              className="h-10 rounded-xl text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">Length (cm)</label>
-            <Input
-              type="number"
-              placeholder="10"
-              value={length || ""}
-              onChange={(e) =>
-                onChangeDimensions &&
-                onChangeDimensions({ length: parseFloat(e.target.value) || 0, width, height })
-              }
-              className="h-10 rounded-xl text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">Width (cm)</label>
-            <Input
-              type="number"
-              placeholder="10"
-              value={width || ""}
-              onChange={(e) =>
-                onChangeDimensions &&
-                onChangeDimensions({ length, width: parseFloat(e.target.value) || 0, height })
-              }
-              className="h-10 rounded-xl text-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-xs text-gray-600 mb-1">Height (cm)</label>
-            <Input
-              type="number"
-              placeholder="10"
-              value={height || ""}
-              onChange={(e) =>
-                onChangeDimensions &&
-                onChangeDimensions({ length, width, height: parseFloat(e.target.value) || 0 })
-              }
-              className="h-10 rounded-xl text-sm"
-            />
-          </div>
-        </div>
-      </div>
-
       {/* Policy Selector */}
       <div className="space-y-3 pt-2">
         <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">

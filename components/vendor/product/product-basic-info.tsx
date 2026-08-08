@@ -259,25 +259,6 @@ export default function ProductBasicInfo({
           </div>
         </div>
 
-        {/* Condition */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Condition</label>
-          <div className="flex gap-3">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="condition" defaultChecked />
-              <span className="text-sm">New</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="condition" />
-              <span className="text-sm">Refurbished</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input type="radio" name="condition" />
-              <span className="text-sm">Used</span>
-            </label>
-          </div>
-        </div>
-
         {/* Tags */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Tags</label>

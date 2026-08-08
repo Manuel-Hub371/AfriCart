@@ -306,12 +306,6 @@ export default function AddProductPage() {
                   availablePolicies={availablePolicies}
                   selectedPolicyIds={selectedPolicyIds}
                   onChangePolicyIds={setSelectedPolicyIds}
-                  weight={weight}
-                  onChangeWeight={setWeight}
-                  length={dimensions.length}
-                  width={dimensions.width}
-                  height={dimensions.height}
-                  onChangeDimensions={setDimensions}
                 />
                 <PoliciesCard
                   refundPolicies={refundPolicies}
