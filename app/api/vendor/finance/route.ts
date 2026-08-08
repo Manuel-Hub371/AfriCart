@@ -28,9 +28,7 @@ export async function GET(req: NextRequest) {
     const orders = await db.order.findMany({
       where: {
         orderItems: {
-          some: {
-            product: { storeId },
-          },
+          some: { storeId },
         },
       },
       include: {
@@ -39,36 +37,52 @@ export async function GET(req: NextRequest) {
             user: { select: { firstName: true, lastName: true, email: true } },
           },
         },
+        orderItems: {
+          where: { storeId },
+          select: { price: true, quantity: true, status: true },
+        },
       },
       orderBy: { createdAt: "desc" },
     });
 
-    const grossRevenue = orders.reduce((acc, o) => acc + Number(o.totalAmount || 0), 0);
+    let grossRevenue = 0;
+    let completedPayouts = 0;
+    let pendingPayouts = 0;
+
     const platformFeeRate = 0.10;
-    const totalPlatformFee = grossRevenue * platformFeeRate;
-    const netEarnings = grossRevenue - totalPlatformFee;
-
-    const completedOrders = orders.filter((o) => o.status === "DELIVERED");
-    const pendingOrders = orders.filter((o) => o.status !== "DELIVERED" && o.status !== "CANCELLED");
-
-    const completedPayouts = completedOrders.reduce((acc, o) => acc + Number(o.totalAmount || 0) * 0.9, 0);
-    const pendingPayouts = pendingOrders.reduce((acc, o) => acc + Number(o.totalAmount || 0) * 0.9, 0);
 
     const transactions = orders.map((o) => {
       const u = o.customerProfile?.user;
       const customerName = `${u?.firstName || "Customer"} ${u?.lastName || ""}`.trim() || u?.email || "Guest";
+      
+      const vendorGrossAmount = o.orderItems.reduce((sum, item) => sum + (Number(item.price || 0) * item.quantity), 0);
+      const fee = vendorGrossAmount * platformFeeRate;
+      const netAmount = vendorGrossAmount - fee;
+
+      if (o.status !== "CANCELLED") {
+        grossRevenue += vendorGrossAmount;
+        if (o.status === "DELIVERED") {
+          completedPayouts += netAmount;
+        } else {
+          pendingPayouts += netAmount;
+        }
+      }
+
       return {
         id: o.id.slice(0, 8).toUpperCase(),
         fullId: o.id,
         customer: customerName,
         type: "Sale",
-        grossAmount: Number(o.totalAmount || 0),
-        fee: Number(o.totalAmount || 0) * 0.1,
-        netAmount: Number(o.totalAmount || 0) * 0.9,
+        grossAmount: vendorGrossAmount,
+        fee,
+        netAmount,
         status: o.status === "DELIVERED" ? "Completed" : o.status === "CANCELLED" ? "Refunded" : "Pending",
         date: new Date(o.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
       };
     });
+
+    const totalPlatformFee = grossRevenue * platformFeeRate;
+    const netEarnings = grossRevenue - totalPlatformFee;
 
     return NextResponse.json({
       summary: {

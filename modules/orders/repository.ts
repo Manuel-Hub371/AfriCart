@@ -105,6 +105,7 @@ export class OrderRepository {
           orderItems: {
             create: pricedItems.map(({ item, pricing }) => ({
               productId: item.productId,
+              variantId: (item as any).variantId || null,
               quantity: item.quantity,
               // Effective (campaign-discounted) price
               price: pricing.effectivePrice,
@@ -114,6 +115,8 @@ export class OrderRepository {
               campaignId: pricing.campaignId,
               campaignName: pricing.campaignName,
               storeId: item.product.storeId,
+              status: "PROCESSING",
+              isInventoryRestored: false,
             })),
           },
         },
@@ -127,7 +130,7 @@ export class OrderRepository {
         },
       });
 
-      // Update product stock and status
+      // Update product & variant stock and status
       for (const { item } of pricedItems) {
         const newStock = item.product.stock - item.quantity;
         await tx.product.update({
@@ -138,6 +141,19 @@ export class OrderRepository {
             soldCount: { increment: item.quantity },
           },
         });
+
+        // Synchronize variant stock if variantId exists
+        const variantId = (item as any).variantId;
+        if (variantId) {
+          const variant = await tx.productVariant.findUnique({ where: { id: variantId } });
+          if (variant) {
+            const newVarStock = Math.max(0, variant.stock - item.quantity);
+            await tx.productVariant.update({
+              where: { id: variantId },
+              data: { stock: newVarStock },
+            });
+          }
+        }
       }
 
       // Clear customer's cart
@@ -213,50 +229,37 @@ export class OrderRepository {
    * Update order status with store ownership check
    */
   async updateVendorOrderStatus(storeId: string, orderId: string, status: UpdateOrderStatusInput["status"]) {
-    const order = await db.order.findFirst({
-      where: {
-        id: orderId,
-        deletedAt: null,
-        orderItems: {
-          some: { storeId },
-        },
-      },
-      include: {
-        orderItems: true,
-      },
+    // 1. Verify vendor owns order items in this order
+    const vendorItems = await db.orderItem.findMany({
+      where: { orderId, storeId },
+      include: { product: true },
     });
 
-    if (!order) {
+    if (vendorItems.length === 0) {
       throw { code: "ORDER_NOT_FOUND", message: "Order not found for this store", status: 404 };
     }
 
-    const previousStatus = String(order.status);
     const targetStatus = String(status);
     const isNowCancelledOrRefunded = targetStatus === "CANCELLED" || targetStatus === "REFUNDED" || targetStatus === "RETURNED";
-    const wasNotCancelledOrRefunded = previousStatus !== "CANCELLED" && previousStatus !== "REFUNDED" && previousStatus !== "RETURNED";
 
-    const updatedOrder = await db.order.update({
-      where: { id: orderId },
-      data: { status },
-      include: {
-        orderItems: {
-          include: {
-            product: true,
-            store: true,
-          },
-        },
-      },
+    // 2. Update ONLY this vendor's order items
+    await db.orderItem.updateMany({
+      where: { orderId, storeId },
+      data: { status: targetStatus },
     });
 
-    // If order was cancelled or refunded, adjust product stock and soldCount
-    if (isNowCancelledOrRefunded && wasNotCancelledOrRefunded) {
+    // 3. Idempotent inventory & variant stock restoration if items are cancelled/refunded
+    if (isNowCancelledOrRefunded) {
       const { queueProductBestSellerRecalculation } = await import("@/modules/catalog/best-seller-calculator");
 
-      for (const item of order.orderItems) {
+      const itemsToRestore = vendorItems.filter((i) => !i.isInventoryRestored);
+
+      for (const item of itemsToRestore) {
         const prod = await db.product.findUnique({
           where: { id: item.productId },
           select: { id: true, stock: true, soldCount: true, status: true },
         });
+
         if (prod) {
           const newSoldCount = Math.max(0, (prod.soldCount || 0) - item.quantity);
           const newStock = (prod.stock || 0) + item.quantity;
@@ -271,10 +274,57 @@ export class OrderRepository {
             },
           });
 
+          // Restore variant stock if variantId is present
+          if (item.variantId) {
+            const variant = await db.productVariant.findUnique({ where: { id: item.variantId } });
+            if (variant) {
+              await db.productVariant.update({
+                where: { id: item.variantId },
+                data: { stock: variant.stock + item.quantity },
+              });
+            }
+          }
+
+          // Mark item inventory as restored so retries are idempotent
+          await db.orderItem.update({
+            where: { id: item.id },
+            data: { isInventoryRestored: true },
+          });
+
           queueProductBestSellerRecalculation(item.productId);
         }
       }
     }
+
+    // 4. Calculate aggregate Order status across ALL vendor items in the order
+    const allOrderItems = await db.orderItem.findMany({
+      where: { orderId },
+      select: { status: true },
+    });
+
+    const itemStatuses = allOrderItems.map((i) => i.status);
+    let aggregateOrderStatus = "PROCESSING";
+
+    if (itemStatuses.every((s) => s === "CANCELLED" || s === "REFUNDED")) {
+      aggregateOrderStatus = "CANCELLED";
+    } else if (itemStatuses.every((s) => s === "DELIVERED")) {
+      aggregateOrderStatus = "DELIVERED";
+    } else if (itemStatuses.every((s) => s === "SHIPPED" || s === "DELIVERED")) {
+      aggregateOrderStatus = "SHIPPED";
+    }
+
+    const updatedOrder = await db.order.update({
+      where: { id: orderId },
+      data: { status: aggregateOrderStatus },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+            store: true,
+          },
+        },
+      },
+    });
 
     return updatedOrder;
   }

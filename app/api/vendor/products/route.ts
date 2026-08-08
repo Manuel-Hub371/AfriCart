@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUserId } from "@/lib/auth/authentication";
 import { vendorService } from "@/modules/vendor/service";
 import { VendorProductSchema } from "@/modules/vendor/dto";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 
 // GET /api/vendor/products
 export async function GET() {
@@ -25,6 +26,11 @@ export async function POST(req: NextRequest) {
   const userId = await getAuthenticatedUserId();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rl = checkRateLimit(`vendor-prod-write:${userId}`, { limit: 20, windowMs: 60000 });
+  if (!rl.success) {
+    return NextResponse.json({ error: "Rate limit exceeded. Please wait a minute." }, { status: 429 });
   }
 
   let body: unknown;

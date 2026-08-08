@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         where: {
           orderItems: {
             some: {
-              product: { storeId: store.id },
+              storeId: store.id,
             },
           },
         },
@@ -50,6 +50,10 @@ export async function GET(req: NextRequest) {
           status: true,
           createdAt: true,
           customerProfileId: true,
+          orderItems: {
+            where: { storeId: store.id },
+            select: { price: true, quantity: true, status: true },
+          },
         },
       }),
       db.product.count({
@@ -68,7 +72,7 @@ export async function GET(req: NextRequest) {
         where: {
           orderItems: {
             some: {
-              product: { storeId: store.id },
+              storeId: store.id,
             },
           },
         },
@@ -79,6 +83,7 @@ export async function GET(req: NextRequest) {
             },
           },
           orderItems: {
+            where: { storeId: store.id },
             include: {
               product: { select: { name: true } },
             },
@@ -95,13 +100,23 @@ export async function GET(req: NextRequest) {
       }),
     ]);
 
-    const totalRevenue = allOrders.reduce((acc, order) => acc + Number(order.totalAmount || 0), 0);
-    const todaySales = allOrders
-      .filter((o) => new Date(o.createdAt) >= startOfToday)
-      .reduce((acc, order) => acc + Number(order.totalAmount || 0), 0);
-    const monthlyRevenue = allOrders
-      .filter((o) => new Date(o.createdAt) >= startOfMonth)
-      .reduce((acc, order) => acc + Number(order.totalAmount || 0), 0);
+    let totalRevenue = 0;
+    let todaySales = 0;
+    let monthlyRevenue = 0;
+
+    allOrders.forEach((o) => {
+      const orderRevenue = o.orderItems.reduce((sum, item) => sum + (Number(item.price || 0) * item.quantity), 0);
+      const isPaid = o.status !== "CANCELLED";
+      if (isPaid) {
+        totalRevenue += orderRevenue;
+        if (new Date(o.createdAt) >= startOfToday) {
+          todaySales += orderRevenue;
+        }
+        if (new Date(o.createdAt) >= startOfMonth) {
+          monthlyRevenue += orderRevenue;
+        }
+      }
+    });
 
     const pendingOrdersCount = allOrders.filter((o) => o.status === "PENDING" || o.status === "PROCESSING").length;
     const processingOrdersCount = allOrders.filter((o) => o.status === "PROCESSING").length;

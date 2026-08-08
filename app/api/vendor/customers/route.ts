@@ -28,9 +28,7 @@ export async function GET(req: NextRequest) {
     const orders = await db.order.findMany({
       where: {
         orderItems: {
-          some: {
-            product: { storeId },
-          },
+          some: { storeId },
         },
       },
       include: {
@@ -47,7 +45,14 @@ export async function GET(req: NextRequest) {
                 createdAt: true,
               },
             },
+            addresses: {
+              take: 1,
+            },
           },
+        },
+        orderItems: {
+          where: { storeId },
+          select: { price: true, quantity: true },
         },
       },
       orderBy: { createdAt: "desc" },
@@ -59,7 +64,14 @@ export async function GET(req: NextRequest) {
       const u = order.customerProfile?.user;
       if (!u) return;
 
-      const totalAmount = Number(order.totalAmount || 0);
+      const vendorSpendForOrder = order.orderItems.reduce(
+        (sum, item) => sum + Number(item.price || 0) * item.quantity,
+        0
+      );
+
+      const customerAddr = order.customerProfile?.addresses?.[0];
+      const city = customerAddr?.city || "N/A";
+      const country = customerAddr?.country || "N/A";
 
       if (!customerMap.has(u.id)) {
         customerMap.set(u.id, {
@@ -67,11 +79,11 @@ export async function GET(req: NextRequest) {
           name: `${u.firstName || ""} ${u.lastName || ""}`.trim() || u.email,
           email: u.email,
           phone: u.phone || "N/A",
-          country: "Ghana",
-          city: "Accra",
+          country,
+          city,
           totalOrders: 1,
-          lifetimeSpend: totalAmount,
-          averageOrderValue: totalAmount,
+          lifetimeSpend: vendorSpendForOrder,
+          averageOrderValue: vendorSpendForOrder,
           lastPurchase: new Date(order.createdAt).toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
@@ -87,7 +99,7 @@ export async function GET(req: NextRequest) {
       } else {
         const existing = customerMap.get(u.id);
         existing.totalOrders += 1;
-        existing.lifetimeSpend += totalAmount;
+        existing.lifetimeSpend += vendorSpendForOrder;
         existing.averageOrderValue = existing.lifetimeSpend / existing.totalOrders;
         if (new Date(order.createdAt) > existing.lastPurchaseDate) {
           existing.lastPurchaseDate = new Date(order.createdAt);
