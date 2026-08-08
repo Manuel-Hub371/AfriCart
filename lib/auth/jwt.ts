@@ -6,6 +6,7 @@ const secretKey = new TextEncoder().encode(JWT_SECRET);
 
 export interface JWTPayload {
   userId: string;
+  sessionId?: string;
   email: string;
   firstName: string;
   lastName: string;

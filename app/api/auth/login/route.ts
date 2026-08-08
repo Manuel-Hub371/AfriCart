@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { comparePassword, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
 import { getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
+import { createServerSession } from "@/lib/auth/session";
+import { checkRateLimit } from "@/lib/security/rate-limit";
 
 function parseUserAgent(uaString: string | null) {
   if (!uaString) return { browser: "Unknown", os: "Unknown", deviceType: "Unknown" };
@@ -43,6 +45,15 @@ export async function POST(req: Request) {
   const { browser, os, deviceType } = parseUserAgent(userAgent);
   // IP country can be resolved from custom CDN headers if available (e.g. Cloudflare CF-IPCountry)
   const country = req.headers.get("cf-ipcountry") || req.headers.get("x-vercel-ip-country") || null;
+
+  // Rate Limiting (5 attempts per minute per IP)
+  const rateLimit = checkRateLimit(`login:${ipAddress}`, { limit: 5, windowMs: 60 * 1000 });
+  if (!rateLimit.success) {
+    return NextResponse.json(
+      { message: "Too many login attempts. Please try again in 1 minute." },
+      { status: 429, headers: { "Retry-After": "60" } }
+    );
+  }
 
   try {
     const { email, password } = await req.json();
@@ -131,12 +142,16 @@ export async function POST(req: Request) {
       }
     });
 
-    // Generate cookies
+    // Create Server-Side Session in Database
+    const session = await createServerSession(user.id, userAgent, ipAddress);
+
+    // Generate cookies with embedded sessionId
     await setAuthCookies({
       userId: user.id,
+      sessionId: session.id,
       email: user.email,
-      firstName: user.email.split("@")[0], // Fallback if no profile is loaded yet
-      lastName: "",
+      firstName: user.firstName || user.email.split("@")[0],
+      lastName: user.lastName || "",
       roles,
       permissions
     });

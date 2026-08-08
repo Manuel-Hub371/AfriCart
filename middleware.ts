@@ -2,6 +2,15 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { verifyToken } from "./lib/auth/jwt";
 
+function getSafeRedirectUrl(redirectParam: string | null): string {
+  if (!redirectParam) return "/profile";
+  // Only permit valid relative paths starting with "/" and not containing "//" or protocol schemes
+  if (redirectParam.startsWith("/") && !redirectParam.startsWith("//") && !redirectParam.includes("://")) {
+    return redirectParam;
+  }
+  return "/profile";
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -37,7 +46,8 @@ export async function middleware(request: NextRequest) {
   if (isCustomerRoute || isVendorRoute) {
     if (!session || !session.userId) {
       const loginUrl = new URL("/auth/login", request.url);
-      loginUrl.searchParams.set("redirect", pathname);
+      const safeRedirect = getSafeRedirectUrl(pathname);
+      loginUrl.searchParams.set("redirect", safeRedirect);
       return NextResponse.redirect(loginUrl);
     }
 
