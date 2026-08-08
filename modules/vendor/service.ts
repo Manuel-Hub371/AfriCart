@@ -219,6 +219,16 @@ export class VendorService {
    */
   async createVendorProduct(userId: string, input: VendorProductInput): Promise<VendorProductDTO> {
     const { store } = await this.resolveVendorStore(userId);
+
+    // Backend Business Rule: Vendor cannot operate or create products if store is not approved ACTIVE
+    if (store.status !== "ACTIVE") {
+      throw {
+        code: "STORE_NOT_ACTIVE",
+        message: `Your store is currently ${store.status || "PENDING_APPROVAL"}. Products can only be created once your store application is approved by an administrator.`,
+        status: 403,
+      };
+    }
+
     const authorizedCategories = getAuthorizedVendorCategoryNames(store);
 
     if (authorizedCategories.length === 1) {
@@ -263,6 +273,15 @@ export class VendorService {
     input: Partial<VendorProductInput>
   ): Promise<VendorProductDTO> {
     const { store } = await this.resolveVendorStore(userId);
+
+    // Backend Business Rule: Vendor cannot operate or update products if store is not ACTIVE
+    if (store.status !== "ACTIVE") {
+      throw {
+        code: "STORE_NOT_ACTIVE",
+        message: `Your store is currently ${store.status || "PENDING_APPROVAL"}. Products can only be updated once your store application is approved by an administrator.`,
+        status: 403,
+      };
+    }
 
     const existing = await vendorRepository.findVendorProductById(productId, store.id);
     if (!existing) {

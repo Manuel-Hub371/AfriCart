@@ -177,3 +177,41 @@ export async function getAuthenticatedUserId(): Promise<string | null> {
     return null;
   }
 }
+
+/**
+ * Require authenticated Admin user in API route handlers
+ * Returns admin user object or null if unauthenticated / non-admin
+ */
+export async function getAuthenticatedAdminUser(): Promise<{ id: string; email: string; firstName: string; lastName: string } | null> {
+  const userId = await getAuthenticatedUserId();
+  if (!userId) return null;
+
+  try {
+    const { db } = await import("@/lib/db");
+    const user = await db.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      include: {
+        userRoles: {
+          include: { role: true }
+        }
+      }
+    });
+
+    if (!user) return null;
+
+    const roles = user.userRoles.map((ur) => ur.role.name.toUpperCase());
+    const isAdmin = roles.includes("ADMIN");
+
+    if (!isAdmin) return null;
+
+    return {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+  } catch (err) {
+    console.error("Failed to verify admin user:", err);
+    return null;
+  }
+}

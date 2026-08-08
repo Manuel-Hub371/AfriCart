@@ -19,7 +19,39 @@ async function main() {
     create: { name: "VENDOR", description: "Merchant store seller" },
   });
 
+  const adminRole = await prisma.role.upsert({
+    where: { name: "ADMIN" },
+    update: {},
+    create: { name: "ADMIN", description: "Platform administrator" },
+  });
+
   const passwordHash = await bcrypt.hash("password123", 10);
+
+  // 1b. Create Admin User
+  const adminUser = await prisma.user.upsert({
+    where: { email: "admin@africart.com" },
+    update: {
+      passwordHash,
+      status: "ACTIVE",
+      emailVerified: true,
+      emailVerificationStatus: "VERIFIED",
+    },
+    create: {
+      email: "admin@africart.com",
+      firstName: "AfriCart",
+      lastName: "Administrator",
+      passwordHash,
+      status: "ACTIVE",
+      emailVerified: true,
+      emailVerificationStatus: "VERIFIED",
+    },
+  });
+
+  await prisma.userRole.upsert({
+    where: { userId_roleId: { userId: adminUser.id, roleId: adminRole.id } },
+    update: {},
+    create: { userId: adminUser.id, roleId: adminRole.id },
+  });
 
   // 2. Create Sample Vendor User & Vendor Store
   const vendorUser = await prisma.user.upsert({
@@ -153,7 +185,6 @@ async function main() {
       slug: "handwoven-kente-cloth-stole",
       description: "Authentic handwoven Ashanti Kente cloth stealing vibrance and culture. Perfect for special occasions and celebrations.",
       price: 85.0,
-      compareAtPrice: 110.0,
       categoryName: "Fashion & Apparel",
       categoryId: categories[0].id,
       images: ["https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=600&h=600&fit=crop"],
@@ -167,7 +198,6 @@ async function main() {
       slug: "organic-raw-african-black-soap",
       description: "100% natural, handcrafted black soap infused with unrefined shea butter, cocoa pod ash, and coconut oil for radiant skin.",
       price: 18.5,
-      compareAtPrice: 24.0,
       categoryName: "Beauty & Wellness",
       categoryId: categories[2].id,
       images: ["https://images.unsplash.com/photo-1607006482172-3ba983050c26?w=600&h=600&fit=crop"],
@@ -181,7 +211,6 @@ async function main() {
       slug: "handcarved-wooden-ashanti-stool",
       description: "Traditional royal Ashanti stool handcarved from durable mahogany wood with intricate symbolic motifs.",
       price: 140.0,
-      compareAtPrice: 175.0,
       categoryName: "Art & Crafts",
       categoryId: categories[1].id,
       images: ["https://images.unsplash.com/photo-1538688525198-9b88f6f53126?w=600&h=600&fit=crop"],
@@ -195,7 +224,6 @@ async function main() {
       slug: "bolgatanga-woven-bolga-basket",
       description: "Durable and colorful market tote basket handwoven from elephant grass in Northern Ghana.",
       price: 45.0,
-      compareAtPrice: 55.0,
       categoryName: "Home & Living",
       categoryId: categories[3].id,
       images: ["https://images.unsplash.com/photo-1590736704728-f4730bb30770?w=600&h=600&fit=crop"],
@@ -209,7 +237,6 @@ async function main() {
       slug: "unrefined-pure-shea-butter-500g",
       description: "Grade-A unrefined yellow shea butter ethically sourced from women cooperatives in Tamale.",
       price: 22.0,
-      compareAtPrice: 28.0,
       categoryName: "Beauty & Wellness",
       categoryId: categories[2].id,
       images: ["https://images.unsplash.com/photo-1608248597260-2646c05d762e?w=600&h=600&fit=crop"],

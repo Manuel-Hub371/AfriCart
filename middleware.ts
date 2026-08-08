@@ -42,8 +42,11 @@ export async function middleware(request: NextRequest) {
   const isVendorRoute = 
     pathname.startsWith("/vendor");
 
-  // 1. Guard customer and vendor routes
-  if (isCustomerRoute || isVendorRoute) {
+  const isAdminRoute = 
+    pathname.startsWith("/admin");
+
+  // 1. Guard customer, vendor, and admin routes
+  if (isCustomerRoute || isVendorRoute || isAdminRoute) {
     if (!session || !session.userId) {
       const loginUrl = new URL("/auth/login", request.url);
       const safeRedirect = getSafeRedirectUrl(pathname);
@@ -51,34 +54,43 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // 2. Guard Vendor routes specifically
-    if (isVendorRoute) {
-      const roles = Array.isArray(session.roles)
-        ? session.roles.map((r: string) => String(r).toUpperCase())
-        : [];
-      const singleRole = String(session.role || "").toUpperCase();
+    const roles = Array.isArray(session.roles)
+      ? session.roles.map((r: string) => String(r).toUpperCase())
+      : [];
+    const singleRole = String(session.role || "").toUpperCase();
 
+    // 2. Guard Admin routes specifically (Requires ADMIN role)
+    if (isAdminRoute) {
+      const isAdmin = roles.includes("ADMIN") || singleRole === "ADMIN";
+      if (!isAdmin) {
+        return NextResponse.redirect(new URL("/profile", request.url));
+      }
+    }
+
+    // 3. Guard Vendor routes specifically
+    if (isVendorRoute) {
       const isVendorOrAdmin = 
         roles.includes("VENDOR") || 
         roles.includes("ADMIN") || 
         singleRole === "VENDOR" || 
         singleRole === "ADMIN";
 
-      // Only redirect to /profile if roles array is defined AND explicitly lacks VENDOR/ADMIN
       if (roles.length > 0 && !isVendorOrAdmin && singleRole === "CUSTOMER") {
         return NextResponse.redirect(new URL("/profile", request.url));
       }
     }
   }
 
-  // 3. Redirect authenticated users away from authentication pages
+  // 4. Redirect authenticated users away from authentication pages
   if (isAuthRoute && session && session.userId) {
     const roles = Array.isArray(session.roles)
       ? session.roles.map((r: string) => String(r).toUpperCase())
       : [];
     const singleRole = String(session.role || "").toUpperCase();
 
-    if (roles.includes("VENDOR") || roles.includes("ADMIN") || singleRole === "VENDOR" || singleRole === "ADMIN") {
+    if (roles.includes("ADMIN") || singleRole === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    } else if (roles.includes("VENDOR") || singleRole === "VENDOR") {
       return NextResponse.redirect(new URL("/vendor", request.url));
     } else {
       return NextResponse.redirect(new URL("/profile", request.url));
@@ -92,6 +104,7 @@ export const config = {
   matcher: [
     "/profile/:path*",
     "/vendor/:path*",
+    "/admin/:path*",
     "/cart",
     "/checkout",
     "/auth/login",
