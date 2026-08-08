@@ -365,6 +365,7 @@ model Product {
   description     String?
   brand           String?
   price           Float
+  compareAtPrice  Float?
   categoryName    String?
   categoryId      String?
   category        Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
