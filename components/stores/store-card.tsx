@@ -44,7 +44,7 @@ export function StoreCard({
   isFollowing = false,
   category = "General",
   categories = [],
-  businessType = "Retailer",
+  businessType = "Indivual",
   location = "Ghana",
   slug,
 }: StoreCardProps) {

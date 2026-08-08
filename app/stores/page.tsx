@@ -18,6 +18,7 @@ import {
   ArrowUpDown
 } from "lucide-react";
 import { OFFICIAL_STORE_CATEGORIES } from "@/lib/constants/store-categories";
+import { OFFICIAL_BUSINESS_TYPES } from "@/lib/constants/business-types";
 
 export default function StoresPage() {
   const [stores, setStores] = useState<any[]>([]);
@@ -178,13 +179,11 @@ export default function StoresPage() {
                     className="w-full h-11 px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-sm font-medium focus:outline-none focus:border-emerald-500"
                   >
                     <option value="all">All Business Types</option>
-                    <option value="Retailer">Retailer (Retail Store)</option>
-                    <option value="Wholesaler">Wholesaler (Wholesale Supplier)</option>
-                    <option value="Manufacturer">Manufacturer (Direct Brand)</option>
-                    <option value="Distributor">Distributor (Authorized Dealer)</option>
-                    <option value="Pharmacy">Pharmacy / Healthcare</option>
-                    <option value="Restaurant">Restaurant / Food Provider</option>
-                    <option value="Service Provider">Service Provider</option>
+                    {OFFICIAL_BUSINESS_TYPES.map((bt) => (
+                      <option key={bt.value} value={bt.value}>
+                        {bt.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

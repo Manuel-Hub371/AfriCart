@@ -96,7 +96,7 @@ function toVendorStoreDTO(store: any): VendorStoreDTO {
     category: store.category || (categoriesList[0]?.name ?? "Electronics & Gadget"),
     categories: categoriesList,
     categorySlugs: categorySlugsList,
-    businessType: store.businessType ?? "Retailer",
+    businessType: store.businessType ?? "Indivual",
     email: store.email ?? null,
     phone: store.phone ?? null,
     website: store.website ?? null,

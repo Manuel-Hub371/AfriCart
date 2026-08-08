@@ -301,8 +301,11 @@ export const RegisterVendorPayloadSchema = {
       ? storeCategorySlugs
       : (typeof storeCategory === "string" && storeCategory.trim() ? storeCategory.split(",").map((s) => s.trim()) : []);
 
-    if (rawCategories.length === 0) {
-      return { success: false as const, error: "At least one store category is required" };
+    // Business Type Validation (Strictly Indivual or Paternship)
+    const validBusinessTypes = ["Indivual", "Paternship"];
+    const cleanBusinessType = businessType ? String(businessType).trim() : "Indivual";
+    if (!validBusinessTypes.includes(cleanBusinessType)) {
+      return { success: false as const, error: "Invalid business type. Must be 'Indivual' or 'Paternship'" };
     }
 
     return {
@@ -317,7 +320,7 @@ export const RegisterVendorPayloadSchema = {
         storeDescription: storeDescription ? String(storeDescription).trim() : null,
         categorySlugs: Array.from(new Set(rawCategories)),
         businessName: businessName.trim(),
-        businessType: businessType ? String(businessType).trim() : "Retailer",
+        businessType: cleanBusinessType,
         registrationNumber: registrationNumber ? String(registrationNumber).trim() : null,
         taxId: taxId ? String(taxId).trim() : null,
         country: country.trim(),

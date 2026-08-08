@@ -24,6 +24,7 @@ import {
   X
 } from "lucide-react";
 import { OFFICIAL_STORE_CATEGORIES } from "@/lib/constants/store-categories";
+import { OFFICIAL_BUSINESS_TYPES } from "@/lib/constants/business-types";
 
 export default function VendorRegistrationPage() {
   const router = useRouter();
@@ -520,9 +521,11 @@ export default function VendorRegistrationPage() {
                     required
                   >
                     <option value="">Select business type</option>
-                    <option value="individual">Individual / Sole Proprietor</option>
-                    <option value="company">Registered Company</option>
-                    <option value="partnership">Partnership</option>
+                    {OFFICIAL_BUSINESS_TYPES.map((bt) => (
+                      <option key={bt.value} value={bt.value}>
+                        {bt.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

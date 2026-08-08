@@ -357,7 +357,7 @@ export class CatalogService {
         category: s.category || (categoriesList[0]?.name ?? "Electronics & Gadget"),
         categories: categoriesList,
         categorySlugs: categorySlugsList,
-        businessType: s.businessType || "Retailer",
+        businessType: s.businessType || "Indivual",
         city: city || null,
         region: region || null,
         country: country || "Ghana",

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OFFICIAL_STORE_CATEGORIES, mapLegacyCategoryToOfficialSlug } from "@/lib/constants/store-categories";
+import { OFFICIAL_BUSINESS_TYPES } from "@/lib/constants/business-types";
 
 interface StoreProfileFormProps {
   onSave: (data: any) => void;
@@ -174,13 +175,11 @@ export function StoreProfileForm({ onSave, initialData }: StoreProfileFormProps)
           onChange={(e) => setBusinessType(e.target.value)}
           className="w-full h-12 px-4 rounded-lg border border-gray-200 bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm font-medium"
         >
-          <option value="Retailer">Retailer (Retail Store)</option>
-          <option value="Wholesaler">Wholesaler (Wholesale Supplier)</option>
-          <option value="Manufacturer">Manufacturer (Direct Brand)</option>
-          <option value="Distributor">Distributor (Authorized Dealer)</option>
-          <option value="Pharmacy">Pharmacy / Healthcare</option>
-          <option value="Restaurant">Restaurant / Food Provider</option>
-          <option value="Service Provider">Service Provider</option>
+          {OFFICIAL_BUSINESS_TYPES.map((bt) => (
+            <option key={bt.value} value={bt.value}>
+              {bt.name}
+            </option>
+          ))}
         </select>
       </div>
 

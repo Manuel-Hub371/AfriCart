@@ -4,6 +4,7 @@ import { verifyToken, setAuthCookies, formatUserResponse } from "@/lib/auth/auth
 import { db, withDbRetry } from "@/lib/db";
 import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
 import { isValidStoreCategorySlug, mapLegacyCategoryToOfficialSlug } from "@/lib/constants/store-categories";
+import { isValidBusinessType, sanitizeBusinessType } from "@/lib/constants/business-types";
 
 /**
  * Generate an SEO-friendly unique slug for a store
@@ -74,6 +75,12 @@ export async function POST(req: Request) {
       }
     }
 
+    // Business Type Validation (Strictly Indivual or Paternship)
+    const cleanBusinessType = sanitizeBusinessType(businessType);
+    if (businessType && !isValidBusinessType(businessType.trim())) {
+      return NextResponse.json({ message: "Invalid business type. Must be 'Indivual' or 'Paternship'" }, { status: 400 });
+    }
+
     // Check duplicate store name
     const existingStore = await db.store.findFirst({
       where: { name: storeName, deletedAt: null }
@@ -123,7 +130,7 @@ export async function POST(req: Request) {
           userId: user.id,
           businessName,
           businessCategory: categorySlugs[0] || "electronics-gadget",
-          businessType: businessType || "Retailer",
+          businessType: cleanBusinessType,
           country,
           region,
           city,
@@ -171,7 +178,7 @@ export async function POST(req: Request) {
           slug,
           description: storeDescription || null,
           category: categoryRecords[0]?.name || "Electronics & Gadget",
-          businessType: businessType || "Retailer",
+          businessType: cleanBusinessType,
           country,
           region,
           city,

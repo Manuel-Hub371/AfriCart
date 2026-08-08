@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Upload, Loader2, Image as ImageIcon, X } from "lucide-react";
 import { OFFICIAL_STORE_CATEGORIES } from "@/lib/constants/store-categories";
+import { OFFICIAL_BUSINESS_TYPES } from "@/lib/constants/business-types";
 
 export default function BecomeVendorPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -240,8 +241,11 @@ export default function BecomeVendorPage() {
                         required
                         className="w-full h-11 px-4 rounded-md border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
                       >
-                        <option value="individual">Individual / Sole Proprietor</option>
-                        <option value="company">Registered Company</option>
+                        {OFFICIAL_BUSINESS_TYPES.map((bt) => (
+                          <option key={bt.value} value={bt.value}>
+                            {bt.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
                     <div>

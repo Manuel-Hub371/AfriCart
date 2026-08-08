@@ -28,8 +28,8 @@ export const OFFICIAL_STORE_CATEGORIES: OfficialStoreCategory[] = [
     description: "Cosmetics, skincare, haircare, fragrances, and personal grooming products.",
   },
   {
-    name: "Food & Groceries",
-    slug: "food-groceries",
+    name: "Food & Gorrices",
+    slug: "food-gorrices",
     description: "Fresh produce, packaged foods, beverages, snacks, and daily household essentials.",
   },
   {
@@ -43,8 +43,8 @@ export const OFFICIAL_STORE_CATEGORIES: OfficialStoreCategory[] = [
     description: "Vehicle parts, auto accessories, car care, tools, and automotive electronics.",
   },
   {
-    name: "Sports & Fitness",
-    slug: "sports-fitness",
+    name: "Sorts & Fitness",
+    slug: "sorts-fitness",
     description: "Sports gear, outdoor equipment, athletic wear, fitness instruments, and activewear.",
   },
   {
@@ -75,10 +75,10 @@ export function mapLegacyCategoryToOfficialSlug(legacyCategory?: string | null):
   if (lower.includes("home") || lower.includes("furnit") || lower.includes("living")) return "home-living";
   if (lower.includes("fashion") || lower.includes("clot") || lower.includes("appeal") || lower.includes("apparel")) return "fashion-appeal";
   if (lower.includes("beaut") || lower.includes("care") || lower.includes("cosmetic")) return "beauty-personal-care";
-  if (lower.includes("food") || lower.includes("groc")) return "food-groceries";
+  if (lower.includes("food") || lower.includes("groc") || lower.includes("gorric")) return "food-gorrices";
   if (lower.includes("pharm") || lower.includes("health") || lower.includes("medic")) return "pharmacy-health";
   if (lower.includes("auto") || lower.includes("car") || lower.includes("motor")) return "automotive-automobile";
-  if (lower.includes("sport") || lower.includes("fit")) return "sports-fitness";
+  if (lower.includes("sport") || lower.includes("sort") || lower.includes("fit")) return "sorts-fitness";
   if (lower.includes("book") || lower.includes("stat") || lower.includes("paper")) return "books-stationery";
   return "electronics-gadget";
 }
