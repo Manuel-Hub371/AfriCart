@@ -23,6 +23,7 @@ import {
   Loader2,
   X
 } from "lucide-react";
+import { OFFICIAL_STORE_CATEGORIES } from "@/lib/constants/store-categories";
 
 export default function VendorRegistrationPage() {
   const router = useRouter();
@@ -297,25 +298,55 @@ export default function VendorRegistrationPage() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Store Category <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    value={formData.storeCategory}
-                    onChange={(e) => setFormData({ ...formData, storeCategory: e.target.value })}
-                    className="w-full h-12 px-4 rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
-                    required
-                  >
-                    <option value="">Select a category</option>
-                    <option value="electronics">Electronics</option>
-                    <option value="fashion">Fashion</option>
-                    <option value="home">Home & Living</option>
-                    <option value="beauty">Beauty</option>
-                    <option value="sports">Sports</option>
-                    <option value="books">Books</option>
-                    <option value="groceries">Groceries</option>
-                    <option value="other">Other</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-semibold text-gray-700">
+                      Store Categories <span className="text-red-500">*</span>
+                    </label>
+                    <span className="text-xs text-green-700 font-bold bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+                      You can select multiple categories
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">
+                    Select all categories that describe your business:
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 p-3 rounded-xl border border-gray-200 bg-gray-50/50">
+                    {OFFICIAL_STORE_CATEGORIES.map((cat) => {
+                      const isSelected = (formData.storeCategory || "").split(",").includes(cat.slug);
+                      const toggle = () => {
+                        const current = (formData.storeCategory || "").split(",").filter(Boolean);
+                        let updated: string[];
+                        if (current.includes(cat.slug)) {
+                          updated = current.filter((s) => s !== cat.slug);
+                        } else {
+                          updated = [...current, cat.slug];
+                        }
+                        setFormData({ ...formData, storeCategory: updated.join(",") });
+                      };
+                      return (
+                        <button
+                          key={cat.slug}
+                          type="button"
+                          onClick={toggle}
+                          className={`flex items-start gap-2.5 p-2.5 rounded-lg border text-left transition-all ${
+                            isSelected
+                              ? "bg-green-50 border-green-500 text-green-900 font-medium ring-1 ring-green-500/20"
+                              : "bg-white border-gray-200 text-gray-700 hover:border-green-300"
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            className="mt-0.5 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer pointer-events-none"
+                          />
+                          <div>
+                            <p className="text-xs font-bold leading-tight">{cat.name}</p>
+                            <p className="text-[10px] text-gray-500 line-clamp-1">{cat.description}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 {/* Store Logo */}

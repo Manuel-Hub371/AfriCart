@@ -219,7 +219,7 @@ model Store {
   description     String?
   logo            String?
   banner          String?
-  category        String
+  category        String?
   businessType    String?       @default("Retailer")
 
   // Contact & Location
@@ -278,11 +278,35 @@ model Store {
   privacyPolicies  PrivacyPolicy[]  @relation("PrivacyPolicies")
   marketingCampaigns MarketingCampaign[]
   followers        StoreFollow[]
+  categories       StoreCategoryAssignment[]
 
   @@index([category])
   @@index([city])
   @@index([region])
   @@index([businessType])
+}
+
+model StoreCategory {
+  id          String                    @id @default(uuid())
+  name        String                    @unique
+  slug        String                    @unique
+  description String?
+  stores      StoreCategoryAssignment[]
+  createdAt   DateTime                  @default(now())
+  updatedAt   DateTime                  @updatedAt
+}
+
+model StoreCategoryAssignment {
+  id              String        @id @default(uuid())
+  storeId         String
+  store           Store         @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  storeCategoryId String
+  storeCategory   StoreCategory @relation(fields: [storeCategoryId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+
+  @@unique([storeId, storeCategoryId])
+  @@index([storeId])
+  @@index([storeCategoryId])
 }
 
 model Category {

@@ -6,6 +6,8 @@ export interface UpdateStoreInput {
   slug?: string;
   description?: string;
   category?: string;
+  categories?: string[];
+  categorySlugs?: string[];
   businessType?: string;
   logo?: string;
   banner?: string;
@@ -46,6 +48,8 @@ export interface VendorStoreDTO {
   logo: string | null;
   banner: string | null;
   category: string;
+  categories?: { id: string; name: string; slug: string }[];
+  categorySlugs?: string[];
   businessType: string | null;
   email: string | null;
   phone: string | null;

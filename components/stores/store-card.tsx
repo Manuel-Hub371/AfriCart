@@ -23,6 +23,7 @@ interface StoreCardProps {
   followerCount?: number;
   isFollowing?: boolean;
   category?: string;
+  categories?: { id: string; name: string; slug: string }[];
   businessType?: string;
   location?: string;
   slug?: string;
@@ -42,6 +43,7 @@ export function StoreCard({
   followerCount,
   isFollowing = false,
   category = "General",
+  categories = [],
   businessType = "Retailer",
   location = "Ghana",
   slug,
@@ -52,6 +54,10 @@ export function StoreCard({
     followerCount ?? followers ?? 0
   );
   const [isTogglingFollow, setIsTogglingFollow] = useState(false);
+
+  const displayCategories = categories && categories.length > 0
+    ? categories
+    : [{ id: "cat-1", name: category, slug: "cat-1" }];
 
   const realProductCount = productCount ?? products ?? 0;
   const isLogoUrl = Boolean(logo && (logo.startsWith("http") || logo.startsWith("/") || logo.startsWith("data:image/")));
@@ -98,7 +104,9 @@ export function StoreCard({
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="w-full h-full bg-gradient-to-r from-emerald-600 to-teal-700 opacity-90"></div>
+            <div className="w-full h-full flex items-center justify-center text-white/20 font-black text-4xl">
+              AfriCart
+            </div>
           )}
 
           {/* Follow Heart Button */}
@@ -120,10 +128,9 @@ export function StoreCard({
         </div>
       </Link>
 
-      {/* Content */}
-      <div className="p-5 relative flex-1 flex flex-col justify-between">
-        {/* Logo */}
-        <Avatar className="h-16 w-16 absolute -top-8 left-5 border-4 border-white shadow-lg overflow-hidden bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-bold text-xl flex items-center justify-center">
+      <div className="px-6 pb-6 pt-0 relative flex-1 flex flex-col justify-between">
+        {/* Logo Avatar */}
+        <Avatar className="h-16 w-16 border-4 border-white shadow-md bg-white text-emerald-700 font-extrabold text-xl absolute -top-8 left-6">
           {isLogoUrl ? (
             <img
               src={logo}
@@ -137,7 +144,7 @@ export function StoreCard({
 
         <div className="pt-10 space-y-3 flex-1 flex flex-col justify-between">
           <div className="space-y-2">
-            {/* Store Name & Category */}
+            {/* Store Name & Categories */}
             <div>
               <Link href={storeHref}>
                 <div className="flex items-center gap-1.5 mb-1">
@@ -150,9 +157,16 @@ export function StoreCard({
                 </div>
               </Link>
               <div className="flex items-center gap-1.5 flex-wrap">
-                <Badge variant="secondary" className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-100 font-semibold">
-                  {category}
-                </Badge>
+                {displayCategories.slice(0, 2).map((c) => (
+                  <Badge key={c.slug} variant="secondary" className="text-xs bg-emerald-50 text-emerald-800 border border-emerald-100 font-semibold">
+                    {c.name}
+                  </Badge>
+                ))}
+                {displayCategories.length > 2 && (
+                  <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200 font-bold">
+                    +{displayCategories.length - 2} more
+                  </Badge>
+                )}
                 {businessType && (
                   <Badge variant="outline" className="text-xs bg-slate-50 text-slate-700 border-slate-200 font-bold">
                     {businessType}

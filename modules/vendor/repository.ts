@@ -24,6 +24,50 @@ export class VendorRepository {
   async findStoreByVendorProfileId(vendorProfileId: string) {
     return db.store.findFirst({
       where: { vendorProfileId, deletedAt: null },
+      include: {
+        categories: {
+          include: {
+            storeCategory: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Sync multi-category assignments for a store
+   */
+  async updateStoreCategories(storeId: string, categorySlugs: string[]) {
+    // 1. Fetch matching StoreCategory IDs
+    const categories = await db.storeCategory.findMany({
+      where: {
+        slug: { in: categorySlugs },
+      },
+      select: { id: true, name: true, slug: true },
+    });
+
+    if (categories.length === 0) return;
+
+    // 2. Delete current assignments for store
+    await db.storeCategoryAssignment.deleteMany({
+      where: { storeId },
+    });
+
+    // 3. Create new assignments
+    await db.storeCategoryAssignment.createMany({
+      data: categories.map((c) => ({
+        storeId,
+        storeCategoryId: c.id,
+      })),
+      skipDuplicates: true,
+    });
+
+    // 4. Update legacy store.category field with primary category name for backward compatibility
+    await db.store.update({
+      where: { id: storeId },
+      data: {
+        category: categories[0].name,
+      },
     });
   }
 

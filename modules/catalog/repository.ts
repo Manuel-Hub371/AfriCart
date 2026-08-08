@@ -190,8 +190,31 @@ export class CatalogRepository {
     }
 
     if (category && category.toLowerCase() !== "all") {
+      const catTokens = category.split(",").map((c) => c.trim()).filter(Boolean);
       andConditions.push({
-        category: { contains: category, mode: "insensitive" },
+        OR: [
+          {
+            categories: {
+              some: {
+                storeCategory: {
+                  slug: { in: catTokens },
+                },
+              },
+            },
+          },
+          {
+            categories: {
+              some: {
+                storeCategory: {
+                  name: { in: catTokens, mode: "insensitive" },
+                },
+              },
+            },
+          },
+          {
+            category: { contains: category, mode: "insensitive" },
+          },
+        ],
       });
     }
 
@@ -226,6 +249,11 @@ export class CatalogRepository {
     return db.store.findMany({
       where,
       include: {
+        categories: {
+          include: {
+            storeCategory: true,
+          },
+        },
         vendorProfile: {
           select: {
             identityVerified: true,

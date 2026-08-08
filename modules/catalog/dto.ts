@@ -131,6 +131,8 @@ export interface StoreCatalogDTO {
   logo: string | null;
   banner: string | null;
   category: string;
+  categories?: { id: string; name: string; slug: string }[];
+  categorySlugs?: string[];
   businessType: string;
   city: string | null;
   region: string | null;

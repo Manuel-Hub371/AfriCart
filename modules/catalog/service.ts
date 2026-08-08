@@ -336,6 +336,17 @@ export class CatalogService {
       }
       const averageRating = totalRatingCount > 0 ? Number((totalRatingSum / totalRatingCount).toFixed(1)) : 5.0;
 
+      const categoryAssignments = Array.isArray(s.categories) ? s.categories : [];
+      const categoriesList = categoryAssignments
+        .map((ca: any) => ca.storeCategory)
+        .filter(Boolean)
+        .map((sc: any) => ({
+          id: sc.id,
+          name: sc.name,
+          slug: sc.slug,
+        }));
+      const categorySlugsList = categoriesList.map((c: any) => c.slug);
+
       return {
         id: s.id,
         name: s.name,
@@ -343,7 +354,9 @@ export class CatalogService {
         description: s.description,
         logo: s.logo,
         banner: s.banner,
-        category: s.category || "General Marketplace",
+        category: s.category || (categoriesList[0]?.name ?? "Electronics & Gadget"),
+        categories: categoriesList,
+        categorySlugs: categorySlugsList,
         businessType: s.businessType || "Retailer",
         city: city || null,
         region: region || null,

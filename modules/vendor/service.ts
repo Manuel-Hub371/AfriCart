@@ -73,6 +73,18 @@ function toVendorProductDTO(product: any): VendorProductDTO {
  * Map raw Prisma store to VendorStoreDTO
  */
 function toVendorStoreDTO(store: any): VendorStoreDTO {
+  const categoryAssignments = Array.isArray(store.categories) ? store.categories : [];
+  const categoriesList = categoryAssignments
+    .map((ca: any) => ca.storeCategory)
+    .filter(Boolean)
+    .map((sc: any) => ({
+      id: sc.id,
+      name: sc.name,
+      slug: sc.slug,
+    }));
+
+  const categorySlugsList = categoriesList.map((c: any) => c.slug);
+
   return {
     id: store.id,
     vendorProfileId: store.vendorProfileId,
@@ -81,7 +93,9 @@ function toVendorStoreDTO(store: any): VendorStoreDTO {
     description: store.description ?? null,
     logo: store.logo ?? null,
     banner: store.banner ?? null,
-    category: store.category,
+    category: store.category || (categoriesList[0]?.name ?? "Electronics & Gadget"),
+    categories: categoriesList,
+    categorySlugs: categorySlugsList,
     businessType: store.businessType ?? "Retailer",
     email: store.email ?? null,
     phone: store.phone ?? null,
@@ -108,7 +122,7 @@ function toVendorStoreDTO(store: any): VendorStoreDTO {
     acceptingOrders: Boolean(store.acceptingOrders ?? true),
     vacationMode: Boolean(store.vacationMode ?? false),
     vacationMessage: store.vacationMessage ?? null,
-    status: store.status ?? "ACTIVE",
+    status: store.status,
     createdAt: store.createdAt instanceof Date ? store.createdAt.toISOString() : store.createdAt,
     updatedAt: store.updatedAt instanceof Date ? store.updatedAt.toISOString() : store.updatedAt,
   };
@@ -147,6 +161,12 @@ export class VendorService {
     const { vendorProfile, store } = await this.resolveVendorStore(userId);
 
     await vendorRepository.updateStore(store.id, vendorProfile.id, input);
+
+    // Sync categories if categorySlugs or categories is provided
+    const targetSlugs = input.categorySlugs || input.categories;
+    if (Array.isArray(targetSlugs) && targetSlugs.length > 0) {
+      await vendorRepository.updateStoreCategories(store.id, targetSlugs);
+    }
 
     // Refetch to return fresh data
     const updatedStore = await vendorRepository.findStoreByVendorProfileId(vendorProfile.id);

@@ -17,6 +17,7 @@ import {
   SlidersHorizontal,
   ArrowUpDown
 } from "lucide-react";
+import { OFFICIAL_STORE_CATEGORIES } from "@/lib/constants/store-categories";
 
 export default function StoresPage() {
   const [stores, setStores] = useState<any[]>([]);
@@ -135,17 +136,12 @@ export default function StoresPage() {
                     onChange={(e) => setSelectedCategory(e.target.value)}
                     className="w-full h-11 px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-sm font-medium focus:outline-none focus:border-emerald-500"
                   >
-                    <option value="all">All Categories</option>
-                    <option value="Electronics">Electronics & Gadgets</option>
-                    <option value="Fashion">Fashion & Apparel</option>
-                    <option value="Beauty">Beauty & Personal Care</option>
-                    <option value="Home">Home & Living</option>
-                    <option value="Groceries">Food & Groceries</option>
-                    <option value="Pharmacy">Pharmacy & Health</option>
-                    <option value="Furniture">Furniture</option>
-                    <option value="Automotive">Automotive</option>
-                    <option value="Sports">Sports & Fitness</option>
-                    <option value="Books">Books & Stationery</option>
+                    <option value="all">All Categories (9 Official)</option>
+                    {OFFICIAL_STORE_CATEGORIES.map((cat) => (
+                      <option key={cat.slug} value={cat.slug}>
+                        {cat.name}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

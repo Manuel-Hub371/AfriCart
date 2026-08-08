@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db, withDbRetry } from "@/lib/db";
 import { hashPassword, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
 import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
+import { isValidStoreCategorySlug, mapLegacyCategoryToOfficialSlug } from "@/lib/constants/store-categories";
 
 /**
  * Generate an SEO-friendly unique slug for a store
@@ -129,7 +130,22 @@ export async function POST(req: Request) {
       // 5. Generate Unique SEO-friendly slug
       const slug = await generateUniqueStoreSlug(storeName);
 
-      // 6. Create Store
+      // Parse and validate multi-category selection
+      const rawCategories: string[] = Array.isArray(body.storeCategories) && body.storeCategories.length > 0
+        ? body.storeCategories
+        : Array.isArray(body.storeCategorySlugs) && body.storeCategorySlugs.length > 0
+        ? body.storeCategorySlugs
+        : [storeCategory || "electronics-gadget"];
+
+      const validSlugs = Array.from(
+        new Set(rawCategories.map((c) => (isValidStoreCategorySlug(c) ? c : mapLegacyCategoryToOfficialSlug(c))))
+      );
+
+      const categoryRecords = await tx.storeCategory.findMany({
+        where: { slug: { in: validSlugs } },
+      });
+
+      // 6. Create Store with multi-category assignments
       const store = await tx.store.create({
         data: {
           vendorProfileId: vendorProfile.id,
@@ -138,8 +154,13 @@ export async function POST(req: Request) {
           description: storeDescription || null,
           logo: storeLogo || null,
           banner: storeBanner || null,
-          category: storeCategory
-        }
+          category: categoryRecords[0]?.name || "Electronics & Gadget",
+          categories: {
+            create: categoryRecords.map((c) => ({
+              storeCategoryId: c.id,
+            })),
+          },
+        },
       });
 
       // 7. Write Audit Log

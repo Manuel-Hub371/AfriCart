@@ -26,6 +26,7 @@ export function StoreGrid({ stores = [] }: StoreGridProps) {
           slug={store.slug}
           description={store.description}
           category={store.category || "General"}
+          categories={store.categories || []}
           businessType={store.businessType || "Retailer"}
           location={store.location || "Ghana"}
           rating={store.rating || 5.0}
