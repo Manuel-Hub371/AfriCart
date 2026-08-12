@@ -159,7 +159,7 @@ export function ProductTabs({
                     </div>
                     <div>
                       <span className="text-gray-400 block text-[10px] uppercase font-bold">Shipping Fee</span>
-                      <strong className="text-emerald-700">{sp.shippingCost === 0 ? "FREE" : `$${sp.shippingCost.toFixed(2)}`}</strong>
+                      <strong className="text-emerald-700">{sp.shippingCost === 0 ? "FREE" : `GH₵${sp.shippingCost.toFixed(2)}`}</strong>
                     </div>
                     {sp.processingTime && (
                       <div>
@@ -170,7 +170,7 @@ export function ProductTabs({
                     {sp.freeShippingThreshold && (
                       <div>
                         <span className="text-gray-400 block text-[10px] uppercase font-bold">Free Minimum</span>
-                        <strong className="text-gray-900">${sp.freeShippingThreshold}</strong>
+                        <strong className="text-gray-900">GH₵{sp.freeShippingThreshold}</strong>
                       </div>
                     )}
                   </div>

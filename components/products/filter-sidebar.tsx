@@ -112,8 +112,8 @@ export function FilterSidebar() {
             }
           />
           <div className="flex justify-between text-sm text-gray-600">
-            <span>${priceRange.min}</span>
-            <span>${priceRange.max}</span>
+            <span>GH₵{priceRange.min}</span>
+            <span>GH₵{priceRange.max}</span>
           </div>
         </div>
       </FilterSection>

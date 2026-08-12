@@ -114,12 +114,12 @@ export default function ShippingCard({
                         </span>
                         <span>•</span>
                         <span>
-                          Cost: <strong>${policy.shippingCost.toFixed(2)}</strong>
+                          Cost: <strong>GH₵{policy.shippingCost.toFixed(2)}</strong>
                         </span>
                         {policy.freeShippingThreshold && (
                           <>
                             <span>•</span>
-                            <span>Free over ${policy.freeShippingThreshold}</span>
+                            <span>Free over GH₵{policy.freeShippingThreshold}</span>
                           </>
                         )}
                       </p>

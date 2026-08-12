@@ -515,7 +515,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                   {/* Price Range */}
                   <div>
                     <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                      Price Range ($)
+                      Price Range (GH₵)
                     </label>
                     <div className="flex items-center gap-2">
                       <Input

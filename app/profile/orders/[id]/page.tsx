@@ -173,9 +173,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                       </div>
                       <div className="text-right">
                         <span className="text-base font-extrabold text-gray-900">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          GH₵{(item.price * item.quantity).toFixed(2)}
                         </span>
-                        <p className="text-xs text-gray-400">${item.price.toFixed(2)} each</p>
+                        <p className="text-xs text-gray-400">GH₵{item.price.toFixed(2)} each</p>
                       </div>
                     </div>
                   ))}

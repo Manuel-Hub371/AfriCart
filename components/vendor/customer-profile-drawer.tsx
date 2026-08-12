@@ -71,7 +71,7 @@ export function CustomerProfileDrawer({ customer, onClose }: CustomerProfileDraw
                     <DollarSign className="h-4 w-4" />
                     <span className="text-xs font-medium uppercase">Total Spend</span>
                   </div>
-                  <div className="text-2xl font-bold text-gray-900">${customer.lifetimeSpend.toFixed(2)}</div>
+                  <div className="text-2xl font-bold text-gray-900">GH₵{customer.lifetimeSpend.toFixed(2)}</div>
                 </div>
               </div>
 
@@ -104,7 +104,7 @@ export function CustomerProfileDrawer({ customer, onClose }: CustomerProfileDraw
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Average Order Value</span>
-                    <span className="font-semibold text-gray-900">${customer.averageOrderValue.toFixed(2)}</span>
+                    <span className="font-semibold text-gray-900">GH₵{customer.averageOrderValue.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Customer Status</span>

@@ -167,11 +167,11 @@ export function OrderDetailsDrawer({ order, onClose, onStatusChange }: OrderDeta
                 <div className="mt-4 bg-gray-50 rounded-2xl p-4 space-y-2 border border-gray-200">
                   <div className="flex justify-between text-xs font-semibold text-gray-600">
                     <span>Line Items Total</span>
-                    <span className="text-gray-900 font-bold">${order.totalAmount.toFixed(2)}</span>
+                    <span className="text-gray-900 font-bold">GH₵{order.totalAmount.toFixed(2)}</span>
                   </div>
                   <div className="pt-2 border-t border-gray-200 flex justify-between">
                     <span className="font-extrabold text-gray-900">Order Total</span>
-                    <span className="font-extrabold text-lg text-emerald-600">${order.totalAmount.toFixed(2)}</span>
+                    <span className="font-extrabold text-lg text-emerald-600">GH₵{order.totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
               </div>

@@ -263,7 +263,7 @@ export default function ProductWorkspacePage({ params }: ProductWorkspaceProps) 
                 </div>
                 <div>
                   <p className="text-xs text-gray-400 font-bold uppercase">Base Price</p>
-                  <h3 className="text-2xl font-extrabold text-gray-900">${product.price.toFixed(2)}</h3>
+                  <h3 className="text-2xl font-extrabold text-gray-900">GH₵{product.price.toFixed(2)}</h3>
                 </div>
               </div>
 
@@ -445,7 +445,7 @@ export default function ProductWorkspacePage({ params }: ProductWorkspaceProps) 
 
                   <div className="grid md:grid-cols-2 gap-6 p-6 bg-gray-50/50 rounded-2xl border border-gray-200">
                     <div className="space-y-1">
-                      <label className="font-bold text-gray-900 text-sm">Regular Base Price ($)</label>
+                      <label className="font-bold text-gray-900 text-sm">Regular Base Price (GH₵)</label>
                       <Input
                         type="number"
                         step="0.01"
@@ -549,7 +549,7 @@ export default function ProductWorkspacePage({ params }: ProductWorkspaceProps) 
                               <td className="py-3 px-4 text-sm text-gray-700">{o.customerName || "Customer"}</td>
                               <td className="py-3 px-4 text-xs font-bold text-emerald-600">{o.status}</td>
                               <td className="py-3 px-4 text-sm text-gray-500">{new Date(o.createdAt).toLocaleDateString()}</td>
-                              <td className="py-3 px-4 text-right font-bold text-gray-900">${Number(o.totalAmount).toFixed(2)}</td>
+                              <td className="py-3 px-4 text-right font-bold text-gray-900">GH₵{Number(o.totalAmount).toFixed(2)}</td>
                             </tr>
                           ))}
                         </tbody>

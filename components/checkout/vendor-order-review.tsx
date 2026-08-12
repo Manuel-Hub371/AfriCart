@@ -115,7 +115,7 @@ export default function VendorOrderReview({
         {/* Vendor Total */}
         <div className="pt-4 border-t flex items-center justify-between">
           <span className="font-medium text-gray-700">Vendor Subtotal</span>
-          <span className="font-semibold text-gray-900">${vendorTotal}</span>
+          <span className="font-semibold text-gray-900">GH₵{vendorTotal}</span>
         </div>
       </div>
     </div>

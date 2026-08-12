@@ -71,7 +71,7 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="py-4 px-6 font-bold text-emerald-400">{o.storeName}</td>
                     <td className="py-4 px-6 font-mono text-slate-300">{o.itemCount} items</td>
-                    <td className="py-4 px-6 font-mono font-bold text-slate-100">${o.totalAmount.toFixed(2)}</td>
+                    <td className="py-4 px-6 font-mono font-bold text-slate-100">GH₵{o.totalAmount.toFixed(2)}</td>
                     <td className="py-4 px-6 font-bold text-emerald-400">{o.status}</td>
                     <td className="py-4 px-6 text-slate-400 font-mono">{new Date(o.createdAt).toLocaleDateString()}</td>
                   </tr>

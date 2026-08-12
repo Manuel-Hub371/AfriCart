@@ -54,7 +54,7 @@ export default function AdminFinancePage() {
             <TrendingUp className="w-5 h-5 text-emerald-400" />
           </div>
           <p className="text-3xl font-extrabold text-slate-100 font-mono">
-            ${(finance?.grossVolume || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            GH₵{(finance?.grossVolume || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[11px] text-slate-500">Total delivered order volume processed through platform</p>
         </div>
@@ -65,7 +65,7 @@ export default function AdminFinancePage() {
             <DollarSign className="w-5 h-5 text-teal-400" />
           </div>
           <p className="text-3xl font-extrabold text-emerald-400 font-mono">
-            ${(finance?.platformRevenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            GH₵{(finance?.platformRevenue || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[11px] text-slate-500">Net platform revenue earned from marketplace transactions</p>
         </div>
@@ -76,7 +76,7 @@ export default function AdminFinancePage() {
             <Wallet className="w-5 h-5 text-blue-400" />
           </div>
           <p className="text-3xl font-extrabold text-slate-100 font-mono">
-            ${(finance?.vendorPayoutsTotal || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            GH₵{(finance?.vendorPayoutsTotal || 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <p className="text-[11px] text-slate-500">95% allocated for distribution to active vendor accounts</p>
         </div>

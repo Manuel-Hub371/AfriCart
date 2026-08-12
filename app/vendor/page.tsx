@@ -197,11 +197,11 @@ export default function VendorDashboardPage() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Today&apos;s Sales</span>
-                        <span className="font-bold text-emerald-600">${(stats.todaySales || 0).toFixed(2)}</span>
+                        <span className="font-bold text-emerald-600">GH₵{(stats.todaySales || 0).toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Monthly Sales</span>
-                        <span className="font-bold text-gray-900">${(stats.monthlyRevenue || 0).toFixed(2)}</span>
+                        <span className="font-bold text-gray-900">GH₵{(stats.monthlyRevenue || 0).toFixed(2)}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-gray-600">Pending Orders</span>

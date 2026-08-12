@@ -322,7 +322,7 @@ export function ShippingSettingsForm({ onSave }: ShippingSettingsFormProps) {
                 <div className="flex items-center gap-2">
                   <Truck className="h-4 w-4 text-emerald-600 flex-shrink-0" />
                   <span>
-                    Cost: <strong className="text-gray-900">${policy.shippingCost.toFixed(2)}</strong>
+                    Cost: <strong className="text-gray-900">GH₵{policy.shippingCost.toFixed(2)}</strong>
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -486,7 +486,7 @@ export function ShippingSettingsForm({ onSave }: ShippingSettingsFormProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                    Base Shipping Fee ($) <span className="text-red-500">*</span>
+                    Base Shipping Fee (GH₵) <span className="text-red-500">*</span>
                   </label>
                   <Input
                     type="number"
@@ -501,7 +501,7 @@ export function ShippingSettingsForm({ onSave }: ShippingSettingsFormProps) {
 
                 <div>
                   <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                    Free Shipping Threshold ($)
+                    Free Shipping Threshold (GH₵)
                   </label>
                   <Input
                     type="number"

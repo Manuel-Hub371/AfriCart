@@ -85,7 +85,7 @@ export function PayoutCard({
           <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
           <div>
             <p className="text-sm font-medium text-gray-900">Minimum Payout</p>
-            <p className="text-xs text-gray-600">${minimumPayout} required for withdrawal</p>
+            <p className="text-xs text-gray-600">GH₵{minimumPayout} required for withdrawal</p>
           </div>
         </div>
       </div>

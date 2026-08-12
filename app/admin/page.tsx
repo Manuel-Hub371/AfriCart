@@ -188,7 +188,7 @@ export default function AdminOverviewPage() {
             </div>
           </div>
           <p className="text-3xl font-extrabold text-emerald-400 mt-4 font-mono">
-            ${metrics.totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
+            GH₵{metrics.totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2 })}
           </p>
           <div className="mt-3 flex items-center justify-between text-xs">
             <span className="text-slate-400 font-medium">{metrics.totalOrders} Total Orders</span>

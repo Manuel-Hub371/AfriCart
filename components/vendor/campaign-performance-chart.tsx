@@ -64,7 +64,7 @@ export function CampaignPerformanceChart() {
             stroke="#10b981" 
             strokeWidth={2}
             dot={false}
-            name="Revenue ($)"
+            name="Revenue (GH₵)"
           />
           <Line 
             yAxisId="right"

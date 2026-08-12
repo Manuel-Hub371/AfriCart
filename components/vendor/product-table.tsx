@@ -223,7 +223,7 @@ export function ProductTable({
                     </div>
                     <div className="flex items-center gap-1 text-gray-600">
                       <DollarSign className="h-3 w-3" />
-                      <span>${(product.revenue / 1000).toFixed(1)}k</span>
+                      <span>GH₵{(product.revenue / 1000).toFixed(1)}k</span>
                     </div>
                   </div>
                 </TableCell>

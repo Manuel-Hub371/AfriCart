@@ -142,7 +142,7 @@ export default function AnalyticsPage() {
                         <DollarSign className="h-5 w-5" />
                       </div>
                     </div>
-                    <h3 className="text-3xl font-extrabold text-gray-900">${revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+                    <h3 className="text-3xl font-extrabold text-gray-900">GH₵{revenue.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
                     <p className="text-xs text-gray-400 mt-1">Total completed checkout sales</p>
                   </div>
 
@@ -175,7 +175,7 @@ export default function AnalyticsPage() {
                         <TrendingUp className="h-5 w-5" />
                       </div>
                     </div>
-                    <h3 className="text-3xl font-extrabold text-purple-600">${aov.toFixed(2)}</h3>
+                    <h3 className="text-3xl font-extrabold text-purple-600">GH₵{aov.toFixed(2)}</h3>
                     <p className="text-xs text-gray-400 mt-1">Revenue per completed order</p>
                   </div>
                 </div>
