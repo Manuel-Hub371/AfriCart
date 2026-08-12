@@ -12,8 +12,8 @@ export async function GET() {
   }
 
   try {
-    const products = await vendorService.getVendorProducts(userId);
-    return NextResponse.json({ products, total: products.length });
+    const { products, storeCategories } = await vendorService.getVendorProducts(userId);
+    return NextResponse.json({ products, storeCategories, total: products.length });
   } catch (err: any) {
     const status = err?.status ?? 500;
     const message = err?.message ?? "Internal server error";

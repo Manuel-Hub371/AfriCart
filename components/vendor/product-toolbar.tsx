@@ -32,6 +32,7 @@ interface ProductToolbarProps {
   onExportProducts: () => void;
   onRefresh: () => void;
   onSort: (sortBy: string) => void;
+  assignedCategories?: { id: string; name: string; slug: string }[];
 }
 
 export function ProductToolbar({
@@ -44,6 +45,7 @@ export function ProductToolbar({
   onExportProducts,
   onRefresh,
   onSort,
+  assignedCategories = [],
 }: ProductToolbarProps) {
   return (
     <div className="space-y-4">
@@ -57,7 +59,7 @@ export function ProductToolbar({
         {/* Right: Actions */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Filters */}
-          <ProductFilters onFilterChange={onFilterChange} />
+          <ProductFilters onFilterChange={onFilterChange} assignedCategories={assignedCategories} />
 
           {/* Sort */}
           <DropdownMenu>

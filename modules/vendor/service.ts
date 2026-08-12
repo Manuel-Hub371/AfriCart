@@ -196,10 +196,32 @@ export class VendorService {
   /**
    * GET: all products owned by vendor's store
    */
-  async getVendorProducts(userId: string): Promise<VendorProductDTO[]> {
+  async getVendorProducts(userId: string): Promise<{ products: VendorProductDTO[]; storeCategories: { id: string; name: string; slug: string }[] }> {
     const { store } = await this.resolveVendorStore(userId);
     const products = await vendorRepository.findVendorProducts(store.id);
-    return products.map(toVendorProductDTO);
+    
+    const categoryAssignments = Array.isArray(store.categories) ? store.categories : [];
+    const storeCategories = categoryAssignments
+      .map((ca: any) => ca.storeCategory)
+      .filter(Boolean)
+      .map((sc: any) => ({
+        id: sc.id,
+        name: sc.name,
+        slug: sc.slug,
+      }));
+
+    if (storeCategories.length === 0 && store.category) {
+      storeCategories.push({
+        id: store.category,
+        name: store.category,
+        slug: store.category.toLowerCase().replace(/[^a-z0-9-]+/g, "-"),
+      });
+    }
+
+    return {
+      products: products.map(toVendorProductDTO),
+      storeCategories,
+    };
   }
 
   /**
@@ -335,7 +357,8 @@ export class VendorService {
    * GET: inventory view (products + stock info)
    */
   async getVendorInventory(userId: string): Promise<VendorProductDTO[]> {
-    return this.getVendorProducts(userId);
+    const res = await this.getVendorProducts(userId);
+    return res.products;
   }
 
   /**

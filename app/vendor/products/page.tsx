@@ -58,6 +58,7 @@ export default function ProductsPage() {
 
   // Real data state
   const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [storeCategories, setStoreCategories] = useState<{ id: string; name: string; slug: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -73,6 +74,7 @@ export default function ProductsPage() {
       }
       const data = await res.json();
       setAllProducts((data.products ?? []).map(toUIProduct));
+      setStoreCategories(data.storeCategories ?? []);
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -84,7 +86,7 @@ export default function ProductsPage() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Client-side search and status/featured filter
+  // Client-side search and status/featured/category filter
   const filteredProducts = allProducts.filter((p) => {
     // 1. Search Query
     if (searchQuery.trim()) {
@@ -104,6 +106,12 @@ export default function ProductsPage() {
     // 3. Status Filter
     if (filters.status && filters.status.length > 0) {
       if (!filters.status.includes(p.status)) return false;
+    }
+
+    // 4. Category Filter (Matches vendor's assigned store categories)
+    if (filters.category && filters.category.length > 0) {
+      const selectedCats = filters.category.map((c) => c.toLowerCase());
+      if (!selectedCats.includes(p.category.toLowerCase())) return false;
     }
 
     return true;
@@ -299,6 +307,7 @@ export default function ProductsPage() {
                     onExportProducts={handleExportProducts}
                     onRefresh={handleRefresh}
                     onSort={setSortBy}
+                    assignedCategories={storeCategories}
                   />
                 </div>
 

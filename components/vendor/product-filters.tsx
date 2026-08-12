@@ -20,9 +20,10 @@ interface FilterOption {
 
 interface ProductFiltersProps {
   onFilterChange: (filters: Record<string, string[]>) => void;
+  assignedCategories?: { id: string; name: string; slug: string }[];
 }
 
-export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
+export function ProductFilters({ onFilterChange, assignedCategories = [] }: ProductFiltersProps) {
   const [selectedFilters, setSelectedFilters] = useState<Record<string, string[]>>({
     status: [],
     category: [],
@@ -37,13 +38,12 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
     { label: "Out of Stock", value: "out-of-stock" },
   ];
 
-  const categoryOptions: FilterOption[] = [
-    { label: "Electronics", value: "electronics" },
-    { label: "Fashion", value: "fashion" },
-    { label: "Home & Living", value: "home" },
-    { label: "Beauty", value: "beauty" },
-    { label: "Sports", value: "sports" },
-  ];
+  const categoryOptions: FilterOption[] = assignedCategories.map((c) => ({
+    label: c.name,
+    value: c.name,
+  }));
+
+  const showCategoryFilter = assignedCategories.length > 1;
 
   const toggleFilter = (filterType: string, value: string) => {
     const current = selectedFilters[filterType] || [];
@@ -94,30 +94,32 @@ export function ProductFilters({ onFilterChange }: ProductFiltersProps) {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Category Filter */}
-      <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
-          Category
-          {selectedFilters.category?.length > 0 && (
-            <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
-              {selectedFilters.category.length}
-            </Badge>
-          )}
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {categoryOptions.map((option) => (
-            <DropdownMenuCheckboxItem
-              key={option.value}
-              checked={selectedFilters.category?.includes(option.value)}
-              onCheckedChange={() => toggleFilter("category", option.value)}
-            >
-              <span className="flex-1">{option.label}</span>
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {/* Category Filter - Only visible when store has multiple assigned categories */}
+      {showCategoryFilter && (
+        <DropdownMenu>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 disabled:pointer-events-none disabled:opacity-50 border border-gray-200 bg-white hover:bg-gray-50 h-9 px-3">
+            Category
+            {selectedFilters.category?.length > 0 && (
+              <Badge variant="secondary" className="ml-1 px-1.5 py-0 h-5 text-xs bg-emerald-100 text-emerald-700 font-bold">
+                {selectedFilters.category.length}
+              </Badge>
+            )}
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56">
+            <DropdownMenuLabel>Filter by Category</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {categoryOptions.map((option) => (
+              <DropdownMenuCheckboxItem
+                key={option.value}
+                checked={selectedFilters.category?.includes(option.value)}
+                onCheckedChange={() => toggleFilter("category", option.value)}
+              >
+                <span className="flex-1">{option.label}</span>
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
 
       {/* Featured Filter */}
       <DropdownMenu>
