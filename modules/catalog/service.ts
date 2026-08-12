@@ -85,7 +85,12 @@ export class CatalogService {
       };
     });
 
-    // Requirement 8: Filter by effective price if minPrice/maxPrice requested
+    // Filter by rating if requested
+    if (query.rating !== undefined && query.rating > 0) {
+      formattedProducts = formattedProducts.filter((p) => (p.rating || 0) >= query.rating!);
+    }
+
+    // Filter by effective campaign price if minPrice/maxPrice requested
     if (query.minPrice !== undefined || query.maxPrice !== undefined) {
       formattedProducts = formattedProducts.filter((p) => {
         if (query.minPrice !== undefined && p.price < query.minPrice) return false;
@@ -94,19 +99,27 @@ export class CatalogService {
       });
     }
 
-    // Requirement 8: Sort by effective campaign price when price_asc or price_desc is specified
+    // Sort by effective campaign price when price_asc or price_desc is specified
     if (query.sortBy === "price_asc") {
       formattedProducts.sort((a, b) => a.price - b.price);
     } else if (query.sortBy === "price_desc") {
       formattedProducts.sort((a, b) => b.price - a.price);
+    } else if (query.sortBy === "rating") {
+      formattedProducts.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (query.sortBy === "best_sellers") {
+      formattedProducts.sort((a, b) => (b.unitsSold || b.bestSellerScore || 0) - (a.unitsSold || a.bestSellerScore || 0));
     }
+
+    const effectiveTotal = (query.minPrice !== undefined || query.maxPrice !== undefined || query.rating !== undefined)
+      ? formattedProducts.length
+      : data.total;
 
     return {
       products: formattedProducts,
-      total: formattedProducts.length,
+      total: effectiveTotal,
       page: data.page,
       limit: data.limit,
-      totalPages: Math.ceil(formattedProducts.length / data.limit) || 1,
+      totalPages: Math.ceil(effectiveTotal / data.limit) || 1,
     };
   }
 

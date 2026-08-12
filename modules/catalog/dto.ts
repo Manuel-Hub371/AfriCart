@@ -1,13 +1,14 @@
 // Query validation schema for catalog products
 export interface GetProductsQueryInput {
   query?: string;
-  category?: string;
+  category?: string | string[];
+  categories?: string[];
   storeId?: string;
   minPrice?: number;
   maxPrice?: number;
   rating?: number;
   isFeatured?: "true" | "false";
-  sortBy?: "newest" | "price_asc" | "price_desc" | "rating" | "best_sellers";
+  sortBy?: "newest" | "price_asc" | "price_desc" | "rating" | "best_sellers" | "relevance";
   page?: number;
   limit?: number;
 }
@@ -17,19 +18,31 @@ export const GetProductsQuerySchema = {
     try {
       const page = data.page ? parseInt(data.page, 10) : 1;
       const limit = data.limit ? parseInt(data.limit, 10) : 12;
-      const minPrice = data.minPrice ? parseFloat(data.minPrice) : undefined;
-      const maxPrice = data.maxPrice ? parseFloat(data.maxPrice) : undefined;
-      const rating = data.rating ? parseFloat(data.rating) : undefined;
+      const minPrice = data.minPrice !== undefined && data.minPrice !== "" ? parseFloat(data.minPrice) : undefined;
+      const maxPrice = data.maxPrice !== undefined && data.maxPrice !== "" ? parseFloat(data.maxPrice) : undefined;
+      const rating = data.rating !== undefined && data.rating !== "" ? parseFloat(data.rating) : undefined;
+
+      let categoryList: string[] = [];
+      if (Array.isArray(data.category)) {
+        categoryList = data.category.flatMap((c) => String(c).split(","));
+      } else if (typeof data.category === "string" && data.category.trim()) {
+        categoryList = data.category.split(",");
+      }
+      categoryList = categoryList.map((c) => c.trim()).filter(Boolean);
+
+      const validSorts = ["newest", "price_asc", "price_desc", "rating", "best_sellers", "relevance"];
+      const sortBy = validSorts.includes(data.sortBy) ? data.sortBy : "newest";
 
       const parsed: GetProductsQueryInput = {
-        query: data.query || undefined,
-        category: data.category || undefined,
+        query: data.query?.trim() || undefined,
+        category: categoryList.length > 0 ? (categoryList.length === 1 ? categoryList[0] : categoryList) : undefined,
+        categories: categoryList.length > 0 ? categoryList : undefined,
         storeId: data.storeId || undefined,
         minPrice: isNaN(minPrice!) ? undefined : minPrice,
         maxPrice: isNaN(maxPrice!) ? undefined : maxPrice,
         rating: isNaN(rating!) ? undefined : rating,
         isFeatured: data.isFeatured === "true" || data.isFeatured === "false" ? data.isFeatured : undefined,
-        sortBy: ["newest", "price_asc", "price_desc", "rating", "best_sellers"].includes(data.sortBy) ? data.sortBy : "newest",
+        sortBy: sortBy as GetProductsQueryInput["sortBy"],
         page: isNaN(page) || page < 1 ? 1 : page,
         limit: isNaN(limit) || limit < 1 ? 12 : Math.min(limit, 100),
       };

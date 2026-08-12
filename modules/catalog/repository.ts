@@ -22,20 +22,67 @@ export class CatalogRepository {
     const where: any = {
       deletedAt: null,
       status: "ACTIVE",
+      store: {
+        status: "ACTIVE",
+        deletedAt: null,
+      },
     };
 
+    // 1. Search Query
     if (query.query) {
+      const q = query.query.trim();
       where.OR = [
-        { name: { contains: query.query, mode: "insensitive" } },
-        { description: { contains: query.query, mode: "insensitive" } },
-        { categoryName: { contains: query.query, mode: "insensitive" } },
+        { name: { contains: q, mode: "insensitive" } },
+        { description: { contains: q, mode: "insensitive" } },
+        { brand: { contains: q, mode: "insensitive" } },
+        { categoryName: { contains: q, mode: "insensitive" } },
       ];
     }
 
-    if (query.category) {
-      where.categoryName = { equals: query.category, mode: "insensitive" };
+    // 2. Category Filtering (Multi-category & slug/name mapping)
+    const rawCategories: string[] = [];
+    if (Array.isArray(query.categories) && query.categories.length > 0) {
+      rawCategories.push(...query.categories);
+    } else if (Array.isArray(query.category)) {
+      rawCategories.push(...query.category);
+    } else if (typeof query.category === "string" && query.category.trim()) {
+      rawCategories.push(query.category.trim());
     }
 
+    if (rawCategories.length > 0) {
+      const categorySlugToName: Record<string, string> = {
+        "electronics-gadget": "Electronics & Gadget",
+        "home-living": "Home & Living",
+        "fashion-appeal": "Fashion & Appeal",
+        "beauty-personal-care": "Beauty & Personal Care",
+        "food-gorrices": "Food & Gorrices",
+        "pharmacy-health": "Pharmacy & Health",
+        "automotive-automobile": "Automotive & Automobile",
+        "sorts-fitness": "Sorts & Fitness",
+        "books-stationery": "Books & Stationery",
+      };
+
+      const categoryConditions: any[] = [];
+      rawCategories.forEach((catToken) => {
+        const canonicalName = categorySlugToName[catToken.toLowerCase()] || catToken;
+        categoryConditions.push(
+          { categoryName: { equals: canonicalName, mode: "insensitive" } },
+          { categoryName: { equals: catToken, mode: "insensitive" } },
+          { category: { slug: { equals: catToken, mode: "insensitive" } } },
+          { category: { name: { equals: canonicalName, mode: "insensitive" } } }
+        );
+      });
+
+      where.AND = where.AND || [];
+      where.AND.push({ OR: categoryConditions });
+    }
+
+    // 3. Rating Filtering
+    if (query.rating !== undefined && query.rating > 0) {
+      where.rating = { gte: query.rating };
+    }
+
+    // 4. Base Price Boundaries
     if (query.minPrice !== undefined || query.maxPrice !== undefined) {
       where.price = {};
       if (query.minPrice !== undefined) where.price.gte = query.minPrice;
@@ -50,11 +97,19 @@ export class CatalogRepository {
       where.storeId = query.storeId;
     }
 
+    // 5. Sorting
     let orderBy: any = { createdAt: "desc" };
-    if (query.sortBy === "price_asc") orderBy = { price: "asc" };
-    else if (query.sortBy === "price_desc") orderBy = { price: "desc" };
-    else if (query.sortBy === "rating") orderBy = { rating: "desc" };
-    else if (query.sortBy === "best_sellers") orderBy = { bestSellerScore: "desc" };
+    if (query.sortBy === "price_asc") {
+      orderBy = { price: "asc" };
+    } else if (query.sortBy === "price_desc") {
+      orderBy = { price: "desc" };
+    } else if (query.sortBy === "rating") {
+      orderBy = [{ rating: "desc" }, { numReviews: "desc" }, { createdAt: "desc" }];
+    } else if (query.sortBy === "best_sellers") {
+      orderBy = [{ bestSellerScore: "desc" }, { soldCount: "desc" }, { createdAt: "desc" }];
+    } else if (query.sortBy === "relevance" && query.query) {
+      orderBy = [{ views: "desc" }, { createdAt: "desc" }];
+    }
 
     const [products, total] = await Promise.all([
       db.product.findMany({
@@ -68,6 +123,7 @@ export class CatalogRepository {
               logo: true,
             },
           },
+          category: true,
           campaignProducts: {
             include: { campaign: true },
           },
@@ -79,7 +135,51 @@ export class CatalogRepository {
       db.product.count({ where }),
     ]);
 
-    return { products, total, page, limit, totalPages: Math.ceil(total / limit) };
+    return { products, total, page, limit, totalPages: Math.ceil(total / limit) || 1 };
+  }
+
+  /**
+   * Find all active categories with product counts
+   */
+  async findCategories() {
+    const OFFICIAL_CATEGORIES = [
+      { name: "Electronics & Gadget", slug: "electronics-gadget", description: "Consumer electronics, smartphones, accessories, computing, and home entertainment." },
+      { name: "Home & Living", slug: "home-living", description: "Furniture, home decor, kitchenware, bedding, lighting, and home improvement." },
+      { name: "Fashion & Appeal", slug: "fashion-appeal", description: "Clothing, footwear, jewelry, watches, bags, and fashion accessories." },
+      { name: "Beauty & Personal Care", slug: "beauty-personal-care", description: "Cosmetics, skincare, haircare, fragrances, and personal grooming products." },
+      { name: "Food & Gorrices", slug: "food-gorrices", description: "Fresh produce, packaged foods, beverages, snacks, and daily household essentials." },
+      { name: "Pharmacy & Health", slug: "pharmacy-health", description: "Over-the-counter health products, vitamins, supplements, and medical wellness supplies." },
+      { name: "Automotive & Automobile", slug: "automotive-automobile", description: "Vehicle parts, auto accessories, car care, tools, and automotive electronics." },
+      { name: "Sorts & Fitness", slug: "sorts-fitness", description: "Sports gear, outdoor equipment, athletic wear, fitness instruments, and activewear." },
+      { name: "Books & Stationery", slug: "books-stationery", description: "Educational books, literature, office supplies, art materials, and stationery items." },
+    ];
+
+    const counts = await Promise.all(
+      OFFICIAL_CATEGORIES.map(async (cat) => {
+        const count = await db.product.count({
+          where: {
+            deletedAt: null,
+            status: "ACTIVE",
+            store: { status: "ACTIVE", deletedAt: null },
+            OR: [
+              { categoryName: { equals: cat.name, mode: "insensitive" } },
+              { categoryName: { equals: cat.slug, mode: "insensitive" } },
+              { category: { slug: { equals: cat.slug, mode: "insensitive" } } },
+            ],
+          },
+        });
+        return {
+          id: cat.slug,
+          name: cat.name,
+          slug: cat.slug,
+          description: cat.description,
+          image: null,
+          _count: { products: count },
+        };
+      })
+    );
+
+    return counts;
   }
 
   /**
@@ -148,19 +248,7 @@ export class CatalogRepository {
     return product;
   }
 
-  /**
-   * Find all active categories
-   */
-  async findCategories() {
-    return db.category.findMany({
-      include: {
-        _count: {
-          select: { products: true },
-        },
-      },
-      orderBy: { name: "asc" },
-    });
-  }
+
 
   /**
    * Find stores catalog list with multi-attribute filtering (Category, Location, Business Type)

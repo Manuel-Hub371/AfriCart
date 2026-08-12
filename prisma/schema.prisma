@@ -406,6 +406,10 @@ model Product {
 
   @@index([bestSellerScore])
   @@index([storeId, bestSellerScore])
+  @@index([status, deletedAt, categoryName])
+  @@index([status, deletedAt, rating])
+  @@index([status, deletedAt, price])
+  @@index([status, deletedAt, createdAt])
 }
 
 model ShippingPolicy {

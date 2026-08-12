@@ -5,7 +5,13 @@ import { GetProductsQuerySchema } from "@/modules/catalog/dto";
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const rawQueryParams = Object.fromEntries(searchParams.entries());
+    const rawQueryParams: Record<string, any> = Object.fromEntries(searchParams.entries());
+
+    // If multiple 'category' parameters exist in the URL string, collect them into an array
+    const allCategories = searchParams.getAll("category");
+    if (allCategories.length > 1) {
+      rawQueryParams.category = allCategories;
+    }
 
     // Validate request query parameters using Zod Schema
     const parseResult = GetProductsQuerySchema.safeParse(rawQueryParams);
