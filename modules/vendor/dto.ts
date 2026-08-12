@@ -160,6 +160,8 @@ export const UpdateStoreSchema = {
         ...(data.slug !== undefined && { slug: String(data.slug).trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-") }),
         ...(data.description !== undefined && { description: String(data.description).trim() }),
         ...(data.category !== undefined && { category: String(data.category).trim() }),
+        ...(Array.isArray(data.categorySlugs) && { categorySlugs: data.categorySlugs.map((s: any) => String(s).trim()) }),
+        ...(Array.isArray(data.categories) && { categories: data.categories.map((s: any) => String(s).trim()) }),
         ...(data.logo !== undefined && { logo: String(data.logo).trim() }),
         ...(data.banner !== undefined && { banner: String(data.banner).trim() }),
         ...(data.email !== undefined && { email: String(data.email).trim() }),

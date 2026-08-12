@@ -38,7 +38,21 @@ export class VendorRepository {
    * Sync multi-category assignments for a store
    */
   async updateStoreCategories(storeId: string, categorySlugs: string[]) {
-    // 1. Fetch matching StoreCategory IDs
+    const { OFFICIAL_STORE_CATEGORIES, getStoreCategoryBySlug } = await import("@/lib/constants/store-categories");
+
+    // 1. Ensure all requested categorySlugs exist in StoreCategory database table
+    for (const slug of categorySlugs) {
+      const catInfo = getStoreCategoryBySlug(slug);
+      if (catInfo) {
+        await db.storeCategory.upsert({
+          where: { slug: catInfo.slug },
+          update: { name: catInfo.name, description: catInfo.description },
+          create: { name: catInfo.name, slug: catInfo.slug, description: catInfo.description },
+        });
+      }
+    }
+
+    // 2. Fetch matching StoreCategory IDs
     const categories = await db.storeCategory.findMany({
       where: {
         slug: { in: categorySlugs },
@@ -48,12 +62,12 @@ export class VendorRepository {
 
     if (categories.length === 0) return;
 
-    // 2. Delete current assignments for store
+    // 3. Delete current assignments for store
     await db.storeCategoryAssignment.deleteMany({
       where: { storeId },
     });
 
-    // 3. Create new assignments
+    // 4. Create new assignments
     await db.storeCategoryAssignment.createMany({
       data: categories.map((c) => ({
         storeId,
@@ -62,13 +76,25 @@ export class VendorRepository {
       skipDuplicates: true,
     });
 
-    // 4. Update legacy store.category field with primary category name for backward compatibility
-    await db.store.update({
+    // 5. Update store.category field with primary category name and sync VendorProfile
+    const primaryCategoryName = categories[0].name;
+    const store = await db.store.update({
       where: { id: storeId },
       data: {
-        category: categories[0].name,
+        category: primaryCategoryName,
       },
+      select: { vendorProfileId: true },
     });
+
+    if (store?.vendorProfileId) {
+      const allCategoryNames = categories.map((c) => c.name).join(", ");
+      await db.vendorProfile.update({
+        where: { id: store.vendorProfileId },
+        data: {
+          businessCategory: allCategoryNames,
+        },
+      }).catch(() => {});
+    }
   }
 
   /**
