@@ -18,9 +18,9 @@ export default function CategorySelector({
 }: CategorySelectorProps) {
   const isSingleCategory = vendorCategories.length === 1;
 
-  // Auto-select single category if vendor only has 1 authorized category
+  // Auto-select single category if vendor only has 1 authorized category AND category is not set
   useEffect(() => {
-    if (isSingleCategory && vendorCategories[0] && category !== vendorCategories[0]) {
+    if (isSingleCategory && vendorCategories[0] && !category) {
       onCategoryChange?.(vendorCategories[0]);
     }
   }, [isSingleCategory, vendorCategories, category, onCategoryChange]);

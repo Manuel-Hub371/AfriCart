@@ -38,6 +38,10 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
     stock: 0,
     status: "ACTIVE",
   });
+  const [shortDescription, setShortDescription] = useState<string>("");
+  const [productType, setProductType] = useState<string>("Physical Product");
+  const [tags, setTags] = useState<string[]>([]);
+  const [slug, setSlug] = useState<string>("");
   const [vendorCategories, setVendorCategories] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [variants, setVariants] = useState<GeneratedVariant[]>([]);
@@ -124,8 +128,18 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
             stock: p.stock || 0,
             status: p.status || "ACTIVE",
           });
+          setSlug(p.slug || "");
           setImages(Array.isArray(p.images) ? p.images : []);
           setWeight(p.weight || 0);
+
+          // Extract specifications
+          if (p.specifications && typeof p.specifications === "object") {
+            const specs = p.specifications as any;
+            if (specs.shortDescription) setShortDescription(specs.shortDescription);
+            if (specs.productType) setProductType(specs.productType);
+            if (Array.isArray(specs.tags)) setTags(specs.tags);
+          }
+
           if (p.seoTitle) setSeoTitle(p.seoTitle);
           if (p.seoDescription) setSeoDescription(p.seoDescription);
           if (p.seoKeywords) setSeoKeywords(p.seoKeywords);
@@ -194,9 +208,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           returnPolicyId: selectedReturnPolicyId,
           warrantyPolicyId: selectedWarrantyPolicyId,
           campaignIds: selectedCampaignIds,
+          specifications: {
+            shortDescription: shortDescription.trim() || undefined,
+            productType: productType || "Physical Product",
+            tags: tags.length > 0 ? tags : [],
+          },
           seoTitle: seoTitle.trim() || undefined,
           seoDescription: seoDescription.trim() || undefined,
           seoKeywords: seoKeywords.trim() || undefined,
+          slug: slug.trim() || undefined,
           isFeatured,
           status: newStatus,
         }),
@@ -366,6 +386,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   onBrandChange={(brand) => setProductData((prev) => ({ ...prev, brand }))}
                   description={productData.description}
                   onDescriptionChange={(description) => setProductData((prev) => ({ ...prev, description }))}
+                  shortDescription={shortDescription}
+                  onShortDescriptionChange={setShortDescription}
+                  productType={productType}
+                  onProductTypeChange={setProductType}
+                  tags={tags}
+                  onTagsChange={setTags}
                 />
               </div>
 
@@ -436,9 +462,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                   seoTitle={seoTitle}
                   seoDescription={seoDescription}
                   seoKeywords={seoKeywords}
+                  slug={slug}
                   onChangeSeoTitle={setSeoTitle}
                   onChangeSeoDescription={setSeoDescription}
                   onChangeSeoKeywords={setSeoKeywords}
+                  onChangeSlug={setSlug}
                 />
               </div>
             </div>

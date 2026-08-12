@@ -24,6 +24,12 @@ interface ProductBasicInfoProps {
   onBrandChange?: (val: string) => void;
   description?: string;
   onDescriptionChange?: (val: string) => void;
+  shortDescription?: string;
+  onShortDescriptionChange?: (val: string) => void;
+  productType?: string;
+  onProductTypeChange?: (val: string) => void;
+  tags?: string[];
+  onTagsChange?: (tags: string[]) => void;
 }
 
 /** Simple markdown-to-HTML converter for preview */
@@ -64,9 +70,13 @@ export default function ProductBasicInfo({
   onBrandChange,
   description = "",
   onDescriptionChange,
+  shortDescription = "",
+  onShortDescriptionChange,
+  productType = "Physical Product",
+  onProductTypeChange,
+  tags = [],
+  onTagsChange,
 }: ProductBasicInfoProps) {
-  const [shortDesc, setShortDesc] = useState("");
-  const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [isPreview, setIsPreview] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -74,15 +84,16 @@ export default function ProductBasicInfo({
   const handleAddTag = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && tagInput.trim()) {
       e.preventDefault();
-      if (!tags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]);
+      const newTag = tagInput.trim();
+      if (!tags.includes(newTag)) {
+        onTagsChange?.([...tags, newTag]);
       }
       setTagInput("");
     }
   };
 
   const handleRemoveTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+    onTagsChange?.(tags.filter((tag) => tag !== tagToRemove));
   };
 
   /** Insert markdown syntax around selection */
@@ -157,14 +168,14 @@ export default function ProductBasicInfo({
             Short Description
           </label>
           <textarea
-            value={shortDesc}
-            onChange={(e) => setShortDesc(e.target.value)}
+            value={shortDescription}
+            onChange={(e) => onShortDescriptionChange?.(e.target.value)}
             placeholder="Brief product description (appears in listings)"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-sm"
             rows={3}
             maxLength={200}
           />
-          <p className="text-xs text-gray-500 mt-1">{shortDesc.length}/200 characters</p>
+          <p className="text-xs text-gray-500 mt-1">{shortDescription.length}/200 characters</p>
         </div>
 
         {/* Full Description — Rich Markdown Editor */}
@@ -251,10 +262,14 @@ export default function ProductBasicInfo({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Product Type</label>
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm">
-              <option>Physical Product</option>
-              <option>Digital Product</option>
-              <option>Service</option>
+            <select
+              value={productType}
+              onChange={(e) => onProductTypeChange?.(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm bg-white"
+            >
+              <option value="Physical Product">Physical Product</option>
+              <option value="Digital Product">Digital Product</option>
+              <option value="Service">Service</option>
             </select>
           </div>
         </div>

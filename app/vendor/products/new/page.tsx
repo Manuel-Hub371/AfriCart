@@ -34,6 +34,10 @@ export default function AddProductPage() {
     stock: 0,
     sku: "",
   });
+  const [shortDescription, setShortDescription] = useState<string>("");
+  const [productType, setProductType] = useState<string>("Physical Product");
+  const [tags, setTags] = useState<string[]>([]);
+  const [slug, setSlug] = useState<string>("");
   const [vendorCategories, setVendorCategories] = useState<string[]>([]);
   const [images, setImages] = useState<string[]>([]);
   const [variants, setVariants] = useState<GeneratedVariant[]>([]);
@@ -143,9 +147,15 @@ export default function AddProductPage() {
           returnPolicyId: selectedReturnPolicyId,
           warrantyPolicyId: selectedWarrantyPolicyId,
           campaignIds: selectedCampaignIds,
+          specifications: {
+            shortDescription: shortDescription.trim() || undefined,
+            productType: productType || "Physical Product",
+            tags: tags.length > 0 ? tags : [],
+          },
           seoTitle: seoTitle.trim() || undefined,
           seoDescription: seoDescription.trim() || undefined,
           seoKeywords: seoKeywords.trim() || undefined,
+          slug: slug.trim() || undefined,
           isFeatured,
           status,
         }),
@@ -264,6 +274,12 @@ export default function AddProductPage() {
                   onBrandChange={(brand) => setProductData((prev) => ({ ...prev, brand }))}
                   description={productData.description}
                   onDescriptionChange={(description) => setProductData((prev) => ({ ...prev, description }))}
+                  shortDescription={shortDescription}
+                  onShortDescriptionChange={setShortDescription}
+                  productType={productType}
+                  onProductTypeChange={setProductType}
+                  tags={tags}
+                  onTagsChange={setTags}
                 />
               </div>
 
@@ -333,9 +349,11 @@ export default function AddProductPage() {
                   seoTitle={seoTitle}
                   seoDescription={seoDescription}
                   seoKeywords={seoKeywords}
+                  slug={slug}
                   onChangeSeoTitle={setSeoTitle}
                   onChangeSeoDescription={setSeoDescription}
                   onChangeSeoKeywords={setSeoKeywords}
+                  onChangeSlug={setSlug}
                 />
               </div>
             </div>

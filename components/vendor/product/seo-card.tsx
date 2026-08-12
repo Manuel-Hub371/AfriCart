@@ -8,21 +8,23 @@ interface SeoCardProps {
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string;
+  slug?: string;
   onChangeSeoTitle?: (val: string) => void;
   onChangeSeoDescription?: (val: string) => void;
   onChangeSeoKeywords?: (val: string) => void;
+  onChangeSlug?: (val: string) => void;
 }
 
 export default function SeoCard({
   seoTitle = "",
   seoDescription = "",
   seoKeywords = "",
+  slug = "",
   onChangeSeoTitle,
   onChangeSeoDescription,
   onChangeSeoKeywords,
+  onChangeSlug,
 }: SeoCardProps) {
-  const [urlSlug, setUrlSlug] = useState("");
-
   return (
     <Card className="p-6">
       <h2 className="text-xl font-semibold mb-6">
@@ -55,7 +57,7 @@ export default function SeoCard({
             value={seoDescription}
             onChange={(e) => onChangeSeoDescription?.(e.target.value)}
             placeholder="Brief description for search engines"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none text-sm"
             rows={3}
             maxLength={160}
           />
@@ -89,9 +91,9 @@ export default function SeoCard({
               afriCart.com/product/
             </span>
             <Input
-              value={urlSlug}
+              value={slug}
               onChange={(e) =>
-                setUrlSlug(
+                onChangeSlug?.(
                   e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-")
                 )
               }
@@ -114,7 +116,7 @@ export default function SeoCard({
               {seoTitle || "Product Title - AfriCart"}
             </div>
             <div className="text-green-700 text-sm">
-              https://afriCart.com/product/{urlSlug || "product-name"}
+              https://afriCart.com/product/{slug || "product-name"}
             </div>
             <div className="text-gray-600 text-sm">
               {seoDescription ||
