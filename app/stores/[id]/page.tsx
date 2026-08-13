@@ -144,13 +144,24 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
     }
   };
 
-  // Extract unique categories from store products
+  // Extract unique categories from store products and assigned store categories
   const availableCategories = useMemo(() => {
-    if (!store?.products) return [];
+    if (!store) return [];
     const cats = new Set<string>();
-    store.products.forEach((p: any) => {
-      if (p.category) cats.add(p.category);
-    });
+    if (Array.isArray(store.products)) {
+      store.products.forEach((p: any) => {
+        const catName = p.category || p.categoryName;
+        if (catName) cats.add(catName);
+      });
+    }
+    if (Array.isArray(store.categories)) {
+      store.categories.forEach((c: any) => {
+        const catName = typeof c === "string" ? c : c.name || c.storeCategory?.name;
+        if (catName) cats.add(catName);
+      });
+    } else if (store.category) {
+      cats.add(store.category);
+    }
     return Array.from(cats);
   }, [store]);
 
@@ -166,7 +177,12 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
         if (!matchName && !matchDesc) return false;
       }
       // Category
-      if (selectedCategory !== "all" && p.category !== selectedCategory) {
+      if (
+        availableCategories.length > 1 &&
+        selectedCategory !== "all" &&
+        p.category !== selectedCategory &&
+        p.categoryName !== selectedCategory
+      ) {
         return false;
       }
       // Min Price
@@ -490,27 +506,29 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     </div>
                   </div>
 
-                  {/* Category Filter */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                      Category
-                    </label>
-                    <select
-                      value={selectedCategory}
-                      onChange={(e) => {
-                        setSelectedCategory(e.target.value);
-                        setCurrentPage(1);
-                      }}
-                      className="w-full h-10 px-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 focus:outline-none"
-                    >
-                      <option value="all">All Categories ({store.products?.length || 0})</option>
-                      {availableCategories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  {/* Category Filter — Only shown when store has multiple categories */}
+                  {availableCategories.length > 1 && (
+                    <div>
+                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                        Filter by Category
+                      </label>
+                      <select
+                        value={selectedCategory}
+                        onChange={(e) => {
+                          setSelectedCategory(e.target.value);
+                          setCurrentPage(1);
+                        }}
+                        className="w-full h-10 px-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 focus:outline-none cursor-pointer"
+                      >
+                        <option value="all">All Categories ({store.products?.length || 0})</option>
+                        {availableCategories.map((cat) => (
+                          <option key={cat} value={cat}>
+                            {cat}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
 
                   {/* Price Range */}
                   <div>
