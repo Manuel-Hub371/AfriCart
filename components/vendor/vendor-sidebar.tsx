@@ -78,7 +78,6 @@ export default function VendorSidebar({
     { icon: Package, label: "Products", href: "/vendor/products" },
     { icon: ShoppingBag, label: "Orders", href: "/vendor/orders" },
     { icon: Users, label: "Customers", href: "/vendor/customers" },
-    { icon: Boxes, label: "Inventory", href: "/vendor/inventory" },
     { icon: MessageSquare, label: "Reviews", href: "/vendor/reviews" },
     { icon: BarChart3, label: "Analytics", href: "/vendor/analytics" },
     { icon: Tag, label: "Marketing", href: "/vendor/marketing" },

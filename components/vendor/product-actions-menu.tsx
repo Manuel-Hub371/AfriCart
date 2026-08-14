@@ -48,10 +48,6 @@ export function ProductActionsMenu({ productId, onAction }: ProductActionsMenuPr
           Duplicate
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => onAction("inventory", productId)}>
-          <Package className="h-4 w-4 mr-2" />
-          Manage Inventory
-        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => onAction("analytics", productId)}>
           <BarChart3 className="h-4 w-4 mr-2" />
           View Analytics

@@ -77,9 +77,7 @@ export function ProductTable({
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead>SKU</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Brand</TableHead>
               <TableHead>
                 <Button
                   variant="ghost"
@@ -91,33 +89,9 @@ export function ProductTable({
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort("stock")}
-                  className="h-8 -ml-3 font-semibold text-gray-700"
-                >
-                  Stock
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Featured</TableHead>
-              <TableHead>Best Seller</TableHead>
               <TableHead>Rating</TableHead>
-              <TableHead>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleSort("sales")}
-                  className="h-8 -ml-3 font-semibold text-gray-700"
-                >
-                  Sales
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead>Performance</TableHead>
               <TableHead>Last Updated</TableHead>
               <TableHead className="w-12"></TableHead>
             </TableRow>
@@ -160,21 +134,12 @@ export function ProductTable({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm text-gray-600 font-mono">{product.sku}</span>
-                </TableCell>
-                <TableCell>
                   <span className="text-sm text-gray-600">{product.category}</span>
                 </TableCell>
                 <TableCell>
-                  <span className="text-sm text-gray-600">{product.brand || "—"}</span>
-                </TableCell>
-                <TableCell>
                   <span className="font-semibold text-gray-900">
-                    ${product.price.toFixed(2)}
+                    GH₵{product.price.toFixed(2)}
                   </span>
-                </TableCell>
-                <TableCell>
-                  <InventoryIndicator stock={product.stock} />
                 </TableCell>
                 <TableCell>
                   <ProductStatusBadge status={product.status} />
@@ -193,38 +158,11 @@ export function ProductTable({
                   </button>
                 </TableCell>
                 <TableCell>
-                  {product.isBestSeller ? (
-                    <span
-                      title={`Best Seller Score: ${product.bestSellerScore || 0}`}
-                      className="inline-flex items-center gap-1 text-xs font-extrabold px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-xs cursor-default"
-                    >
-                      🔥 Best Seller
-                    </span>
-                  ) : (
-                    <span className="text-xs text-gray-400 font-medium px-2">—</span>
-                  )}
-                </TableCell>
-                <TableCell>
                   <div className="flex items-center gap-1">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                     <span className="text-sm font-medium text-gray-900">
                       {product.rating}
                     </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <span className="font-semibold text-gray-900">{product.sales}</span>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col gap-1 text-xs">
-                    <div className="flex items-center gap-1 text-gray-600">
-                      <Eye className="h-3 w-3" />
-                      <span>{product.views}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-gray-600">
-                      <DollarSign className="h-3 w-3" />
-                      <span>GH₵{(product.revenue / 1000).toFixed(1)}k</span>
-                    </div>
                   </div>
                 </TableCell>
                 <TableCell>

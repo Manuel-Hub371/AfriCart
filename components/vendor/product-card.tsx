@@ -107,62 +107,19 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
           <h3 className="font-semibold text-gray-900 line-clamp-2 mb-1">
             {product.name}
           </h3>
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span>{product.sku || "N/A"}</span>
-            <span>•</span>
-            <span>{product.category}</span>
+          <div className="text-sm text-gray-500 font-medium">
+            {product.category}
           </div>
         </div>
 
-        {/* Price & Stock */}
+        {/* Price & Rating */}
         <div className="flex items-center justify-between">
-          <div>
-            <p className="text-2xl font-bold text-gray-900">
-              ${Number(product.price).toFixed(2)}
-            </p>
-          </div>
-          <InventoryIndicator stock={product.stock} />
-        </div>
-
-        {/* Rating */}
-        <div className="flex items-center gap-1">
-          {[...Array(5)].map((_, i) => (
-            <Star
-              key={i}
-              className={`h-4 w-4 ${
-                i < Math.floor(product.rating || 5)
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "fill-gray-200 text-gray-200"
-              }`}
-            />
-          ))}
-          <span className="text-sm text-gray-600 ml-1">({product.rating || 5})</span>
-        </div>
-
-        {/* Metrics */}
-        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-gray-100">
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
-              <Eye className="h-3 w-3" />
-            </div>
-            <p className="text-xs font-semibold text-gray-900">{product.views || 0}</p>
-            <p className="text-xs text-gray-500">Views</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
-              <ShoppingCart className="h-3 w-3" />
-            </div>
-            <p className="text-xs font-semibold text-gray-900">{product.sales || 0}</p>
-            <p className="text-xs text-gray-500">Sales</p>
-          </div>
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-1 text-gray-500 mb-1">
-              <DollarSign className="h-3 w-3" />
-            </div>
-            <p className="text-xs font-semibold text-gray-900">
-              ${((product.revenue || 0) / 1000).toFixed(1)}k
-            </p>
-            <p className="text-xs text-gray-500">Revenue</p>
+          <p className="text-xl font-extrabold text-gray-900">
+            GH₵{Number(product.price).toFixed(2)}
+          </p>
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <span className="text-xs font-bold text-gray-700">{product.rating || 5.0}</span>
           </div>
         </div>
 

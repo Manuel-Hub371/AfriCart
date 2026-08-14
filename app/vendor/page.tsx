@@ -101,7 +101,7 @@ export default function VendorDashboardPage() {
                 <DashboardCard
                   icon={DollarSign}
                   label="Total Revenue"
-                  value={`$${(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+                  value={`GH₵${(stats.totalRevenue || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
                   iconColor="text-emerald-600"
                   iconBg="bg-emerald-100"
                 />
@@ -168,7 +168,7 @@ export default function VendorDashboardPage() {
                                 {order.product}
                               </td>
                               <td className="py-3.5 px-4 text-sm font-bold text-gray-900">
-                                ${order.amount.toFixed(2)}
+                                GH₵{order.amount.toFixed(2)}
                               </td>
                               <td className="py-3.5 px-4">
                                 <span className={`text-xs px-2.5 py-1 rounded-full font-bold border ${statusColors[order.status] || "bg-gray-100 text-gray-700"}`}>
