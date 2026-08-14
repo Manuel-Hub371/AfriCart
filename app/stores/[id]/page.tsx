@@ -953,18 +953,21 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     {store.assignedStorePolicy ? (
                       <div className="space-y-2 text-xs text-gray-600 leading-relaxed">
                         <p className="font-extrabold text-gray-900 text-sm">{store.assignedStorePolicy.name}</p>
-                        {store.assignedStorePolicy.introduction && <p>{store.assignedStorePolicy.introduction}</p>}
-                        {store.assignedStorePolicy.generalTerms && (
+                        {store.assignedStorePolicy.description && <p>{store.assignedStorePolicy.description}</p>}
+                        {store.assignedStorePolicy.termsConditions && (
                           <div className="bg-white p-3 rounded-xl border border-gray-200 my-2">
-                            <strong className="text-gray-900 font-bold block mb-1">General Terms:</strong>
-                            <p className="whitespace-pre-line text-gray-700">{store.assignedStorePolicy.generalTerms}</p>
+                            <strong className="text-gray-900 font-bold block mb-1">Terms &amp; Conditions:</strong>
+                            <p className="whitespace-pre-line text-gray-700">{store.assignedStorePolicy.termsConditions}</p>
                           </div>
                         )}
-                        {store.assignedStorePolicy.paymentTerms && (
-                          <p><strong className="text-gray-900 font-semibold">Payment Terms:</strong> {store.assignedStorePolicy.paymentTerms}</p>
+                        {store.assignedStorePolicy.customerResponsibilities && (
+                          <p><strong className="text-gray-900 font-semibold">Customer Responsibilities:</strong> {store.assignedStorePolicy.customerResponsibilities}</p>
                         )}
-                        {store.assignedStorePolicy.customerRights && (
-                          <p><strong className="text-gray-900 font-semibold">Customer Rights:</strong> {store.assignedStorePolicy.customerRights}</p>
+                        {store.assignedStorePolicy.sellerResponsibilities && (
+                          <p><strong className="text-gray-900 font-semibold">Seller Responsibilities:</strong> {store.assignedStorePolicy.sellerResponsibilities}</p>
+                        )}
+                        {store.assignedStorePolicy.cancellationRules && (
+                          <p><strong className="text-gray-900 font-semibold">Cancellation Rules:</strong> {store.assignedStorePolicy.cancellationRules}</p>
                         )}
                         {store.assignedStorePolicy.disputeResolution && (
                           <p><strong className="text-gray-900 font-semibold">Dispute Resolution:</strong> {store.assignedStorePolicy.disputeResolution}</p>

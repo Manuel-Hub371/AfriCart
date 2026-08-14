@@ -462,7 +462,7 @@ export class CatalogService {
       returnPolicy: activeReturnPolicy ? `${activeReturnPolicy.name}: Return window is ${activeReturnPolicy.returnWindowDays || 30} days. ${activeReturnPolicy.policyDetails || ""}` : (store.returnPolicy || null),
       refundPolicy: activeRefundPolicy ? `${activeRefundPolicy.name}: Refund method is ${activeRefundPolicy.refundMethod || "Original Payment Method"}. ${activeRefundPolicy.conditions || ""}` : (store.refundPolicy || null),
       privacyPolicy: assignedPrivacyPolicy ? `${assignedPrivacyPolicy.name}: ${assignedPrivacyPolicy.introduction || ""} ${assignedPrivacyPolicy.infoCollected || ""}` : (store.privacyPolicy || null),
-      termsConditions: assignedStorePolicy ? `${assignedStorePolicy.name}: ${assignedStorePolicy.introduction || ""} ${assignedStorePolicy.generalTerms || ""}` : (store.termsConditions || null),
+      termsConditions: assignedStorePolicy ? `${assignedStorePolicy.name}: ${assignedStorePolicy.description || ""} ${assignedStorePolicy.termsConditions || ""}` : (store.termsConditions || null),
       rating: averageRating,
       numReviews: totalRatingsCount,
       reviews: allReviews,
