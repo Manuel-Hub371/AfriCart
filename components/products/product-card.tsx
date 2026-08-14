@@ -142,10 +142,10 @@ export function ProductCard({
   };
 
   return (
-    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full bg-white border border-gray-200">
+    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col justify-between h-full bg-white border border-gray-200 rounded-2xl">
       <div>
         <Link href={`/product/${id}`}>
-          <div className="relative aspect-square bg-gray-100 overflow-hidden">
+          <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
             {imgSrc ? (
               <img
                 src={imgSrc}
@@ -155,33 +155,33 @@ export function ProductCard({
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center text-gray-300 bg-gray-50">
-                <Package className="w-12 h-12 stroke-[1.5]" />
+                <Package className="w-10 h-10 stroke-[1.5]" />
               </div>
             )}
 
             {/* Top-Left: Marketing Campaign Badges & Discount — all from API */}
             <div className="absolute top-2 left-2 flex flex-col items-start gap-1 z-10 max-w-[70%]">
               {isBestSeller && (
-                <span className="text-[10px] font-extrabold uppercase tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2.5 py-0.5 rounded-full shadow-md">
+                <span className="text-[9px] font-extrabold uppercase tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2 py-0.5 rounded-full shadow-md">
                   🔥 Best Seller
                 </span>
               )}
               {campaignTag && (
                 <span
-                  className="text-[10px] font-extrabold uppercase tracking-wide text-white px-2.5 py-0.5 rounded-full shadow-sm truncate max-w-full"
+                  className="text-[9px] font-extrabold uppercase tracking-wide text-white px-2 py-0.5 rounded-full shadow-sm truncate max-w-full"
                   style={{ backgroundColor: tagColor }}
                 >
                   {campaignTag}
                 </span>
               )}
               {isDiscounted && discountPercent > 0 && (
-                <Badge className="bg-orange-500 text-white font-extrabold text-[10px] px-2 py-0.5 rounded-full shadow-xs gap-1">
+                <Badge className="bg-orange-500 text-white font-extrabold text-[9px] px-2 py-0.5 rounded-full shadow-xs gap-1">
                   <Zap className="h-2.5 w-2.5" />
                   -{discountPercent}%
                 </Badge>
               )}
               {!inStock && (
-                <Badge variant="destructive" className="text-[10px] px-2 py-0.5 rounded-full">
+                <Badge variant="destructive" className="text-[9px] px-2 py-0.5 rounded-full">
                   Out of Stock
                 </Badge>
               )}
@@ -189,77 +189,77 @@ export function ProductCard({
 
             {/* Image count indicator */}
             {displayImageCount > 1 && (
-              <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-xs px-2 py-1 rounded">
-                <Images className="h-3 w-3" />
+              <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                <Images className="h-2.5 w-2.5" />
                 <span>{displayImageCount}</span>
               </div>
             )}
 
             {/* Action Buttons */}
-            <div className="absolute top-2 right-2 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            <div className="absolute top-2 right-2 flex flex-col gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
               <button
                 type="button"
                 onClick={handleWishlist}
-                className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-emerald-600 hover:text-white text-gray-700 transition-colors"
+                className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-emerald-600 hover:text-white text-gray-700 transition-colors"
                 title="Add to Wishlist"
               >
-                <Heart className="h-4 w-4" />
+                <Heart className="h-3.5 w-3.5" />
               </button>
               <Link href={`/product/${id}`}>
                 <button
                   type="button"
-                  className="p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-emerald-600 hover:text-white text-gray-700 transition-colors"
+                  className="p-1.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-emerald-600 hover:text-white text-gray-700 transition-colors"
                   title="View Product"
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-3.5 w-3.5" />
                 </button>
               </Link>
             </div>
           </div>
         </Link>
 
-        <div className="p-4 space-y-2">
+        <div className="p-3 space-y-1.5">
           <div>
             {brand && (
-              <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block mb-0.5">
+              <span className="text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 block mb-0.5">
                 {brand}
               </span>
             )}
             <Link href={`/product/${id}`}>
-              <h3 className="font-semibold text-gray-900 line-clamp-2 hover:text-emerald-600 transition-colors mb-1 text-base">
+              <h3 className="font-bold text-gray-900 line-clamp-2 hover:text-emerald-600 transition-colors text-sm leading-snug">
                 {name}
               </h3>
             </Link>
             {storeName && (
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <span>{storeName}</span>
+              <div className="flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">
+                <span className="truncate max-w-[140px]">{storeName}</span>
                 {verified && (
-                  <CheckCircle className="h-3 w-3 text-emerald-600" />
+                  <CheckCircle className="h-3 w-3 text-emerald-600 shrink-0" />
                 )}
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-2 text-xs">
-            <div className="flex items-center gap-1">
-              <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-              <span className="font-medium text-gray-900">{rating || "5.0"}</span>
+          <div className="flex items-center gap-1.5 text-[11px]">
+            <div className="flex items-center gap-0.5">
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+              <span className="font-bold text-gray-900">{rating || "5.0"}</span>
             </div>
-            <span className="text-gray-400">({reviews || 0} reviews)</span>
+            <span className="text-gray-400">({reviews || 0})</span>
           </div>
 
-          {/* Pricing — from API, no frontend calculations */}
-          <div className="flex items-baseline gap-2 pt-1">
-            <span className="text-lg font-extrabold text-gray-900">
+          {/* Pricing */}
+          <div className="flex items-baseline gap-1.5 pt-0.5 flex-wrap">
+            <span className="text-base font-extrabold text-gray-900">
               GH₵{Number(price).toFixed(2)}
             </span>
             {isDiscounted && originalPrice && originalPrice > price && (
-              <span className="text-xs text-gray-400 line-through">
+              <span className="text-[11px] text-gray-400 line-through">
                 GH₵{Number(originalPrice).toFixed(2)}
               </span>
             )}
             {isDiscounted && amountSaved > 0 && (
-              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md">
+              <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-md">
                 Save GH₵{Number(amountSaved).toFixed(2)}
               </span>
             )}
@@ -267,18 +267,18 @@ export function ProductCard({
         </div>
       </div>
 
-      <div className="p-4 pt-0">
+      <div className="p-3 pt-0">
         {inStock ? (
           <Button
-            className="w-full gap-2 gradient-primary text-white shadow-sm hover:shadow transition-all"
+            className="w-full h-8 text-xs font-bold gap-1.5 gradient-primary text-white shadow-xs hover:shadow transition-all rounded-xl"
             size="sm"
             onClick={handleAddToCart}
           >
-            <ShoppingCart className="h-4 w-4" />
+            <ShoppingCart className="h-3.5 w-3.5" />
             Add to Cart
           </Button>
         ) : (
-          <Button className="w-full" size="sm" variant="outline" disabled>
+          <Button className="w-full h-8 text-xs font-bold rounded-xl" size="sm" variant="outline" disabled>
             Out of Stock
           </Button>
         )}

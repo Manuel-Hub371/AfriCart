@@ -163,8 +163,10 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
             <div className="grid lg:grid-cols-2 gap-10">
               {/* Left: Product Gallery */}
               <ProductGallery
-                images={galleryImages}
+                images={product.images}
                 activeVariantImage={activeVariantImage}
+                productName={product.name}
+                category={product.category}
               />
 
               {/* Right: Product Details & Purchase Actions */}
