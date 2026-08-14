@@ -388,6 +388,7 @@ export class CatalogRepository {
             user: {
               select: { email: true, phone: true },
             },
+            verification: true,
           },
         },
         products: {

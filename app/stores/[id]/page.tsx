@@ -879,6 +879,24 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                         <span className="font-medium text-gray-500">Business Name</span>
                         <span className="font-bold text-gray-900">{store.businessName || store.name}</span>
                       </div>
+                      {store.businessType && (
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="font-medium text-gray-500">Business Type</span>
+                          <span className="font-bold text-gray-900">{store.businessType}</span>
+                        </div>
+                      )}
+                      {store.registrationNumber && (
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="font-medium text-gray-500">Reg. Number</span>
+                          <span className="font-bold text-gray-900">{store.registrationNumber}</span>
+                        </div>
+                      )}
+                      {store.taxId && (
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="font-medium text-gray-500">Tax ID / TIN</span>
+                          <span className="font-bold text-gray-900">{store.taxId}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between border-b pb-2">
                         <span className="font-medium text-gray-500">Primary Category</span>
                         <span className="font-bold text-gray-900">{store.category || "General Marketplace"}</span>
@@ -890,7 +908,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                       <div className="flex justify-between border-b pb-2">
                         <span className="font-medium text-gray-500">Verification Status</span>
                         <span className="font-bold text-emerald-600 flex items-center gap-1">
-                          <CheckCircle className="h-4 w-4" /> Verified Business
+                          <CheckCircle className="h-4 w-4" /> {store.verified ? "Verified Business" : "Registered Vendor"}
                         </span>
                       </div>
                     </div>
@@ -911,20 +929,34 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                           <span className="font-bold text-gray-900">{store.businessAddress}</span>
                         </div>
                       )}
-                      {(store.contactEmail || store.supportEmail) && (
+                      {(store.supportEmail || store.contactEmail) && (
                         <div className="flex justify-between border-b pb-2">
                           <span className="font-medium text-gray-500">Support Email</span>
                           <span className="font-bold text-gray-900 flex items-center gap-1">
-                            <Mail className="h-3.5 w-3.5 text-gray-400" /> {store.contactEmail || store.supportEmail}
+                            <Mail className="h-3.5 w-3.5 text-gray-400" /> {store.supportEmail || store.contactEmail}
                           </span>
                         </div>
                       )}
-                      {(store.contactPhone || store.supportPhone) && (
+                      {(store.supportPhone || store.contactPhone) && (
                         <div className="flex justify-between border-b pb-2">
                           <span className="font-medium text-gray-500">Support Phone</span>
                           <span className="font-bold text-gray-900 flex items-center gap-1">
-                            <Phone className="h-3.5 w-3.5 text-gray-400" /> {store.contactPhone || store.supportPhone}
+                            <Phone className="h-3.5 w-3.5 text-gray-400" /> {store.supportPhone || store.contactPhone}
                           </span>
+                        </div>
+                      )}
+                      {store.website && (
+                        <div className="flex justify-between border-b pb-2">
+                          <span className="font-medium text-gray-500">Website</span>
+                          <a
+                            href={store.website.startsWith("http") ? store.website : `https://${store.website}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-bold text-emerald-600 hover:underline flex items-center gap-1"
+                          >
+                            {store.website}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
                         </div>
                       )}
                       {store.businessHours && (
