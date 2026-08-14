@@ -403,7 +403,7 @@ function ProductsContent() {
                       campaignBadge={product.campaignBadge}
                       campaignColor={product.campaignColor}
                       campaignName={product.campaignName}
-                      image={Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : ""}
+                      image={product.images}
                       inStock={product.stock > 0}
                       imagesCount={Array.isArray(product.images) ? product.images.length : 1}
                       isBestSeller={product.isBestSeller ?? false}
