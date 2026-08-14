@@ -938,7 +938,78 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                 </div>
               </div>
 
+              {/* Store Policies (Store Policy & Privacy Policy Only) */}
+              <div className="bg-white rounded-3xl border border-gray-200 p-8 space-y-6 shadow-sm">
+                <h3 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
+                  <ShieldCheck className="h-6 w-6 text-emerald-600" /> Store Terms &amp; Policies
+                </h3>
 
+                <div className="grid md:grid-cols-2 gap-6 pt-2">
+                  {/* Store Policy */}
+                  <div className="border rounded-2xl p-6 bg-gray-50/50 space-y-2">
+                    <h4 className="font-bold text-gray-900 flex items-center gap-2 text-base text-emerald-800">
+                      <FileText className="h-5 w-5" /> Store Policy
+                    </h4>
+                    {store.assignedStorePolicy ? (
+                      <div className="space-y-2 text-xs text-gray-600 leading-relaxed">
+                        <p className="font-extrabold text-gray-900 text-sm">{store.assignedStorePolicy.name}</p>
+                        {store.assignedStorePolicy.introduction && <p>{store.assignedStorePolicy.introduction}</p>}
+                        {store.assignedStorePolicy.generalTerms && (
+                          <div className="bg-white p-3 rounded-xl border border-gray-200 my-2">
+                            <strong className="text-gray-900 font-bold block mb-1">General Terms:</strong>
+                            <p className="whitespace-pre-line text-gray-700">{store.assignedStorePolicy.generalTerms}</p>
+                          </div>
+                        )}
+                        {store.assignedStorePolicy.paymentTerms && (
+                          <p><strong className="text-gray-900 font-semibold">Payment Terms:</strong> {store.assignedStorePolicy.paymentTerms}</p>
+                        )}
+                        {store.assignedStorePolicy.customerRights && (
+                          <p><strong className="text-gray-900 font-semibold">Customer Rights:</strong> {store.assignedStorePolicy.customerRights}</p>
+                        )}
+                        {store.assignedStorePolicy.disputeResolution && (
+                          <p><strong className="text-gray-900 font-semibold">Dispute Resolution:</strong> {store.assignedStorePolicy.disputeResolution}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
+                        {store.termsConditions || "Standard store guidelines and terms apply to all orders."}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Privacy Policy */}
+                  <div className="border rounded-2xl p-6 bg-gray-50/50 space-y-2">
+                    <h4 className="font-bold text-gray-900 flex items-center gap-2 text-base text-emerald-800">
+                      <Lock className="h-5 w-5" /> Privacy Policy
+                    </h4>
+                    {store.assignedPrivacyPolicy ? (
+                      <div className="space-y-2 text-xs text-gray-600 leading-relaxed">
+                        <p className="font-extrabold text-gray-900 text-sm">{store.assignedPrivacyPolicy.name}</p>
+                        {store.assignedPrivacyPolicy.introduction && <p>{store.assignedPrivacyPolicy.introduction}</p>}
+                        {store.assignedPrivacyPolicy.infoCollected && (
+                          <p><strong className="text-gray-900 font-semibold">Information Collected:</strong> {store.assignedPrivacyPolicy.infoCollected}</p>
+                        )}
+                        {store.assignedPrivacyPolicy.howInfoUsed && (
+                          <p><strong className="text-gray-900 font-semibold">How Used:</strong> {store.assignedPrivacyPolicy.howInfoUsed}</p>
+                        )}
+                        {store.assignedPrivacyPolicy.thirdPartyServices && (
+                          <p><strong className="text-gray-900 font-semibold">Third Parties:</strong> {store.assignedPrivacyPolicy.thirdPartyServices}</p>
+                        )}
+                        {store.assignedPrivacyPolicy.securityMeasures && (
+                          <p><strong className="text-gray-900 font-semibold">Security:</strong> {store.assignedPrivacyPolicy.securityMeasures}</p>
+                        )}
+                        {store.assignedPrivacyPolicy.contactInfo && (
+                          <p><strong className="text-gray-900 font-semibold">Privacy Contact:</strong> {store.assignedPrivacyPolicy.contactInfo}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
+                        {store.privacyPolicy || "We strictly protect customer privacy. Personal contact information collected during transaction processing is exclusively used to fulfill your order."}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
               {/* Social Media Links (Only Configured Accounts) */}
               {(() => {
