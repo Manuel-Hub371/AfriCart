@@ -425,6 +425,13 @@ export class CatalogService {
 
     const averageRating = totalRatingsCount > 0 ? Number((totalRatingsSum / totalRatingsCount).toFixed(1)) : 5.0;
 
+    const assignedStorePolicy = (store as any).currentStorePolicy || (store as any).storePolicies?.find((p: any) => p.isDefault) || (store as any).storePolicies?.[0] || null;
+    const assignedPrivacyPolicy = (store as any).currentPrivacyPolicy || (store as any).privacyPolicies?.find((p: any) => p.isDefault) || (store as any).privacyPolicies?.[0] || null;
+    const activeShippingPolicy = (store as any).shippingPolicies?.find((p: any) => p.isDefault) || (store as any).shippingPolicies?.[0] || null;
+    const activeRefundPolicy = (store as any).refundPolicies?.find((p: any) => p.isDefault) || (store as any).refundPolicies?.[0] || null;
+    const activeReturnPolicy = (store as any).returnPolicies?.find((p: any) => p.isDefault) || (store as any).returnPolicies?.[0] || null;
+    const activeWarrantyPolicy = (store as any).warrantyPolicies?.find((p: any) => p.isDefault) || (store as any).warrantyPolicies?.[0] || null;
+
     return {
       id: store.id,
       name: store.name,
@@ -443,11 +450,19 @@ export class CatalogService {
       contactPhone: store.phone || store.supportPhone || vp?.user?.phone || null,
       businessAddress: store.address || vp?.businessAddress || null,
       businessName: vp?.businessName || store.name,
-      shippingPolicy: store.shippingPolicy || null,
-      returnPolicy: store.returnPolicy || null,
-      refundPolicy: store.refundPolicy || null,
-      privacyPolicy: store.privacyPolicy || null,
-      termsConditions: store.termsConditions || null,
+      assignedStorePolicy,
+      currentStorePolicy: assignedStorePolicy,
+      assignedPrivacyPolicy,
+      currentPrivacyPolicy: assignedPrivacyPolicy,
+      activeShippingPolicy,
+      activeRefundPolicy,
+      activeReturnPolicy,
+      activeWarrantyPolicy,
+      shippingPolicy: activeShippingPolicy ? `${activeShippingPolicy.name}: Processing time ${activeShippingPolicy.processingTime || "1-2 days"}. ${activeShippingPolicy.domesticShipping || ""}` : (store.shippingPolicy || null),
+      returnPolicy: activeReturnPolicy ? `${activeReturnPolicy.name}: Return window is ${activeReturnPolicy.returnWindowDays || 30} days. ${activeReturnPolicy.policyDetails || ""}` : (store.returnPolicy || null),
+      refundPolicy: activeRefundPolicy ? `${activeRefundPolicy.name}: Refund method is ${activeRefundPolicy.refundMethod || "Original Payment Method"}. ${activeRefundPolicy.conditions || ""}` : (store.refundPolicy || null),
+      privacyPolicy: assignedPrivacyPolicy ? `${assignedPrivacyPolicy.name}: ${assignedPrivacyPolicy.introduction || ""} ${assignedPrivacyPolicy.infoCollected || ""}` : (store.privacyPolicy || null),
+      termsConditions: assignedStorePolicy ? `${assignedStorePolicy.name}: ${assignedStorePolicy.introduction || ""} ${assignedStorePolicy.generalTerms || ""}` : (store.termsConditions || null),
       rating: averageRating,
       numReviews: totalRatingsCount,
       reviews: allReviews,

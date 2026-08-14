@@ -410,6 +410,12 @@ export class CatalogRepository {
         },
         currentStorePolicy: true,
         currentPrivacyPolicy: true,
+        storePolicies: { orderBy: { updatedAt: "desc" } },
+        privacyPolicies: { orderBy: { updatedAt: "desc" } },
+        shippingPolicies: { orderBy: { updatedAt: "desc" } },
+        refundPolicies: { orderBy: { updatedAt: "desc" } },
+        returnPolicies: { orderBy: { updatedAt: "desc" } },
+        warrantyPolicies: { orderBy: { updatedAt: "desc" } },
         followers: userId ? { where: { userId }, select: { id: true } } : false,
         _count: {
           select: {

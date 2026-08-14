@@ -1017,9 +1017,27 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     <h4 className="font-bold text-gray-900 flex items-center gap-2 text-base text-emerald-800">
                       <Truck className="h-5 w-5" /> Shipping Policy
                     </h4>
-                    <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
-                      {store.shippingPolicy || "All orders are processed securely within 1-2 business days. Delivery timelines and costs are calculated dynamically at checkout based on policy guidelines."}
-                    </p>
+                    {store.activeShippingPolicy ? (
+                      <div className="space-y-2 text-xs text-gray-600 leading-relaxed">
+                        <p className="font-extrabold text-gray-900 text-sm">{store.activeShippingPolicy.name}</p>
+                        {store.activeShippingPolicy.processingTime && (
+                          <p><strong className="text-gray-900 font-semibold">Processing Time:</strong> {store.activeShippingPolicy.processingTime}</p>
+                        )}
+                        {store.activeShippingPolicy.domesticShipping && (
+                          <p><strong className="text-gray-900 font-semibold">Domestic Shipping:</strong> {store.activeShippingPolicy.domesticShipping}</p>
+                        )}
+                        {store.activeShippingPolicy.internationalShipping && (
+                          <p><strong className="text-gray-900 font-semibold">International Shipping:</strong> {store.activeShippingPolicy.internationalShipping}</p>
+                        )}
+                        {store.activeShippingPolicy.policyDetails && (
+                          <p className="whitespace-pre-line mt-1">{store.activeShippingPolicy.policyDetails}</p>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
+                        {store.shippingPolicy || "All orders are processed securely within 1-2 business days. Delivery timelines and costs are calculated dynamically at checkout based on policy guidelines."}
+                      </p>
+                    )}
                   </div>
 
                   {/* Return & Refund Policy */}
@@ -1027,9 +1045,32 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     <h4 className="font-bold text-gray-900 flex items-center gap-2 text-base text-emerald-800">
                       <RotateCcw className="h-5 w-5" /> Return &amp; Refund Policy
                     </h4>
-                    <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
-                      {store.returnPolicy || store.refundPolicy || "We offer a 30-day return policy for products in original packaging. Damaged or defective items are eligible for full replacement or refund."}
-                    </p>
+                    {store.activeReturnPolicy || store.activeRefundPolicy ? (
+                      <div className="space-y-2 text-xs text-gray-600 leading-relaxed">
+                        {store.activeReturnPolicy && (
+                          <div>
+                            <p className="font-extrabold text-gray-900 text-sm">{store.activeReturnPolicy.name}</p>
+                            <p><strong className="text-gray-900 font-semibold">Return Window:</strong> {store.activeReturnPolicy.returnWindowDays || 30} Days</p>
+                            {store.activeReturnPolicy.policyDetails && (
+                              <p className="whitespace-pre-line mt-1">{store.activeReturnPolicy.policyDetails}</p>
+                            )}
+                          </div>
+                        )}
+                        {store.activeRefundPolicy && (
+                          <div className="pt-2 border-t border-gray-200">
+                            <p className="font-extrabold text-gray-900 text-sm">{store.activeRefundPolicy.name}</p>
+                            <p><strong className="text-gray-900 font-semibold">Refund Method:</strong> {store.activeRefundPolicy.refundMethod || "Original Payment Method"}</p>
+                            {store.activeRefundPolicy.conditions && (
+                              <p className="whitespace-pre-line mt-1">{store.activeRefundPolicy.conditions}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
+                        {store.returnPolicy || store.refundPolicy || "We offer a 30-day return policy for products in original packaging. Damaged or defective items are eligible for full replacement or refund."}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
