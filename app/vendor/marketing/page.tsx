@@ -260,83 +260,7 @@ export default function VendorMarketingDashboardPage() {
               <span>{error}</span>
             </div>
           ) : (
-            <>
-              {/* Requirement 9 Stats Overview Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-6">
-                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
-                    <span>Revenue Generated</span>
-                    <DollarSign className="h-4 w-4 text-emerald-600" />
-                  </div>
-                  <p className="text-3xl font-extrabold text-emerald-700">GH₵{stats.totalRevenue.toFixed(2)}</p>
-                  <span className="text-[11px] text-gray-400 font-semibold block">From active campaign orders</span>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
-                    <span>Campaign Orders</span>
-                    <ShoppingCart className="h-4 w-4 text-blue-600" />
-                  </div>
-                  <p className="text-3xl font-extrabold text-gray-900">{stats.totalOrders}</p>
-                  <span className="text-[11px] text-gray-400 font-semibold block">{stats.unitsSold} total units sold</span>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
-                    <span>Conversion Rate</span>
-                    <TrendingUp className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <p className="text-3xl font-extrabold text-purple-700">{stats.conversionRate}%</p>
-                  <span className="text-[11px] text-gray-400 font-semibold block">Orders vs Campaign Views</span>
-                </div>
-
-                <div className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-1">
-                  <div className="flex items-center justify-between text-gray-500 text-xs font-bold uppercase tracking-wider">
-                    <span>Campaign ROI</span>
-                    <Percent className="h-4 w-4 text-amber-500" />
-                  </div>
-                  <p className="text-3xl font-extrabold text-amber-600">{stats.campaignRoi}%</p>
-                  <span className="text-[11px] text-gray-400 font-semibold block">Net Return on Discounts</span>
-                </div>
-              </div>
-
-              {/* Secondary Stats Row */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Assigned Products</span>
-                    <p className="text-xl font-extrabold text-gray-900">{stats.productsInCampaigns}</p>
-                  </div>
-                  <Package className="h-5 w-5 text-gray-400" />
-                </div>
-
-                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Total Discount Cost</span>
-                    <p className="text-xl font-extrabold text-red-600">GH₵{stats.totalDiscountGiven.toFixed(2)}</p>
-                  </div>
-                  <Flame className="h-5 w-5 text-red-500" />
-                </div>
-
-                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Active Deals</span>
-                    <p className="text-xl font-extrabold text-emerald-600">{stats.activeCampaigns}</p>
-                  </div>
-                  <Sparkles className="h-5 w-5 text-emerald-500" />
-                </div>
-
-                <div className="bg-white p-4 rounded-2xl border border-gray-200 shadow-xs flex items-center justify-between">
-                  <div>
-                    <span className="text-[10px] font-extrabold uppercase text-gray-400">Average Discount</span>
-                    <p className="text-xl font-extrabold text-gray-900">{stats.avgDiscount}%</p>
-                  </div>
-                  <Percent className="h-5 w-5 text-blue-500" />
-                </div>
-              </div>
-
-              {/* Marketing Campaigns Detailed Grid */}
-              <div className="space-y-4 pt-4">
+            <div className="space-y-4 pt-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="h-5 w-5 text-emerald-600" />
@@ -455,7 +379,6 @@ export default function VendorMarketingDashboardPage() {
                   </div>
                 )}
               </div>
-            </>
           )}
         </main>
       </div>
