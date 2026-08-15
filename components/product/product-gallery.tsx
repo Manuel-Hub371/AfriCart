@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { ChevronLeft, ChevronRight, ZoomIn, X, Play, Package } from "lucide-react";
+import { extractCoverImage, getCategoryFallbackImage } from "@/lib/image-utils";
 
 interface ProductGalleryProps {
   images: string | string[];
@@ -9,26 +10,6 @@ interface ProductGalleryProps {
   productName?: string;
   category?: string;
 }
-
-const getFallbackImage = (productName?: string, category?: string): string => {
-  const text = `${productName || ""} ${category || ""}`.toLowerCase();
-  if (text.includes("phone") || text.includes("smart") || text.includes("mobile") || text.includes("tech") || text.includes("electronic") || text.includes("gadget") || text.includes("laptop") || text.includes("camera")) {
-    return "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=800&auto=format&fit=crop&q=80";
-  }
-  if (text.includes("fashion") || text.includes("cloth") || text.includes("wear") || text.includes("apparel") || text.includes("shirt") || text.includes("shoe") || text.includes("dress")) {
-    return "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?w=800&auto=format&fit=crop&q=80";
-  }
-  if (text.includes("home") || text.includes("living") || text.includes("chair") || text.includes("furniture") || text.includes("decor") || text.includes("lamp") || text.includes("bed")) {
-    return "https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=800&auto=format&fit=crop&q=80";
-  }
-  if (text.includes("beauty") || text.includes("care") || text.includes("skin") || text.includes("hair") || text.includes("cosmetic") || text.includes("perfume")) {
-    return "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=800&auto=format&fit=crop&q=80";
-  }
-  if (text.includes("food") || text.includes("grocery") || text.includes("drink") || text.includes("snack") || text.includes("beverage")) {
-    return "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800&auto=format&fit=crop&q=80";
-  }
-  return "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80";
-};
 
 export function ProductGallery({ images, activeVariantImage, productName, category }: ProductGalleryProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -39,25 +20,15 @@ export function ProductGallery({ images, activeVariantImage, productName, catego
   const validImages: string[] = Array.from(new Set((() => {
     let list: string[] = [];
     if (Array.isArray(images)) {
-      list = images.flatMap((img) => {
-        if (typeof img === "string" && img.startsWith("[") && img.endsWith("]")) {
-          try { return JSON.parse(img); } catch { return img; }
-        }
-        return img;
-      });
-    } else if (typeof images === "string" && (images as string).trim()) {
-      const str = (images as string).trim();
-      if (str.startsWith("[") && str.endsWith("]")) {
-        try { list = JSON.parse(str); } catch { list = [str]; }
-      } else {
-        list = [str];
-      }
+      list = images.map((img) => extractCoverImage(img, productName, category)).filter(Boolean);
+    } else if (typeof images === "string" && images.trim()) {
+      const extracted = extractCoverImage(images, productName, category);
+      if (extracted) list = [extracted];
     }
-    const filtered = list.filter((img) => typeof img === "string" && img.trim() && !img.includes("example.com") && (img.startsWith("http") || img.startsWith("/") || img.startsWith("data:")));
-    return filtered.length > 0 ? filtered : [getFallbackImage(productName, category)];
+    return list.length > 0 ? list : [getCategoryFallbackImage(productName, category)];
   })()));
 
-  const activeMediaRaw = activeVariantImage || validImages[currentImageIndex] || getFallbackImage(productName, category);
+  const activeMediaRaw = activeVariantImage || validImages[currentImageIndex] || getCategoryFallbackImage(productName, category);
   const [activeMedia, setActiveMedia] = useState<string>(activeMediaRaw);
 
   useEffect(() => {
@@ -128,7 +99,7 @@ export function ProductGallery({ images, activeVariantImage, productName, catego
             alt={productName || "Product view"}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             onError={() => {
-              setActiveMedia(getFallbackImage(productName, category));
+              setActiveMedia(getCategoryFallbackImage(productName, category));
             }}
           />
         )}

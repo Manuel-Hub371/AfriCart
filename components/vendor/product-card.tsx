@@ -7,6 +7,7 @@ import { ProductStatusBadge } from "./product-status-badge";
 import { InventoryIndicator } from "./inventory-indicator";
 import { ProductActionsMenu } from "./product-actions-menu";
 import { Star, Eye, ShoppingCart, DollarSign, Package } from "lucide-react";
+import { extractCoverImage, getCategoryFallbackImage } from "@/lib/image-utils";
 
 export interface Product {
   id: string;
@@ -37,7 +38,10 @@ interface ProductCardProps {
 
 export function ProductCard({ product, isSelected, onSelect, onAction }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [imgSrc, setImgSrc] = useState(product.image || "");
+  const [imgSrc, setImgSrc] = useState(
+    extractCoverImage(product.image, product.name, product.category) ||
+    getCategoryFallbackImage(product.name, product.category)
+  );
 
   return (
     <Card

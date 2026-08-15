@@ -12,6 +12,7 @@ import { ProductPagination } from "@/components/vendor/product-pagination";
 import { BulkActionBar } from "@/components/vendor/bulk-action-bar";
 import { ProductEmptyState } from "@/components/vendor/product-empty-state";
 import { Plus, Loader2 } from "lucide-react";
+import { extractCoverImage } from "@/lib/image-utils";
 import type { Product } from "@/components/vendor/product-card";
 
 // Map API product → UI Product shape
@@ -35,7 +36,7 @@ function toUIProduct(p: any): Product {
     sales: p.orderCount ?? 0,
     views: p.views ?? 0,
     revenue: p.totalRevenue ?? 0,
-    image: p.images?.[0] ?? "",
+    image: extractCoverImage(p.images, p.name, p.categoryName),
     isFeatured: Boolean(p.isFeatured),
     isBestSeller: Boolean(p.soldCount > 0 || (p.bestSellerScore && p.bestSellerScore >= 15)),
     bestSellerScore: p.bestSellerScore || 0,
