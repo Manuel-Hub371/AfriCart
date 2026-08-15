@@ -307,7 +307,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
         {/* 1. STORE HERO SECTION */}
         <div className="bg-white border-b shadow-sm relative">
           {/* Banner */}
-          <div className="h-32 sm:h-56 md:h-72 w-full relative bg-slate-900 overflow-hidden">
+          <div className="h-28 sm:h-56 md:h-72 w-full relative bg-slate-900 overflow-hidden">
             {isBannerUrl ? (
               <img
                 src={store.banner}
@@ -322,12 +322,12 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Hero Header Content */}
-          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-4 sm:pb-8">
-            <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-3 sm:pb-8">
+            <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-6">
               
               {/* Store Logo & Details */}
-              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-6 -mt-10 sm:-mt-20 md:-mt-24 z-10">
-                <div className="w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl sm:rounded-3xl bg-white p-1 sm:p-2 shadow-xl border border-gray-100 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-2.5 sm:gap-6 -mt-9 sm:-mt-20 md:-mt-24 z-10">
+                <div className="w-18 h-18 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl sm:rounded-3xl bg-white p-1 sm:p-2 shadow-xl border border-gray-100 flex-shrink-0">
                   {isLogoUrl ? (
                     <img
                       src={store.logo}
@@ -335,25 +335,25 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                       className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
                     />
                   ) : (
-                    <div className="w-full h-full gradient-primary rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-2xl sm:text-4xl md:text-5xl font-extrabold shadow-inner">
+                    <div className="w-full h-full gradient-primary rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-xl sm:text-4xl md:text-5xl font-extrabold shadow-inner">
                       {store.name?.[0] || "S"}
                     </div>
                   )}
                 </div>
 
-                <div className="text-center sm:text-left space-y-1.5 pt-1 sm:pt-2">
-                  <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                    <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+                <div className="text-center sm:text-left space-y-1 pt-0.5 sm:pt-2">
+                  <div className="flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
+                    <h1 className="text-lg sm:text-3xl md:text-4xl font-black text-gray-900 tracking-tight">
                       {store.name}
                     </h1>
                     {store.verified && (
-                      <Badge className="bg-emerald-600 text-white gap-1 px-2 py-0.5 text-[10px] sm:text-xs font-semibold shadow-xs">
-                        <CheckCircle className="h-3 w-3" /> Verified Vendor
+                      <Badge className="bg-emerald-600 text-white gap-0.5 px-2 py-0.5 text-[9px] sm:text-xs font-bold shadow-2xs">
+                        <CheckCircle className="h-3 w-3" /> Verified
                       </Badge>
                     )}
                   </div>
 
-                  <p className="text-xs sm:text-sm text-gray-600 font-medium flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
+                  <p className="text-[11px] sm:text-sm text-gray-600 font-medium flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
                     <span className="flex items-center gap-0.5 text-amber-500 font-bold">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                       {store.rating}
@@ -366,11 +366,11 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     </span>
                   </p>
 
-                  <div className="flex items-center justify-center sm:justify-start gap-2 text-[10px] sm:text-xs text-gray-500 pt-0.5">
-                    <span className="bg-gray-100 px-2.5 py-0.5 rounded-full font-medium text-gray-700">
+                  <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[10px] sm:text-xs text-gray-500 pt-0.5">
+                    <span className="bg-gray-100 px-2 py-0.5 rounded-full font-medium text-gray-700">
                       {store.productCount || 0} Products
                     </span>
-                    <span className="bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-semibold border border-emerald-200">
+                    <span className="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold border border-emerald-200">
                       {store.category}
                     </span>
                   </div>
