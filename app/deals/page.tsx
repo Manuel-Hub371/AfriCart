@@ -220,13 +220,50 @@ export default function DealsPage() {
         </section>
 
         {/* Main Content Area */}
-        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-8 space-y-3 sm:space-y-6">
+          
+          {/* Touch Category Pills Bar */}
+          <div className="overflow-x-auto no-scrollbar flex items-center gap-1.5 py-1">
+            <button
+              onClick={() => {
+                setSelectedCategory("");
+                setPage(1);
+              }}
+              className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                selectedCategory === ""
+                  ? "bg-emerald-600 text-white shadow-2xs"
+                  : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              🔥 All Deals
+            </button>
+            {categories.map((c) => {
+              const isSelected = selectedCategory === c;
+              return (
+                <button
+                  key={c}
+                  onClick={() => {
+                    setSelectedCategory(c);
+                    setPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                    isSelected
+                      ? "bg-emerald-600 text-white shadow-2xs"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {c}
+                </button>
+              );
+            })}
+          </div>
+
           {/* Toolbar: Search, Filters & Sorting */}
-          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3 sm:p-6 shadow-2xs space-y-3">
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-2.5 sm:p-5 shadow-2xs space-y-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
               {/* Search within Deals */}
               <div className="relative col-span-2 sm:col-span-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
                 <Input
                   type="text"
                   placeholder="Search active deals..."
@@ -235,7 +272,7 @@ export default function DealsPage() {
                     setSearchQuery(e.target.value);
                     setPage(1);
                   }}
-                  className="pl-8 h-9 sm:h-10 rounded-xl text-xs"
+                  className="pl-8 h-8 sm:h-10 rounded-xl text-xs bg-gray-50/50 border-gray-200"
                 />
               </div>
 
@@ -247,7 +284,7 @@ export default function DealsPage() {
                     setSelectedCategory(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700"
+                  className="w-full h-8 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700 cursor-pointer"
                 >
                   <option value="">All Categories</option>
                   {categories.map((c) => (
@@ -264,7 +301,7 @@ export default function DealsPage() {
                     setMinDiscount(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700"
+                  className="w-full h-8 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700 cursor-pointer"
                 >
                   <option value="">Any Discount</option>
                   <option value="10">10%+ OFF</option>
@@ -282,7 +319,7 @@ export default function DealsPage() {
                     setSortBy(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-bold text-emerald-800"
+                  className="w-full h-8 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-bold text-emerald-800 cursor-pointer"
                 >
                   <option value="discount_desc">🔥 Highest Discount</option>
                   <option value="price_asc">Price: Low to High</option>
@@ -294,9 +331,36 @@ export default function DealsPage() {
               </div>
             </div>
 
-            {/* Price Range & Reset Filters Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t text-[11px] sm:text-xs">
-              <div className="flex items-center gap-1.5 flex-wrap">
+            {/* Quick Discount Chips & Price Range */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-gray-100 text-[10px] sm:text-xs">
+              {/* Preset Discount Chips */}
+              <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-0.5">
+                <span className="font-bold text-gray-500 mr-1 hidden sm:inline">Discount:</span>
+                {[
+                  { label: "10%+ OFF", val: "10" },
+                  { label: "20%+ OFF", val: "20" },
+                  { label: "30%+ OFF", val: "30" },
+                  { label: "50%+ OFF", val: "50" },
+                ].map((chip) => (
+                  <button
+                    key={chip.val}
+                    onClick={() => {
+                      setMinDiscount(minDiscount === chip.val ? "" : chip.val);
+                      setPage(1);
+                    }}
+                    className={`px-2 py-0.5 rounded-md text-[10px] font-extrabold transition-all border ${
+                      minDiscount === chip.val
+                        ? "bg-orange-500 text-white border-orange-500 shadow-2xs"
+                        : "bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100"
+                    }`}
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Min/Max Price Inputs & Reset */}
+              <div className="flex items-center gap-1.5 ml-auto">
                 <span className="font-bold text-gray-600">Price (GH₵):</span>
                 <Input
                   type="number"
@@ -306,7 +370,7 @@ export default function DealsPage() {
                     setMinPrice(e.target.value);
                     setPage(1);
                   }}
-                  className="w-16 sm:w-24 h-7 sm:h-8 text-[11px] sm:text-xs rounded-lg px-2"
+                  className="w-14 sm:w-20 h-7 text-[10px] sm:text-xs rounded-lg px-1.5"
                 />
                 <span className="text-gray-400">—</span>
                 <Input
@@ -317,20 +381,15 @@ export default function DealsPage() {
                     setMaxPrice(e.target.value);
                     setPage(1);
                   }}
-                  className="w-16 sm:w-24 h-7 sm:h-8 text-[11px] sm:text-xs rounded-lg px-2"
+                  className="w-14 sm:w-20 h-7 text-[10px] sm:text-xs rounded-lg px-1.5"
                 />
-              </div>
 
-              <div className="flex items-center gap-2 ml-auto">
-                <span className="text-gray-500 font-semibold text-[10px] sm:text-xs">
-                  <strong className="text-gray-900">{total}</strong> deal{total === 1 ? "" : "s"}
-                </span>
                 {(searchQuery || selectedCategory || minDiscount || minPrice || maxPrice || sortBy !== "discount_desc") && (
                   <Button
-                    variant="outline"
-                    size="sm"
                     onClick={handleResetFilters}
-                    className="h-7 sm:h-8 px-2 gap-1 text-[10px] sm:text-xs text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 px-1.5 text-[10px] text-gray-500 hover:text-red-600 font-bold gap-0.5 ml-1"
                   >
                     <RotateCcw className="h-3 w-3" />
                     Reset
@@ -342,12 +401,12 @@ export default function DealsPage() {
 
           {/* Deals Grid / Loading / Error / Empty States */}
           {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-                <div key={i} className="bg-white rounded-2xl border p-4 space-y-4 animate-pulse">
-                  <div className="h-48 bg-gray-200 rounded-xl" />
-                  <div className="h-4 bg-gray-200 rounded w-3/4" />
-                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                <div key={i} className="bg-white rounded-xl sm:rounded-2xl border p-2.5 sm:p-4 space-y-2 sm:space-y-4 animate-pulse">
+                  <div className="h-36 sm:h-48 bg-gray-200 rounded-lg sm:rounded-xl" />
+                  <div className="h-3 bg-gray-200 rounded w-3/4" />
+                  <div className="h-3 bg-gray-200 rounded w-1/2" />
                   <div className="h-8 bg-gray-200 rounded-xl" />
                 </div>
               ))}
@@ -363,7 +422,7 @@ export default function DealsPage() {
             </div>
           ) : products.length > 0 ? (
             <>
-              <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 md:gap-6">
                 {products.map((product) => (
                   <ProductCard
                     key={product.id}
