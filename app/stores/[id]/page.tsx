@@ -425,23 +425,23 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* 2. STICKY NAVIGATION TABS */}
-        <div className="sticky top-14 z-30 bg-white border-b shadow-2xs">
+        <div className="sticky top-14 z-30 bg-white border-b border-gray-200 shadow-2xs">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-            <div className="flex gap-1.5 sm:gap-6 overflow-x-auto no-scrollbar py-2">
+            <div className="flex gap-1.5 sm:gap-4 overflow-x-auto no-scrollbar py-2">
               {[
                 { id: "products", label: `Products (${store.products?.length || 0})` },
                 { id: "featured", label: "Featured & Best Sellers" },
                 { id: "deals", label: `Deals (${storeDeals.length})` },
-                { id: "about", label: "About" },
+                { id: "about", label: "About Store" },
                 { id: "reviews", label: `Reviews (${store.numReviews || 0})` },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all ${
                     activeTab === tab.id
-                      ? "bg-emerald-600 text-white shadow"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                      ? "bg-emerald-600 text-white shadow-2xs"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-gray-900 border border-transparent"
                   }`}
                 >
                   {tab.label}
@@ -452,17 +452,17 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* MAIN TAB CONTENT CONTAINER */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8">
 
           {/* 3. PRODUCTS TAB (Primary Shopping Area) */}
           {activeTab === "products" && (
-            <div className="grid lg:grid-cols-4 gap-8">
+            <div className="grid lg:grid-cols-4 gap-4 sm:gap-8">
               {/* Left Filters Sidebar */}
-              <div className="lg:col-span-1 space-y-6">
-                <div className="bg-white rounded-2xl border border-gray-200 p-6 space-y-6 shadow-sm">
-                  <div className="flex items-center justify-between border-b pb-3">
-                    <h3 className="font-extrabold text-gray-900 flex items-center gap-2">
-                      <Filter className="h-4 w-4 text-emerald-600" /> Filters
+              <div className="lg:col-span-1 space-y-4 sm:space-y-6">
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 space-y-4 shadow-2xs">
+                  <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                    <h3 className="font-black text-gray-900 flex items-center gap-1.5 text-xs sm:text-base">
+                      <Filter className="h-4 w-4 text-emerald-600" /> Store Filters
                     </h3>
                     {(searchQuery || selectedCategory !== "all" || minPrice || maxPrice || minRating > 0 || inStockOnly) && (
                       <button
@@ -475,46 +475,69 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                           setInStockOnly(false);
                           setCurrentPage(1);
                         }}
-                        className="text-xs text-red-600 font-bold hover:underline"
+                        className="text-[11px] text-red-600 font-extrabold hover:underline"
                       >
-                        Reset
+                        Reset All
                       </button>
                     )}
                   </div>
 
-                  {/* Search */}
+                  {/* Search Input */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
                       Search Products
                     </label>
                     <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                       <Input
                         type="text"
-                        placeholder="Type keywords..."
+                        placeholder="Search keywords..."
                         value={searchQuery}
                         onChange={(e) => {
                           setSearchQuery(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="pl-9 h-10 rounded-xl text-sm"
+                        className="pl-8 h-8 sm:h-10 rounded-xl text-xs bg-white border-gray-200 shadow-2xs"
                       />
                     </div>
                   </div>
 
-                  {/* Category Filter — Only shown when store has multiple categories */}
+                  {/* Horizontal Category Touch Pills Bar on Mobile */}
                   {availableCategories.length > 1 && (
                     <div>
-                      <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                        Filter by Category
+                      <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">
+                        Category
                       </label>
+                      <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 lg:hidden">
+                        <button
+                          onClick={() => { setSelectedCategory("all"); setCurrentPage(1); }}
+                          className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all ${
+                            selectedCategory === "all" ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          All ({store.products?.length || 0})
+                        </button>
+                        {availableCategories.map((cat) => (
+                          <button
+                            key={cat}
+                            onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold whitespace-nowrap transition-all ${
+                              selectedCategory === cat ? "bg-emerald-600 text-white" : "bg-gray-100 text-gray-700"
+                            }`}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Select Dropdown for Desktop */}
                       <select
                         value={selectedCategory}
                         onChange={(e) => {
                           setSelectedCategory(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="w-full h-10 px-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 focus:outline-none cursor-pointer"
+                        className="hidden lg:block w-full h-10 px-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-500 focus:outline-none cursor-pointer bg-white"
                       >
                         <option value="all">All Categories ({store.products?.length || 0})</option>
                         {availableCategories.map((cat) => (
@@ -526,108 +549,85 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     </div>
                   )}
 
-                  {/* Price Range */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                      Price Range (GH₵)
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        placeholder="Min"
-                        value={minPrice}
-                        onChange={(e) => {
-                          setMinPrice(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="h-10 rounded-xl text-sm"
-                      />
-                      <span className="text-gray-400">-</span>
-                      <Input
-                        type="number"
-                        placeholder="Max"
-                        value={maxPrice}
-                        onChange={(e) => {
-                          setMaxPrice(e.target.value);
-                          setCurrentPage(1);
-                        }}
-                        className="h-10 rounded-xl text-sm"
-                      />
+                  {/* Price Range & Availability in 2 columns on Mobile */}
+                  <div className="grid grid-cols-2 gap-2 sm:block sm:space-y-4">
+                    {/* Price Range */}
+                    <div>
+                      <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                        Price (GH₵)
+                      </label>
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          placeholder="Min"
+                          value={minPrice}
+                          onChange={(e) => {
+                            setMinPrice(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="h-8 sm:h-10 rounded-xl text-xs"
+                        />
+                        <span className="text-gray-400 text-xs">-</span>
+                        <Input
+                          type="number"
+                          placeholder="Max"
+                          value={maxPrice}
+                          onChange={(e) => {
+                            setMaxPrice(e.target.value);
+                            setCurrentPage(1);
+                          }}
+                          className="h-8 sm:h-10 rounded-xl text-xs"
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Minimum Rating */}
-                  <div>
-                    <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-                      Minimum Rating
-                    </label>
-                    <div className="space-y-2">
-                      {[4, 3, 2].map((stars) => (
-                        <label key={stars} className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="ratingFilter"
-                            checked={minRating === stars}
-                            onChange={() => {
-                              setMinRating(minRating === stars ? 0 : stars);
-                              setCurrentPage(1);
-                            }}
-                            className="text-emerald-600 focus:ring-emerald-500"
-                          />
-                          <span className="flex items-center gap-1 font-semibold text-gray-900">
-                            {stars}★ &amp; Above
-                          </span>
-                        </label>
-                      ))}
+                    {/* Stock Filter */}
+                    <div className="flex items-center pt-5 sm:pt-2">
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={inStockOnly}
+                          onChange={(e) => {
+                            setInStockOnly(e.target.checked);
+                            setCurrentPage(1);
+                          }}
+                          className="h-3.5 w-3.5 text-emerald-600 rounded focus:ring-emerald-500"
+                        />
+                        <span className="text-xs font-bold text-gray-800">
+                          In Stock Only
+                        </span>
+                      </label>
                     </div>
-                  </div>
-
-                  {/* Availability */}
-                  <div className="pt-2 border-t">
-                    <label className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={inStockOnly}
-                        onChange={(e) => {
-                          setInStockOnly(e.target.checked);
-                          setCurrentPage(1);
-                        }}
-                        className="h-4 w-4 text-emerald-600 rounded focus:ring-emerald-500"
-                      />
-                      <span className="text-sm font-semibold text-gray-800">
-                        In Stock Only
-                      </span>
-                    </label>
                   </div>
                 </div>
               </div>
 
               {/* Right Product Grid & Sorting */}
-              <div className="lg:col-span-3 space-y-6">
+              <div className="lg:col-span-3 space-y-3 sm:space-y-6">
                 {/* Header Control Bar */}
-                <div className="bg-white rounded-2xl border border-gray-200 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
-                  <p className="text-sm text-gray-600 font-medium">
-                    Showing <span className="font-bold text-gray-900">{filteredProducts.length}</span> products in storefront
+                <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-2.5 sm:p-4 flex items-center justify-between gap-2 shadow-2xs">
+                  <p className="text-xs sm:text-sm text-gray-600 font-medium">
+                    Showing <span className="font-black text-gray-900">{filteredProducts.length}</span> products
                   </p>
 
-                  <div className="flex items-center gap-2 w-full sm:w-auto">
-                    <span className="text-xs font-bold text-gray-500 whitespace-nowrap">Sort By:</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] sm:text-xs font-bold text-gray-400 whitespace-nowrap">Sort:</span>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="h-10 px-3 rounded-xl border border-gray-200 text-sm font-medium focus:border-emerald-500 focus:outline-none w-full sm:w-auto"
+                      className="h-8 sm:h-10 px-2 text-xs sm:text-sm font-bold bg-white border border-gray-200 rounded-xl focus:outline-none"
                     >
-                      <option value="newest">Newest Arrivals</option>
-                      <option value="price_asc">Price: Low to High</option>
-                      <option value="price_desc">Price: High to Low</option>
-                      <option value="rating">Highest Rated</option>
+                      <option value="newest">Newest</option>
+                      <option value="price_asc">Price: Low</option>
+                      <option value="price_desc">Price: High</option>
+                      <option value="rating">Top Rated</option>
                     </select>
                   </div>
                 </div>
 
-                {/* Product Cards Grid */}
+                {/* Product Cards Grid - 2 Columns on Mobile */}
                 {paginatedProducts.length > 0 ? (
-                  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-1.5 sm:gap-3 md:gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
                     {paginatedProducts.map((product: any) => (
                       <ProductCard
                         key={product.id}
@@ -655,11 +655,11 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                   </div>
                 ) : (
                   /* Professional Empty State */
-                  <div className="bg-white rounded-3xl border border-gray-200 p-16 text-center shadow-sm">
-                    <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-extrabold text-gray-900 mb-2">No Products Found</h3>
-                    <p className="text-gray-500 max-w-md mx-auto text-sm mb-6">
-                      No products match your current search or filter options for this store.
+                  <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 sm:p-16 text-center">
+                    <Package className="h-12 w-12 text-gray-300 mx-auto mb-3" />
+                    <h3 className="text-base sm:text-xl font-black text-gray-900 mb-1">No Products Found</h3>
+                    <p className="text-gray-500 text-xs mb-4">
+                      No products match your search or filter options.
                     </p>
                     <Button
                       onClick={() => {
@@ -670,7 +670,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                         setMinRating(0);
                         setInStockOnly(false);
                       }}
-                      className="gradient-primary text-white rounded-xl h-11 px-6 font-semibold"
+                      className="gradient-primary text-white rounded-xl h-8 text-xs font-bold px-4"
                     >
                       Clear All Filters
                     </Button>
@@ -715,7 +715,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     <Sparkles className="h-6 w-6 text-amber-500" />
                     <h2 className="text-2xl font-extrabold text-gray-900">Featured Store Products</h2>
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
                     {featuredProducts.map((product: any) => (
                       <ProductCard
                         key={product.id}
@@ -745,13 +745,13 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
               )}
 
               {/* Best Sellers Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-2 border-b pb-4">
-                  <Award className="h-6 w-6 text-emerald-600" />
-                  <h2 className="text-2xl font-extrabold text-gray-900">Best Sellers</h2>
+              <div className="space-y-4 sm:space-y-6">
+                <div className="flex items-center gap-2 border-b border-gray-100 pb-3">
+                  <Award className="h-5 w-5 text-emerald-600" />
+                  <h2 className="text-lg sm:text-2xl font-black text-gray-900">Best Sellers</h2>
                 </div>
                 {bestSellers.length > 0 ? (
-                  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
                     {bestSellers.slice(0, 4).map((product: any) => (
                       <ProductCard
                         key={product.id}
@@ -778,7 +778,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     ))}
                   </div>
                 ) : (
-                  <div className="bg-white rounded-2xl border p-12 text-center text-gray-500 text-sm">
+                  <div className="bg-white rounded-xl border border-gray-200 p-8 text-center text-gray-400 text-xs font-semibold">
                     No best sellers available yet.
                   </div>
                 )}
@@ -788,27 +788,27 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
 
           {/* 5. VENDOR DEALS TAB (Vendor Specific Promotional Offers) */}
           {activeTab === "deals" && (
-            <div className="space-y-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4">
+            <div className="space-y-4 sm:space-y-8">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 border-b border-gray-100 pb-3">
                 <div>
-                  <h2 className="text-2xl font-black text-gray-900 flex items-center gap-2">
-                    <Tag className="h-6 w-6 text-orange-500" />
-                    Special Store Deals & Promotions
+                  <h2 className="text-lg sm:text-2xl font-black text-gray-900 flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-orange-500" />
+                    Special Store Deals &amp; Promotions
                   </h2>
-                  <p className="text-gray-600 text-sm mt-1">
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">
                     Exclusive limited-time discounts and active promotional offers from <strong className="text-gray-900">{store.name}</strong>.
                   </p>
                 </div>
 
                 {storeDeals.length > 0 && (
-                  <Badge className="bg-orange-500 text-white font-extrabold text-xs px-3 py-1 rounded-full self-start md:self-auto shadow-xs">
+                  <Badge className="bg-orange-500 text-white font-black text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full self-start md:self-auto shadow-2xs">
                     🔥 {storeDeals.length} Active Deal{storeDeals.length === 1 ? "" : "s"}
                   </Badge>
                 )}
               </div>
 
               {storeDeals.length > 0 ? (
-                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
                   {storeDeals.map((product: any) => (
                     <ProductCard
                       key={product.id}
@@ -855,256 +855,102 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
 
           {/* 6. ABOUT TAB (Single Source of Truth) */}
           {activeTab === "about" && (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-8">
               {/* About Store & Business Overview */}
-              <div className="bg-white rounded-3xl border border-gray-200 p-8 space-y-6 shadow-sm">
+              <div className="bg-white rounded-xl sm:rounded-3xl border border-gray-200 p-4 sm:p-8 space-y-4 sm:space-y-6 shadow-2xs">
                 <div>
-                  <h2 className="text-2xl font-extrabold text-gray-900 mb-3">About {store.name}</h2>
-                  <p className="text-gray-700 leading-relaxed text-base whitespace-pre-line">
+                  <h2 className="text-base sm:text-2xl font-black text-gray-900 mb-2">About {store.name}</h2>
+                  <p className="text-gray-700 leading-relaxed text-xs sm:text-base whitespace-pre-line">
                     {store.description || "Welcome to our storefront on AfriCart. We offer high-quality products and reliable delivery across all major regions."}
                   </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 pt-6 border-t">
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
-                      <Building2 className="h-5 w-5 text-emerald-600" /> Business Overview
+                <div className="grid md:grid-cols-2 gap-4 sm:gap-6 pt-4 border-t border-gray-100">
+                  <div className="space-y-3">
+                    <h3 className="font-extrabold text-gray-900 text-xs sm:text-lg flex items-center gap-1.5">
+                      <Building2 className="h-4 w-4 text-emerald-600" /> Business Overview
                     </h3>
-                    <div className="space-y-3 text-sm text-gray-600">
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="font-medium text-gray-500">Business Name</span>
+                    <div className="space-y-2 text-xs text-gray-600">
+                      <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                        <span className="font-medium text-gray-400">Business Name</span>
                         <span className="font-bold text-gray-900">{store.businessName || store.name}</span>
                       </div>
                       {store.businessType && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Business Type</span>
+                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                          <span className="font-medium text-gray-400">Business Type</span>
                           <span className="font-bold text-gray-900">{store.businessType}</span>
                         </div>
                       )}
                       {store.registrationNumber && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Reg. Number</span>
+                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                          <span className="font-medium text-gray-400">Reg. Number</span>
                           <span className="font-bold text-gray-900">{store.registrationNumber}</span>
                         </div>
                       )}
-                      {store.taxId && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Tax ID / TIN</span>
-                          <span className="font-bold text-gray-900">{store.taxId}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="font-medium text-gray-500">Primary Category</span>
+                      <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                        <span className="font-medium text-gray-400">Primary Category</span>
                         <span className="font-bold text-gray-900">{store.category || "General Marketplace"}</span>
                       </div>
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="font-medium text-gray-500">Member Since</span>
+                      <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                        <span className="font-medium text-gray-400">Member Since</span>
                         <span className="font-bold text-gray-900">{joinedYear}</span>
-                      </div>
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="font-medium text-gray-500">Verification Status</span>
-                        <span className="font-bold text-emerald-600 flex items-center gap-1">
-                          <CheckCircle className="h-4 w-4" /> {store.verified ? "Verified Business" : "Registered Vendor"}
-                        </span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-gray-900 text-lg flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-emerald-600" /> Contact &amp; Hours
+                  <div className="space-y-3">
+                    <h3 className="font-extrabold text-gray-900 text-xs sm:text-lg flex items-center gap-1.5">
+                      <MapPin className="h-4 w-4 text-emerald-600" /> Contact &amp; Hours
                     </h3>
-                    <div className="space-y-3 text-sm text-gray-600">
-                      <div className="flex justify-between border-b pb-2">
-                        <span className="font-medium text-gray-500">Location</span>
+                    <div className="space-y-2 text-xs text-gray-600">
+                      <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                        <span className="font-medium text-gray-400">Location</span>
                         <span className="font-bold text-gray-900">{store.location || "Accra, Ghana"}</span>
                       </div>
-                      {store.businessAddress && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Address</span>
-                          <span className="font-bold text-gray-900">{store.businessAddress}</span>
-                        </div>
-                      )}
                       {(store.supportEmail || store.contactEmail) && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Support Email</span>
+                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                          <span className="font-medium text-gray-400">Support Email</span>
                           <span className="font-bold text-gray-900 flex items-center gap-1">
-                            <Mail className="h-3.5 w-3.5 text-gray-400" /> {store.supportEmail || store.contactEmail}
+                            <Mail className="h-3 w-3 text-gray-400" /> {store.supportEmail || store.contactEmail}
                           </span>
                         </div>
                       )}
                       {(store.supportPhone || store.contactPhone) && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Support Phone</span>
+                        <div className="flex justify-between border-b border-gray-100 pb-1.5">
+                          <span className="font-medium text-gray-400">Support Phone</span>
                           <span className="font-bold text-gray-900 flex items-center gap-1">
-                            <Phone className="h-3.5 w-3.5 text-gray-400" /> {store.supportPhone || store.contactPhone}
+                            <Phone className="h-3 w-3 text-gray-400" /> {store.supportPhone || store.contactPhone}
                           </span>
                         </div>
                       )}
-                      {store.website && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Website</span>
-                          <a
-                            href={store.website.startsWith("http") ? store.website : `https://${store.website}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="font-bold text-emerald-600 hover:underline flex items-center gap-1"
-                          >
-                            {store.website}
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </div>
-                      )}
-                      {store.businessHours && (
-                        <div className="flex justify-between border-b pb-2">
-                          <span className="font-medium text-gray-500">Hours</span>
-                          <span className="font-bold text-gray-900">{store.businessHours}</span>
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
-
-              {/* Store Policies (Store Policy & Privacy Policy Only) */}
-              <div className="bg-white rounded-3xl border border-gray-200 p-8 space-y-6 shadow-sm">
-                <h3 className="text-xl font-extrabold text-gray-900 flex items-center gap-2">
-                  <ShieldCheck className="h-6 w-6 text-emerald-600" /> Store Terms &amp; Policies
-                </h3>
-
-                <div className="grid md:grid-cols-2 gap-6 pt-2">
-                  {/* Store Policy */}
-                  <div className="border rounded-2xl p-6 bg-gray-50/50 space-y-2">
-                    <h4 className="font-bold text-gray-900 flex items-center gap-2 text-base text-emerald-800">
-                      <FileText className="h-5 w-5" /> Store Policy
-                    </h4>
-                    {store.assignedStorePolicy ? (
-                      <div className="space-y-2 text-xs text-gray-600 leading-relaxed">
-                        <p className="font-extrabold text-gray-900 text-sm">{store.assignedStorePolicy.name}</p>
-                        {store.assignedStorePolicy.description && <p>{store.assignedStorePolicy.description}</p>}
-                        {store.assignedStorePolicy.termsConditions && (
-                          <div className="bg-white p-3 rounded-xl border border-gray-200 my-2">
-                            <strong className="text-gray-900 font-bold block mb-1">Terms &amp; Conditions:</strong>
-                            <p className="whitespace-pre-line text-gray-700">{store.assignedStorePolicy.termsConditions}</p>
-                          </div>
-                        )}
-                        {store.assignedStorePolicy.customerResponsibilities && (
-                          <p><strong className="text-gray-900 font-semibold">Customer Responsibilities:</strong> {store.assignedStorePolicy.customerResponsibilities}</p>
-                        )}
-                        {store.assignedStorePolicy.sellerResponsibilities && (
-                          <p><strong className="text-gray-900 font-semibold">Seller Responsibilities:</strong> {store.assignedStorePolicy.sellerResponsibilities}</p>
-                        )}
-                        {store.assignedStorePolicy.cancellationRules && (
-                          <p><strong className="text-gray-900 font-semibold">Cancellation Rules:</strong> {store.assignedStorePolicy.cancellationRules}</p>
-                        )}
-                        {store.assignedStorePolicy.disputeResolution && (
-                          <p><strong className="text-gray-900 font-semibold">Dispute Resolution:</strong> {store.assignedStorePolicy.disputeResolution}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
-                        {store.termsConditions || "Standard store guidelines and terms apply to all orders."}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Privacy Policy */}
-                  <div className="border rounded-2xl p-6 bg-gray-50/50 space-y-2">
-                    <h4 className="font-bold text-gray-900 flex items-center gap-2 text-base text-emerald-800">
-                      <Lock className="h-5 w-5" /> Privacy Policy
-                    </h4>
-                    {store.assignedPrivacyPolicy ? (
-                      <div className="space-y-2 text-xs text-gray-600 leading-relaxed">
-                        <p className="font-extrabold text-gray-900 text-sm">{store.assignedPrivacyPolicy.name}</p>
-                        {store.assignedPrivacyPolicy.introduction && <p>{store.assignedPrivacyPolicy.introduction}</p>}
-                        {store.assignedPrivacyPolicy.infoCollected && (
-                          <p><strong className="text-gray-900 font-semibold">Information Collected:</strong> {store.assignedPrivacyPolicy.infoCollected}</p>
-                        )}
-                        {store.assignedPrivacyPolicy.howInfoUsed && (
-                          <p><strong className="text-gray-900 font-semibold">How Used:</strong> {store.assignedPrivacyPolicy.howInfoUsed}</p>
-                        )}
-                        {store.assignedPrivacyPolicy.thirdPartyServices && (
-                          <p><strong className="text-gray-900 font-semibold">Third Parties:</strong> {store.assignedPrivacyPolicy.thirdPartyServices}</p>
-                        )}
-                        {store.assignedPrivacyPolicy.securityMeasures && (
-                          <p><strong className="text-gray-900 font-semibold">Security:</strong> {store.assignedPrivacyPolicy.securityMeasures}</p>
-                        )}
-                        {store.assignedPrivacyPolicy.contactInfo && (
-                          <p><strong className="text-gray-900 font-semibold">Privacy Contact:</strong> {store.assignedPrivacyPolicy.contactInfo}</p>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-xs text-gray-600 leading-relaxed whitespace-pre-line">
-                        {store.privacyPolicy || "We strictly protect customer privacy. Personal contact information collected during transaction processing is exclusively used to fulfill your order."}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Social Media Links (Only Configured Accounts) */}
-              {(() => {
-                const s = store.socialLinks || {};
-                const links = [
-                  { name: "Website", url: store.website || s.website, icon: "🌐" },
-                  { name: "Facebook", url: s.facebook, icon: "📘" },
-                  { name: "Instagram", url: s.instagram, icon: "📸" },
-                  { name: "X (Twitter)", url: s.twitter || s.x, icon: "🐦" },
-                  { name: "TikTok", url: s.tiktok, icon: "🎵" },
-                  { name: "LinkedIn", url: s.linkedin, icon: "💼" },
-                  { name: "YouTube", url: s.youtube, icon: "▶️" },
-                  { name: "WhatsApp", url: s.whatsapp ? (s.whatsapp.startsWith("http") ? s.whatsapp : `https://wa.me/${s.whatsapp.replace(/[^0-9]/g, "")}`) : null, icon: "💬" },
-                ].filter((item) => Boolean(item.url && item.url.trim()));
-
-                if (links.length === 0) return null;
-
-                return (
-                  <div className="bg-white rounded-3xl border border-gray-200 p-8 space-y-4 shadow-sm">
-                    <h3 className="text-lg font-extrabold text-gray-900 flex items-center gap-2">
-                      <Share2 className="h-5 w-5 text-emerald-600" /> Connect on Social Media
-                    </h3>
-                    <div className="flex flex-wrap gap-3 pt-1">
-                      {links.map((link) => (
-                        <a
-                          key={link.name}
-                          href={link.url!}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl border border-gray-200 bg-gray-50 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 text-xs font-bold text-gray-800 transition-all shadow-sm"
-                        >
-                          <span>{link.icon}</span>
-                          <span>{link.name}</span>
-                          <ExternalLink className="h-3 w-3 text-gray-400 ml-1" />
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                );
-              })()}
             </div>
           )}
 
           {/* 9. STORE REVIEWS TAB */}
           {activeTab === "reviews" && (
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-8">
               {/* Review Summary */}
-              <div className="bg-white rounded-3xl border border-gray-200 p-8 shadow-sm grid md:grid-cols-3 gap-8 items-center">
-                <div className="text-center md:border-r border-gray-200 pr-4">
-                  <div className="text-5xl font-black text-gray-900">{store.rating}</div>
-                  <div className="flex items-center justify-center gap-1 my-2">
+              <div className="bg-white rounded-xl sm:rounded-3xl border border-gray-200 p-4 sm:p-8 shadow-2xs grid md:grid-cols-3 gap-4 sm:gap-8 items-center">
+                <div className="text-center md:border-r border-gray-200 pr-0 sm:pr-4">
+                  <div className="text-3xl sm:text-5xl font-black text-gray-900">{store.rating}</div>
+                  <div className="flex items-center justify-center gap-1 my-1 sm:my-2">
                     {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className="h-5 w-5 fill-amber-400 text-amber-400" />
+                      <Star key={s} className="h-4 w-4 sm:h-5 sm:w-5 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <p className="text-sm text-gray-500 font-medium">Based on {store.numReviews} customer reviews</p>
+                  <p className="text-xs text-gray-500 font-medium">Based on {store.numReviews} reviews</p>
                 </div>
 
-                <div className="md:col-span-2 space-y-2">
-                  <h3 className="font-bold text-gray-900 text-sm mb-3">Rating Breakdown</h3>
+                <div className="md:col-span-2 space-y-1.5">
+                  <h3 className="font-bold text-gray-900 text-xs sm:text-sm mb-2">Rating Breakdown</h3>
                   {[5, 4, 3, 2, 1].map((ratingVal) => (
-                    <div key={ratingVal} className="flex items-center gap-3 text-xs text-gray-600">
+                    <div key={ratingVal} className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-600">
                       <span className="w-8 font-semibold">{ratingVal} Star</span>
-                      <div className="flex-1 h-2.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-amber-400 rounded-full"
                           style={{
@@ -1122,44 +968,44 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
 
               {/* Review List */}
               {store.reviews && store.reviews.length > 0 ? (
-                <div className="space-y-4">
+                <div className="space-y-2.5 sm:space-y-4">
                   {store.reviews.map((rev: any) => (
-                    <div key={rev.id} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-3 shadow-sm">
+                    <div key={rev.id} className="bg-white rounded-xl border border-gray-200 p-3.5 sm:p-6 space-y-2 shadow-2xs">
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold">
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
                             {rev.customerName?.[0] || "C"}
                           </div>
                           <div>
-                            <p className="font-bold text-gray-900 text-sm">{rev.customerName}</p>
-                            <p className="text-xs text-gray-500">Purchased: {rev.productName || "Product"}</p>
+                            <p className="font-bold text-gray-900 text-xs sm:text-sm">{rev.customerName}</p>
+                            <p className="text-[10px] text-gray-400">Purchased: {rev.productName || "Product"}</p>
                           </div>
                         </div>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-[10px] text-gray-400">
                           {new Date(rev.createdAt).toLocaleDateString()}
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-0.5">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`h-4 w-4 ${
+                            className={`h-3 w-3 ${
                               i < rev.rating ? "fill-amber-400 text-amber-400" : "fill-gray-200 text-gray-200"
                             }`}
                           />
                         ))}
                       </div>
 
-                      <p className="text-sm text-gray-700 leading-relaxed">{rev.comment}</p>
+                      <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">{rev.comment}</p>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="bg-white rounded-3xl border border-gray-200 p-16 text-center shadow-sm">
-                  <Star className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-bold text-gray-900 mb-1">No Reviews Yet</h3>
-                  <p className="text-sm text-gray-500 max-w-sm mx-auto">
+                <div className="bg-white rounded-xl sm:rounded-3xl border border-gray-200 p-8 sm:p-16 text-center shadow-2xs">
+                  <Star className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                  <h3 className="text-base sm:text-xl font-bold text-gray-900 mb-1">No Reviews Yet</h3>
+                  <p className="text-xs text-gray-500 max-w-sm mx-auto">
                     Be the first customer to purchase and leave a review for {store.name}!
                   </p>
                 </div>
