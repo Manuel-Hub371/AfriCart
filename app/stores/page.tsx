@@ -113,8 +113,8 @@ export default function StoresPage() {
               })}
             </div>
 
-            {/* Filter Controls Card */}
-            <div className="bg-slate-900 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 text-white shadow-xl space-y-3.5 sm:space-y-5">
+            {/* Filter Controls Card — Hidden on Mobile Devices */}
+            <div className="hidden md:block bg-slate-900 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 text-white shadow-xl space-y-3.5 sm:space-y-5">
               
               {/* Header Title */}
               <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
