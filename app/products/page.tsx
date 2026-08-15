@@ -212,13 +212,13 @@ function ProductsContent() {
 
             {/* In-Page Product Search Bar */}
             <form onSubmit={handleSearchSubmit} className="relative max-w-md w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 z-10 pointer-events-none" />
               <Input
                 type="text"
                 placeholder="Search products by name, brand, or tag..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                className="pl-8 sm:pl-10 pr-16 sm:pr-20 h-9 sm:h-12 text-xs sm:text-sm rounded-xl sm:rounded-2xl bg-white border-gray-200 shadow-xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                className="pl-8 sm:pl-10 pr-20 sm:pr-24 h-9 sm:h-12 text-xs sm:text-sm rounded-xl sm:rounded-2xl bg-white border-gray-200 shadow-2xs focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
               />
               {searchInput && (
                 <button
@@ -227,7 +227,7 @@ function ProductsContent() {
                     setSearchInput("");
                     updateQueryParams({ query: null });
                   }}
-                  className="absolute right-14 sm:right-16 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  className="absolute right-16 sm:right-20 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 z-10"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -235,7 +235,7 @@ function ProductsContent() {
               <Button
                 type="submit"
                 size="sm"
-                className="absolute right-1 top-1 -translate-y-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] sm:text-xs rounded-lg sm:rounded-xl px-2.5 sm:px-3 h-7 sm:h-9"
+                className="absolute right-1 top-1/2 -translate-y-1/2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] sm:text-xs rounded-lg sm:rounded-xl px-2.5 sm:px-3.5 h-7 sm:h-10 z-10"
               >
                 Search
               </Button>
