@@ -161,56 +161,56 @@ export default function DealsPage() {
 
       <main className="flex-1 pb-16">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900 text-white overflow-hidden py-14 px-4 sm:px-6 lg:px-8 border-b">
+        <section className="relative bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900 text-white overflow-hidden py-6 sm:py-14 px-3 sm:px-6 lg:px-8 border-b">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/20 via-transparent to-transparent pointer-events-none" />
 
           <div className="max-w-7xl mx-auto relative z-10">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="space-y-4 max-w-2xl text-center md:text-left">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/40 text-orange-300 font-extrabold text-xs px-3 py-1.5 rounded-full backdrop-blur-md">
-                  <Flame className="h-4 w-4 text-orange-400 animate-pulse" />
+            <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
+              <div className="space-y-2 sm:space-y-4 max-w-2xl text-center md:text-left">
+                <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/40 text-orange-300 font-extrabold text-[10px] sm:text-xs px-2.5 py-1 rounded-full backdrop-blur-md">
+                  <Flame className="h-3.5 w-3.5 text-orange-400 animate-pulse" />
                   <span>Exclusive Marketplace Promotions</span>
                 </div>
 
-                <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+                <h1 className="text-2xl sm:text-5xl font-black tracking-tight text-white leading-tight">
                   Today's <span className="text-gradient">Hot Deals</span> & Discounts
                 </h1>
 
-                <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                <p className="text-gray-300 text-xs sm:text-base leading-relaxed">
                   Discover verified promotional prices, percentage discounts, and flash sales direct from top vendors across Africa.
                 </p>
               </div>
 
               {/* Dynamic Flash Sale Spotlight Widget */}
               {featuredCampaign && !spotlightTime.expired && (
-                <div className="w-full md:w-auto bg-white/10 backdrop-blur-xl border border-white/15 rounded-3xl p-6 shadow-2xl flex flex-col items-center md:items-end text-center md:text-right space-y-3">
-                  <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wide text-orange-400 bg-orange-500/20 px-3 py-1 rounded-full border border-orange-500/30">
-                    <Zap className="h-3.5 w-3.5" />
+                <div className="w-full md:w-auto bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-xl flex flex-col items-center md:items-end text-center md:text-right space-y-2 sm:space-y-3">
+                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-extrabold uppercase tracking-wide text-orange-400 bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/30">
+                    <Zap className="h-3 w-3" />
                     <span>{featuredCampaign.badge || featuredCampaign.name}</span>
                   </div>
 
-                  <p className="text-xs text-gray-300 font-medium">Limited-Time Offer Ending In</p>
+                  <p className="text-[11px] sm:text-xs text-gray-300 font-medium">Limited-Time Offer Ending In</p>
 
-                  <div className="flex items-center gap-2 font-mono font-black text-xl sm:text-2xl text-white">
+                  <div className="flex items-center gap-1.5 font-mono font-black text-sm sm:text-2xl text-white">
                     {spotlightTime.days > 0 && (
-                      <div className="bg-black/50 px-3 py-1.5 rounded-xl border border-white/10">
+                      <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
                         <span>{spotlightTime.days}</span>
-                        <span className="text-[10px] block font-sans text-gray-400 font-semibold uppercase">Days</span>
+                        <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Days</span>
                       </div>
                     )}
-                    <div className="bg-black/50 px-3 py-1.5 rounded-xl border border-white/10">
+                    <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
                       <span>{pad(spotlightTime.hours)}</span>
-                      <span className="text-[10px] block font-sans text-gray-400 font-semibold uppercase">Hrs</span>
+                      <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Hrs</span>
                     </div>
-                    <span className="text-emerald-400">:</span>
-                    <div className="bg-black/50 px-3 py-1.5 rounded-xl border border-white/10">
+                    <span className="text-emerald-400 font-bold">:</span>
+                    <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
                       <span>{pad(spotlightTime.minutes)}</span>
-                      <span className="text-[10px] block font-sans text-gray-400 font-semibold uppercase">Min</span>
+                      <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Min</span>
                     </div>
-                    <span className="text-emerald-400">:</span>
-                    <div className="bg-black/50 px-3 py-1.5 rounded-xl border border-white/10">
+                    <span className="text-emerald-400 font-bold">:</span>
+                    <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
                       <span>{pad(spotlightTime.seconds)}</span>
-                      <span className="text-[10px] block font-sans text-gray-400 font-semibold uppercase">Sec</span>
+                      <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Sec</span>
                     </div>
                   </div>
                 </div>
@@ -220,13 +220,13 @@ export default function DealsPage() {
         </section>
 
         {/* Main Content Area */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-6">
           {/* Toolbar: Search, Filters & Sorting */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-6 shadow-sm space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3 sm:p-6 shadow-2xs space-y-3">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
               {/* Search within Deals */}
-              <div className="relative">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <div className="relative col-span-2 sm:col-span-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400" />
                 <Input
                   type="text"
                   placeholder="Search active deals..."
@@ -235,7 +235,7 @@ export default function DealsPage() {
                     setSearchQuery(e.target.value);
                     setPage(1);
                   }}
-                  className="pl-10 h-10 rounded-xl text-sm"
+                  className="pl-8 h-9 sm:h-10 rounded-xl text-xs"
                 />
               </div>
 
@@ -247,7 +247,7 @@ export default function DealsPage() {
                     setSelectedCategory(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700"
+                  className="w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700"
                 >
                   <option value="">All Categories</option>
                   {categories.map((c) => (
@@ -264,27 +264,27 @@ export default function DealsPage() {
                     setMinDiscount(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700"
+                  className="w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700"
                 >
-                  <option value="">Any Discount Tier</option>
-                  <option value="10">10% OFF or More</option>
-                  <option value="20">20% OFF or More</option>
-                  <option value="30">30% OFF or More</option>
-                  <option value="50">50% OFF or More (Mega Savings)</option>
+                  <option value="">Any Discount</option>
+                  <option value="10">10%+ OFF</option>
+                  <option value="20">20%+ OFF</option>
+                  <option value="30">30%+ OFF</option>
+                  <option value="50">50%+ OFF (Mega)</option>
                 </select>
               </div>
 
               {/* Sorting Engine */}
-              <div>
+              <div className="col-span-2 sm:col-span-1">
                 <select
                   value={sortBy}
                   onChange={(e) => {
                     setSortBy(e.target.value);
                     setPage(1);
                   }}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-sm focus:border-emerald-600 focus:outline-none bg-white font-bold text-emerald-800"
+                  className="w-full h-9 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-bold text-emerald-800"
                 >
-                  <option value="discount_desc">🔥 Highest Discount First</option>
+                  <option value="discount_desc">🔥 Highest Discount</option>
                   <option value="price_asc">Price: Low to High</option>
                   <option value="price_desc">Price: High to Low</option>
                   <option value="rating">Highest Rated</option>
@@ -295,45 +295,45 @@ export default function DealsPage() {
             </div>
 
             {/* Price Range & Reset Filters Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t text-xs">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="font-bold text-gray-600">Price Range (GH₵):</span>
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t text-[11px] sm:text-xs">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="font-bold text-gray-600">Price (GH₵):</span>
                 <Input
                   type="number"
-                  placeholder="Min GH₵"
+                  placeholder="Min"
                   value={minPrice}
                   onChange={(e) => {
                     setMinPrice(e.target.value);
                     setPage(1);
                   }}
-                  className="w-24 h-8 text-xs rounded-lg"
+                  className="w-16 sm:w-24 h-7 sm:h-8 text-[11px] sm:text-xs rounded-lg px-2"
                 />
                 <span className="text-gray-400">—</span>
                 <Input
                   type="number"
-                  placeholder="Max GH₵"
+                  placeholder="Max"
                   value={maxPrice}
                   onChange={(e) => {
                     setMaxPrice(e.target.value);
                     setPage(1);
                   }}
-                  className="w-24 h-8 text-xs rounded-lg"
+                  className="w-16 sm:w-24 h-7 sm:h-8 text-[11px] sm:text-xs rounded-lg px-2"
                 />
               </div>
 
-              <div className="flex items-center gap-3 ml-auto">
-                <span className="text-gray-500 font-semibold">
-                  Showing <strong className="text-gray-900">{total}</strong> active deal{total === 1 ? "" : "s"}
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-gray-500 font-semibold text-[10px] sm:text-xs">
+                  <strong className="text-gray-900">{total}</strong> deal{total === 1 ? "" : "s"}
                 </span>
                 {(searchQuery || selectedCategory || minDiscount || minPrice || maxPrice || sortBy !== "discount_desc") && (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={handleResetFilters}
-                    className="h-8 gap-1.5 text-xs text-red-600 border-red-200 hover:bg-red-50"
+                    className="h-7 sm:h-8 px-2 gap-1 text-[10px] sm:text-xs text-red-600 border-red-200 hover:bg-red-50 rounded-lg"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    Reset Filters
+                    <RotateCcw className="h-3 w-3" />
+                    Reset
                   </Button>
                 )}
               </div>
