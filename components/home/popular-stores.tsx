@@ -41,13 +41,13 @@ export function PopularStores() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[1, 2].map((i) => (
-              <div key={i} className="h-44 bg-gray-100 rounded-2xl animate-pulse"></div>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="h-36 sm:h-44 bg-gray-100 rounded-2xl animate-pulse"></div>
             ))}
           </div>
         ) : stores.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-3 sm:gap-6">
             {stores.map((store) => {
               const isLogoUrl = Boolean(
                 store.logo && (store.logo.startsWith("http") || store.logo.startsWith("/") || store.logo.startsWith("data:image/"))
@@ -60,10 +60,10 @@ export function PopularStores() {
               return (
                 <Card
                   key={store.id}
-                  className="overflow-hidden border border-gray-200 rounded-3xl hover:shadow-xl transition-all group bg-white flex flex-col justify-between"
+                  className="overflow-hidden border border-gray-200 rounded-2xl sm:rounded-3xl hover:shadow-xl transition-all group bg-white flex flex-col justify-between"
                 >
                   {/* Store Banner */}
-                  <div className="h-28 relative bg-gradient-to-r from-emerald-500 via-teal-600 to-green-600 overflow-hidden">
+                  <div className="h-16 sm:h-28 relative bg-gradient-to-r from-emerald-500 via-teal-600 to-green-600 overflow-hidden">
                     {isBannerUrl ? (
                       <img
                         src={store.banner}
@@ -75,10 +75,10 @@ export function PopularStores() {
                     )}
                   </div>
 
-                  <div className="p-6 relative">
-                    <div className="flex items-start gap-4">
+                  <div className="p-2.5 sm:p-5 relative">
+                    <div className="flex items-start gap-2 sm:gap-4">
                       {/* Store Logo Avatar */}
-                      <div className="w-16 h-16 rounded-2xl bg-white border-4 border-white shadow-lg overflow-hidden -mt-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-black text-2xl z-10">
+                      <div className="w-10 h-10 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-white border-2 sm:border-4 border-white shadow-md overflow-hidden -mt-6 sm:-mt-12 flex-shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-500 to-emerald-600 text-white font-black text-sm sm:text-2xl z-10">
                         {isLogoUrl ? (
                           <img
                             src={store.logo}
@@ -92,50 +92,42 @@ export function PopularStores() {
 
                       <div className="flex-1 min-w-0">
                         <Link href={storeHref}>
-                          <div className="flex items-center gap-1.5 mb-1">
-                            <h3 className="text-xl font-extrabold text-gray-900 group-hover:text-emerald-600 transition-colors truncate">
+                          <div className="flex items-center gap-0.5 mb-0.5">
+                            <h3 className="text-xs sm:text-xl font-extrabold text-gray-900 group-hover:text-emerald-600 transition-colors truncate">
                               {store.name}
                             </h3>
-                            <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                            <CheckCircle className="h-3 w-3 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0" />
                           </div>
                         </Link>
 
-                        <div className="flex items-center gap-3 text-xs text-gray-600 flex-wrap">
-                          <div className="flex items-center gap-1 font-bold text-gray-900">
-                            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <div className="flex items-center gap-1 sm:gap-3 text-[9px] sm:text-xs text-gray-600 flex-wrap">
+                          <div className="flex items-center gap-0.5 font-bold text-gray-900">
+                            <Star className="h-2.5 w-2.5 sm:h-4 sm:w-4 fill-yellow-400 text-yellow-400" />
                             <span>4.9</span>
                           </div>
-                          <span>•</span>
-                          <div className="flex items-center gap-1">
-                            <Package className="h-3.5 w-3.5 text-gray-400" />
-                            <span className="font-semibold text-gray-700">{store.productCount || 0} products</span>
+                          <span className="hidden sm:inline">•</span>
+                          <div className="flex items-center gap-0.5">
+                            <Package className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-gray-400" />
+                            <span className="font-semibold text-gray-700">{store.productCount || 0} items</span>
                           </div>
-                          {store.category && (
-                            <>
-                              <span>•</span>
-                              <span className="bg-emerald-50 text-emerald-800 font-bold px-2 py-0.5 rounded-full border border-emerald-100">
-                                {store.category}
-                              </span>
-                            </>
-                          )}
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  <div className="px-3 pb-3 sm:px-6 sm:pb-6 flex items-center justify-between border-t pt-3 gap-2">
-                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500 truncate">
-                      <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600 flex-shrink-0" />
+                  <div className="px-2.5 pb-2.5 sm:px-5 sm:pb-5 flex items-center justify-between border-t pt-2 sm:pt-3 gap-1">
+                    <div className="flex items-center gap-0.5 text-[9px] sm:text-xs text-gray-500 truncate">
+                      <MapPin className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5 text-emerald-600 flex-shrink-0" />
                       <span className="truncate">{store.location || "Ghana"}</span>
                     </div>
 
                     <Link href={storeHref} className="flex-shrink-0">
                       <Button
                         size="sm"
-                        className="h-8 sm:h-10 text-xs font-bold gap-1 bg-emerald-600 text-white rounded-xl shadow-xs hover:shadow transition-all px-3"
+                        className="h-7 sm:h-10 text-[10px] sm:text-xs font-bold gap-1 bg-emerald-600 text-white rounded-lg sm:rounded-xl shadow-xs hover:shadow transition-all px-2 sm:px-3"
                       >
-                        Visit Store
-                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
+                        Visit
+                        <ArrowRight className="h-2.5 w-2.5 sm:h-4 sm:w-4" />
                       </Button>
                     </Link>
                   </div>
