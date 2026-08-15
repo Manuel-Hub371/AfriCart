@@ -306,13 +306,13 @@ function ProductsContent() {
         />
 
         {/* Toolbar & Sort Controls */}
-        <div className="flex items-center justify-between gap-2 mb-4 bg-white p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border border-gray-200 shadow-2xs">
+        <div className="flex items-center justify-between gap-2 mb-4 bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-gray-200 shadow-2xs">
           <div className="flex items-center gap-2">
             {/* Mobile Filter Toggle Button */}
             <Button
               variant="outline"
               onClick={() => setMobileFilterOpen(true)}
-              className="lg:hidden gap-1 rounded-xl text-[11px] sm:text-xs font-bold border-gray-200 h-8 sm:h-10 px-2.5"
+              className="lg:hidden gap-1 rounded-lg text-xs font-bold border-gray-200 h-8 px-2.5"
             >
               <Filter className="h-3.5 w-3.5 text-emerald-600" />
               <span>Filter</span>
@@ -323,7 +323,7 @@ function ProductsContent() {
               )}
             </Button>
 
-            <div className="text-[10px] sm:text-xs text-gray-600 font-medium">
+            <div className="text-xs text-gray-600 font-medium">
               <span className="font-bold text-gray-900">{productsData?.products?.length || 0}</span> /{" "}
               <span className="font-bold text-gray-900">{productsData?.total || 0}</span>
             </div>
@@ -340,7 +340,7 @@ function ProductsContent() {
               id="sortBySelect"
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value)}
-              className="h-8 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-[11px] sm:text-xs font-semibold text-gray-800 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
+              className="h-8 px-2.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-800 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer shadow-2xs"
             >
               <option value="newest">Newest</option>
               <option value="best_sellers">Best Sellers</option>
