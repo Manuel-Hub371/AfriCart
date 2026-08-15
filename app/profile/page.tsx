@@ -14,6 +14,7 @@ import {
   Loader2,
   ShoppingCart,
   AlertCircle,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -39,11 +40,22 @@ interface DashboardData {
 
 export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleProfileLogout = async () => {
+    try {
+      setIsLoggingOut(true);
+      await logout();
+    } catch (err) {
+      console.error("Logout failed:", err);
+      setIsLoggingOut(false);
+    }
+  };
 
   const fetchDashboard = useCallback(async () => {
     setLoading(true);
@@ -285,6 +297,38 @@ export default function DashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Account Security & Sign Out Card */}
+          <div className="bg-white rounded-xl sm:rounded-2xl border border-red-100 p-4 sm:p-6 shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-center sm:text-left">
+              <div className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                <LogOut className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-extrabold text-gray-900 text-xs sm:text-base">Account Security &amp; Sign Out</h3>
+                <p className="text-[11px] sm:text-xs text-gray-500 font-medium">Logged in as {user?.email || "Customer"}</p>
+              </div>
+            </div>
+
+            <Button
+              variant="destructive"
+              disabled={isLoggingOut}
+              onClick={handleProfileLogout}
+              className="w-full sm:w-auto h-9 sm:h-10 px-6 rounded-xl font-bold text-xs bg-red-600 hover:bg-red-700 text-white shadow-2xs gap-2"
+            >
+              {isLoggingOut ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Logging Out...</span>
+                </>
+              ) : (
+                <>
+                  <LogOut className="h-4 w-4" />
+                  <span>Sign Out Account</span>
+                </>
+              )}
+            </Button>
           </div>
         </main>
       </div>

@@ -131,14 +131,14 @@ export default function DashboardSidebar({
         </nav>
 
         {/* Logout */}
-        <div className="p-4 border-t">
+        <div className="p-4 border-t border-gray-100 bg-gray-50/50">
           <button 
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 font-extrabold text-sm w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
           >
-            <LogOut className="h-5 w-5" />
-            <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
+            <LogOut className="h-5 w-5 shrink-0" />
+            <span>{isLoggingOut ? "Logging out..." : "Sign Out Account"}</span>
           </button>
         </div>
       </aside>
