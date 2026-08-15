@@ -45,9 +45,9 @@ export function ProductInfo({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2.5">
       {/* Brand & Badges */}
-      <div className="flex items-center gap-2 flex-wrap text-xs">
+      <div className="flex items-center gap-1.5 flex-wrap text-[10px] sm:text-xs">
         {brand && (
           <span className="font-extrabold uppercase text-gray-500 tracking-wider">
             Brand: <span className="text-gray-900 font-bold">{brand}</span>
@@ -55,15 +55,15 @@ export function ProductInfo({
         )}
 
         {category && (
-          <Badge variant="outline" className="bg-gray-50 text-gray-700 font-bold">
+          <Badge variant="outline" className="bg-gray-50 text-gray-700 font-bold text-[10px] sm:text-xs px-2 py-0.5">
             {category}
           </Badge>
         )}
 
         {/* Dynamic System Best Seller Badge */}
         {isBestSeller && (
-          <span className="font-extrabold uppercase text-[10px] tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2.5 py-0.5 rounded-full shadow-xs">
-            🔥 {bestSellerRank ? `#${bestSellerRank} Best Seller` : "Best Seller"} {category ? `in ${category}` : ""}
+          <span className="font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2 py-0.5 rounded-full shadow-xs">
+            🔥 {bestSellerRank ? `#${bestSellerRank} Best Seller` : "Best Seller"}
           </span>
         )}
 
@@ -71,7 +71,7 @@ export function ProductInfo({
         {campaigns.map((c) => (
           <span
             key={c.id}
-            className="font-extrabold uppercase text-[10px] tracking-wide text-white px-2.5 py-0.5 rounded-full shadow-xs"
+            className="font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide text-white px-2 py-0.5 rounded-full shadow-xs"
             style={{ backgroundColor: c.color || "#EF4444" }}
           >
             {c.badge || c.name}
@@ -79,25 +79,25 @@ export function ProductInfo({
         ))}
 
         {sku && (
-          <span className="text-[11px] text-gray-400 font-mono ml-auto">
+          <span className="text-[10px] text-gray-400 font-mono ml-auto">
             SKU: {sku}
           </span>
         )}
       </div>
 
       {/* Main Title */}
-      <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight leading-snug">
+      <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight leading-snug">
         {name}
       </h1>
 
       {/* Ratings & Sales Social Proof */}
-      <div className="flex items-center gap-4 text-xs flex-wrap pt-1">
-        <div className="flex items-center gap-1.5 bg-amber-50 px-3 py-1 rounded-xl border border-amber-200">
-          <Star className="h-4 w-4 text-amber-500 fill-amber-400" />
-          <span className="font-extrabold text-gray-900 text-sm">
+      <div className="flex items-center gap-2.5 text-[11px] sm:text-xs flex-wrap pt-0.5">
+        <div className="flex items-center gap-1 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
+          <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-400" />
+          <span className="font-extrabold text-gray-900 text-xs sm:text-sm">
             {Number(rating).toFixed(1)}
           </span>
-          <span className="text-gray-500 font-medium">({reviews} customer reviews)</span>
+          <span className="text-gray-500 font-medium text-[10px] sm:text-xs">({reviews} reviews)</span>
         </div>
 
         {soldCount > 0 && (

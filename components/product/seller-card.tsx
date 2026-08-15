@@ -64,14 +64,14 @@ export function SellerCard({
   };
 
   return (
-    <Card className="p-6 border border-gray-200 rounded-3xl bg-white shadow-sm flex flex-col justify-between space-y-6">
+    <Card className="p-3.5 sm:p-6 border border-gray-200 rounded-2xl sm:rounded-3xl bg-white shadow-xs flex flex-col justify-between space-y-4 sm:space-y-6">
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-4">
+        <h3 className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-gray-500 mb-3">
           Sold &amp; Fulfilled By:
         </h3>
 
-        <div className="flex items-start gap-4 mb-6">
-          <Avatar className="h-16 w-16 bg-emerald-600 border border-gray-200 overflow-hidden flex-shrink-0">
+        <div className="flex items-start gap-3 mb-4 sm:mb-6">
+          <Avatar className="h-12 w-12 sm:h-16 sm:w-16 bg-emerald-600 border border-gray-200 overflow-hidden flex-shrink-0">
             {isLogoUrl ? (
               <img
                 src={logo}
@@ -79,58 +79,57 @@ export function SellerCard({
                 className="w-full h-full object-cover"
               />
             ) : (
-              <div className="w-full h-full gradient-primary flex items-center justify-center text-white text-2xl font-bold">
+              <div className="w-full h-full gradient-primary flex items-center justify-center text-white text-xl sm:text-2xl font-bold">
                 {storeName?.charAt(0) || "S"}
               </div>
             )}
           </Avatar>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-1.5 mb-0.5">
               <Link href={`/store/${storeId}`}>
-                <h4 className="text-lg font-bold text-gray-900 hover:text-emerald-600 transition-colors truncate">
+                <h4 className="text-base sm:text-lg font-bold text-gray-900 hover:text-emerald-600 transition-colors truncate">
                   {storeName}
                 </h4>
               </Link>
               {verified && (
-                <CheckCircle className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600 flex-shrink-0" />
               )}
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-gray-600 flex-wrap">
+            <div className="flex items-center gap-2 text-[11px] sm:text-xs text-gray-600 flex-wrap">
               <div className="flex items-center gap-1 font-semibold text-gray-900">
-                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
                 <span>{storeRating}</span>
-                <span className="text-gray-400">/ 5.0</span>
               </div>
               <span>•</span>
               <div className="flex items-center gap-1 text-gray-500">
-                <MapPin className="h-3.5 w-3.5" />
-                <span>{location}</span>
+                <MapPin className="h-3 w-3" />
+                <span className="truncate">{location}</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Store Metrics */}
-        <div className="space-y-3 p-4 bg-gray-50/80 rounded-2xl border border-gray-100 text-xs">
+        <div className="space-y-2.5 p-3 sm:p-4 bg-gray-50/80 rounded-xl border border-gray-100 text-[11px] sm:text-xs">
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-gray-600 font-medium">
-              <Package className="h-4 w-4 text-emerald-600" /> Products Listed
+            <span className="flex items-center gap-1.5 text-gray-600 font-medium">
+              <Package className="h-3.5 w-3.5 text-emerald-600" /> Products Listed
             </span>
             <span className="font-bold text-gray-900">{products}</span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-gray-600 font-medium">
-              <Users className="h-4 w-4 text-blue-600" /> Store Followers
+            <span className="flex items-center gap-1.5 text-gray-600 font-medium">
+              <Users className="h-3.5 w-3.5 text-blue-600" /> Store Followers
             </span>
             <span className="font-bold text-gray-900">{followers}</span>
           </div>
 
           <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-gray-600 font-medium">
-              <MessageCircle className="h-4 w-4 text-purple-600" /> Response Rate
+            <span className="flex items-center gap-1.5 text-gray-600 font-medium">
+              <MessageCircle className="h-3.5 w-3.5 text-purple-600" /> Response Rate
             </span>
             <span className="font-bold text-gray-900">{responseRate}%</span>
           </div>
@@ -138,24 +137,24 @@ export function SellerCard({
       </div>
 
       {/* Buttons */}
-      <div className="grid grid-cols-2 gap-3 pt-2">
-        <Link href={`/store/${storeId}`} className="block">
-          <Button variant="outline" className="w-full h-11 rounded-xl text-xs font-bold border-gray-200">
-            <StoreIcon className="h-4 w-4 mr-1.5 text-emerald-600" />
+      <div className="grid grid-cols-2 gap-2 pt-1">
+        <Link href={`/store/${storeId}`}>
+          <Button variant="outline" className="w-full h-9 sm:h-11 rounded-xl text-xs font-bold border-gray-200">
+            <StoreIcon className="h-3.5 w-3.5 mr-1" />
             Visit Store
           </Button>
         </Link>
         <Button
           onClick={handleContactSeller}
           disabled={isStartingChat}
-          className="h-11 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5"
+          className="w-full h-9 sm:h-11 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
         >
           {isStartingChat ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
           ) : (
-            <MessageCircle className="h-4 w-4" />
+            <MessageCircle className="h-3.5 w-3.5 mr-1" />
           )}
-          Contact Seller
+          Chat Seller
         </Button>
       </div>
     </Card>

@@ -61,15 +61,15 @@ export function ProductVariants({ variants = [], onVariantSelect }: ProductVaria
   if (variants.length === 0 || attributeKeys.length === 0) return null;
 
   return (
-    <div className="space-y-5 py-4 border-y border-gray-100 my-4">
+    <div className="space-y-3 py-2 sm:py-4 border-y border-gray-100 my-2 sm:my-4">
       {attributeKeys.map((key) => {
         const options = attributeOptions[key] || [];
         const currentSelected = selectedAttributes[key];
 
         return (
           <div key={key}>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold uppercase text-gray-700 tracking-wider">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] sm:text-xs font-bold uppercase text-gray-700 tracking-wider">
                 {key}:{" "}
                 <span className="text-emerald-700 font-extrabold normal-case">
                   {currentSelected || "Select option"}
@@ -77,11 +77,9 @@ export function ProductVariants({ variants = [], onVariantSelect }: ProductVaria
               </span>
             </div>
 
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               {options.map((option) => {
                 const isSelected = currentSelected === option;
-
-                // Color swatch handling
                 const isColor = key.toLowerCase() === "color";
                 
                 return (
@@ -89,15 +87,15 @@ export function ProductVariants({ variants = [], onVariantSelect }: ProductVaria
                     key={option}
                     type="button"
                     onClick={() => handleSelectAttribute(key, option)}
-                    className={`px-4 py-2 text-xs font-bold rounded-xl border-2 transition-all ${
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg border-2 transition-all ${
                       isSelected
-                        ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-sm ring-2 ring-emerald-200"
+                        ? "border-emerald-600 bg-emerald-50 text-emerald-800 shadow-2xs ring-1 ring-emerald-200"
                         : "border-gray-200 hover:border-gray-300 bg-white text-gray-700"
                     }`}
                   >
                     {isColor && (
                       <span
-                        className="inline-block w-3 h-3 rounded-full mr-2 border border-gray-300 align-middle"
+                        className="inline-block w-2.5 h-2.5 rounded-full mr-1.5 border border-gray-300 align-middle"
                         style={{ backgroundColor: option.toLowerCase() }}
                       />
                     )}

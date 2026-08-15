@@ -52,34 +52,34 @@ export function ProductTabs({
   return (
     <Tabs defaultValue="description" className="w-full">
       {/* Exactly 4 Navigation Tabs */}
-      <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent gap-2 flex-wrap">
+      <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent gap-1.5 sm:gap-2 flex-wrap">
         <TabsTrigger
           value="description"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-6 py-4 gap-2 text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
         >
-          <FileText className="h-4 w-4" />
+          <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           Description
         </TabsTrigger>
         <TabsTrigger
           value="reviews"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-6 py-4 gap-2 text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
         >
-          <Star className="h-4 w-4" />
+          <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           Reviews
         </TabsTrigger>
         <TabsTrigger
           value="questions"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-6 py-4 gap-2 text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
         >
-          <HelpCircle className="h-4 w-4" />
+          <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           Q &amp; A
         </TabsTrigger>
         <TabsTrigger
           value="shipping"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-6 py-4 gap-2 text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
         >
-          <Truck className="h-4 w-4" />
-          Shipping Policy ({shippingPolicies.length})
+          <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+          Policies
         </TabsTrigger>
       </TabsList>
 

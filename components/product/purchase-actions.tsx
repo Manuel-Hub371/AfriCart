@@ -138,51 +138,53 @@ export function PurchaseActions({
 
   return (
     <div className="space-y-4">
-      {/* Quantity Selector */}
-      <div>
-        <h3 className="text-xs font-bold uppercase text-gray-700 mb-2">Quantity:</h3>
+      {/* Quantity & Stock */}
+      <div className="space-y-1.5">
+        <label className="block text-[11px] sm:text-xs font-bold uppercase text-gray-700 tracking-wider">
+          Quantity
+        </label>
         <div className="flex items-center gap-3">
-          <div className="flex items-center border border-gray-200 bg-gray-50 rounded-2xl p-1">
+          <div className="inline-flex items-center border border-gray-200 rounded-xl bg-gray-50 p-0.5">
             <button
               onClick={decreaseQuantity}
               disabled={quantity <= 1}
-              className="p-2.5 hover:bg-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
+              className="p-1.5 sm:p-2.5 hover:bg-white rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
             >
-              <Minus className="h-4 w-4" />
+              <Minus className="h-3.5 w-3.5" />
             </button>
-            <span className="px-5 font-black text-gray-900 text-base">{quantity}</span>
+            <span className="px-3 sm:px-5 font-black text-gray-900 text-sm sm:text-base">{quantity}</span>
             <button
               onClick={increaseQuantity}
               disabled={quantity >= maxQuantity}
-              className="p-2.5 hover:bg-white rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
+              className="p-1.5 sm:p-2.5 hover:bg-white rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-3.5 w-3.5" />
             </button>
           </div>
-          <span className="text-xs font-semibold text-gray-500">
+          <span className="text-[10px] sm:text-xs font-semibold text-gray-500">
             {maxQuantity} available
           </span>
         </div>
       </div>
 
       {/* Primary Actions */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1">
         <Button
           size="lg"
-          className="h-13 rounded-2xl gap-2 gradient-primary text-white font-extrabold shadow-md hover:opacity-95"
+          className="h-10 sm:h-13 rounded-xl sm:rounded-2xl gap-1.5 gradient-primary text-white font-extrabold text-xs sm:text-base shadow-sm hover:opacity-95"
           disabled={!inStock || isLoading}
           onClick={handleAddToCart}
         >
-          {addedToCart ? <Check className="h-5 w-5 text-white" /> : <ShoppingCart className="h-5 w-5" />}
-          {addedToCart ? "Added to Cart!" : "Add to Cart"}
+          {addedToCart ? <Check className="h-4 w-4 text-white" /> : <ShoppingCart className="h-4 w-4" />}
+          {addedToCart ? "Added!" : "Add to Cart"}
         </Button>
         <Button
           size="lg"
-          className="h-13 rounded-2xl gap-2 bg-orange-600 hover:bg-orange-700 text-white font-extrabold shadow-md"
+          className="h-10 sm:h-13 rounded-xl sm:rounded-2xl gap-1.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs sm:text-base shadow-sm"
           disabled={!inStock || isLoading}
           onClick={handleBuyNow}
         >
-          <Zap className="h-5 w-5 fill-white" />
+          <Zap className="h-4 w-4 fill-white" />
           Buy Now
         </Button>
       </div>

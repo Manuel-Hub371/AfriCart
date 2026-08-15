@@ -151,16 +151,16 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
 
       <main className="flex-1 pb-16">
         {/* Breadcrumb Header */}
-        <div className="bg-white border-b border-gray-200 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="bg-white border-b border-gray-200 shadow-2xs">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 sm:py-3">
             <Breadcrumb items={breadcrumbItems} />
           </div>
         </div>
 
         {/* Main Product Showcase Section */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="bg-white rounded-3xl border border-gray-200 p-6 md:p-8 shadow-sm mb-8">
-            <div className="grid lg:grid-cols-2 gap-10">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-8">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-3.5 sm:p-8 shadow-2xs mb-4 sm:mb-8">
+            <div className="grid lg:grid-cols-2 gap-4 sm:gap-10">
               {/* Left: Product Gallery */}
               <ProductGallery
                 images={product.images}
@@ -170,8 +170,8 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
               />
 
               {/* Right: Product Details & Purchase Actions */}
-              <div className="space-y-6 flex flex-col justify-between">
-                <div className="space-y-4">
+              <div className="space-y-4 sm:space-y-6 flex flex-col justify-between pt-2 lg:pt-0">
+                <div className="space-y-3 sm:space-y-4">
                   {/* Title, Brand & Badges */}
                   <ProductInfo
                     name={product.name}
@@ -224,7 +224,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Store Info & Shipping Cards */}
-          <div className="grid lg:grid-cols-2 gap-6 mb-8">
+          <div className="grid lg:grid-cols-2 gap-3 sm:gap-6 mb-4 sm:mb-8">
             <SellerCard
               storeId={storeInfo.id || storeInfo.slug}
               storeName={storeInfo.name || "Marketplace Vendor"}
@@ -249,7 +249,7 @@ export default function ProductDetailsPage({ params }: { params: Promise<{ id: s
           </div>
 
           {/* Product Tabs (Description, Specifications, Customer Reviews, Q&A, Shipping) */}
-          <div className="bg-white rounded-3xl border border-gray-200 p-6 md:p-8 shadow-sm mb-12">
+          <div className="bg-white rounded-2xl sm:rounded-3xl border border-gray-200 p-3.5 sm:p-8 shadow-2xs mb-6 sm:mb-12">
             <ProductTabs
               productId={product.id}
               description={product.description || "No detailed description provided for this product."}

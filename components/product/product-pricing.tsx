@@ -113,19 +113,19 @@ export function ProductPricing({
       )}
 
       {/* Main Pricing — from API, no frontend calculation */}
-      <div className="flex items-baseline gap-3 flex-wrap">
-        <span className="text-3xl sm:text-4xl font-black text-emerald-700 tracking-tight">
+      <div className="flex items-baseline gap-2.5 flex-wrap">
+        <span className="text-2xl sm:text-4xl font-black text-emerald-700 tracking-tight">
           GH₵{Number(price).toFixed(2)}
         </span>
 
         {isDiscounted && originalPrice && originalPrice > price && (
-          <span className="text-lg text-gray-400 line-through font-semibold">
+          <span className="text-xs sm:text-lg text-gray-400 line-through font-semibold">
             GH₵{Number(originalPrice).toFixed(2)}
           </span>
         )}
 
         {isDiscounted && discountPercent > 0 && (
-          <Badge className="bg-red-600 text-white font-extrabold text-xs px-3 py-1 rounded-full shadow-sm">
+          <Badge className="bg-red-600 text-white font-extrabold text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full shadow-xs">
             -{discountPercent}% OFF
           </Badge>
         )}
@@ -133,32 +133,32 @@ export function ProductPricing({
 
       {/* You Save callout */}
       {isDiscounted && amountSaved > 0 && (
-        <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2 text-sm">
-          <Sparkles className="h-4 w-4 text-emerald-600 flex-shrink-0" />
-          <span className="font-bold text-emerald-800">
+        <div className="flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-1.5 text-xs">
+          <Sparkles className="h-3.5 w-3.5 text-emerald-600 flex-shrink-0" />
+          <span className="font-bold text-emerald-800 text-[11px] sm:text-xs">
             You save <span className="text-emerald-900">GH₵{Number(amountSaved).toFixed(2)}</span> with this offer
           </span>
         </div>
       )}
 
       {/* Real-time Inventory Status */}
-      <div className="flex items-center gap-3 text-xs flex-wrap">
+      <div className="flex items-center gap-2 text-[10px] sm:text-xs flex-wrap">
         {inStock ? (
           isLowStock ? (
-            <div className="flex items-center gap-1.5 font-bold text-amber-700 bg-amber-50 px-3 py-1.5 rounded-xl border border-amber-200">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
-              Only {stock} unit{stock === 1 ? "" : "s"} remaining in stock — order soon!
+            <div className="flex items-center gap-1 font-bold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+              <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
+              Only {stock} unit{stock === 1 ? "" : "s"} left — order soon!
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 font-bold text-emerald-800 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-200">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-              In Stock ({stock} available for immediate dispatch)
+            <div className="flex items-center gap-1 font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+              <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              In Stock ({stock} available for dispatch)
             </div>
           )
         ) : (
-          <div className="flex items-center gap-1.5 font-bold text-red-700 bg-red-50 px-3 py-1.5 rounded-xl border border-red-200">
-            <ShieldAlert className="h-4 w-4 text-red-600" />
-            Currently Out of Stock (Restock in progress)
+          <div className="flex items-center gap-1 font-bold text-red-700 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200">
+            <ShieldAlert className="h-3.5 w-3.5 text-red-600" />
+            Out of Stock
           </div>
         )}
       </div>
