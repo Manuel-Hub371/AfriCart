@@ -244,9 +244,9 @@ function ProductsContent() {
         </div>
       </div>
 
-      {/* Category Pills Navigation */}
+      {/* Category Pills Navigation (Mobile/Tablet Only) */}
       {categories.length > 0 && (
-        <div className="bg-white border-b border-gray-200 sticky top-14 z-30 shadow-2xs">
+        <div className="lg:hidden bg-white border-b border-gray-200 sticky top-14 z-30 shadow-2xs">
           <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2 overflow-x-auto no-scrollbar flex items-center gap-1.5">
             <button
               onClick={() => handlePillCategorySelect("")}
