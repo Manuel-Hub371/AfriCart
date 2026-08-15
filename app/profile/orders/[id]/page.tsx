@@ -112,70 +112,70 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-3 sm:space-y-6">
           <Link href="/profile/orders">
-            <Button variant="ghost" className="gap-2 mb-6 text-gray-600 hover:text-gray-900">
-              <ArrowLeft className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className="gap-1.5 text-xs font-bold text-gray-600 hover:text-gray-900 h-8 px-2.5 rounded-xl">
+              <ArrowLeft className="h-3.5 w-3.5" />
               Back to Orders
             </Button>
           </Link>
 
-          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-gray-200 pb-3 sm:pb-6">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-1">
-                Order #{order.id.slice(0, 8)}...
+              <h1 className="text-lg sm:text-3xl font-black text-gray-900 tracking-tight">
+                Order #{order.id.slice(0, 8).toUpperCase()}...
               </h1>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
                 Placed on {new Date(order.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
               </p>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200 font-extrabold px-3 py-1">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <Badge className="bg-emerald-50 text-emerald-800 border-emerald-200 font-extrabold text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full">
                 Status: {order.status}
               </Badge>
-              <Badge className="bg-blue-100 text-blue-800 border-blue-200 font-extrabold px-3 py-1">
+              <Badge className="bg-blue-50 text-blue-800 border-blue-200 font-extrabold text-[10px] sm:text-xs px-2.5 py-0.5 rounded-full">
                 Payment: {order.paymentStatus}
               </Badge>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-6">
             {/* Left: Items List */}
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
-                <h2 className="text-lg font-extrabold text-gray-900 flex items-center gap-2 border-b pb-4">
-                  <Package className="h-5 w-5 text-emerald-600" />
+            <div className="lg:col-span-2 space-y-3 sm:space-y-6">
+              <div className="bg-white rounded-xl sm:rounded-3xl border border-gray-200 p-3.5 sm:p-6 shadow-2xs space-y-3">
+                <h2 className="text-sm sm:text-lg font-black text-gray-900 flex items-center gap-1.5 border-b border-gray-100 pb-2.5">
+                  <Package className="h-4 w-4 text-emerald-600" />
                   Order Items ({order.orderItems.length})
                 </h2>
 
                 <div className="divide-y divide-gray-100">
                   {order.orderItems.map((item) => (
-                    <div key={item.id} className="py-4 flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
+                    <div key={item.id} className="py-2.5 sm:py-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
                         {item.productImage ? (
                           <img
                             src={item.productImage}
                             alt={item.productName}
-                            className="w-16 h-16 object-cover rounded-xl border flex-shrink-0"
+                            className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-gray-200 flex-shrink-0"
                           />
                         ) : (
-                          <div className="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 flex-shrink-0">
-                            <Package className="h-6 w-6" />
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 flex-shrink-0">
+                            <Package className="h-5 w-5" />
                           </div>
                         )}
-                        <div>
-                          <h3 className="font-extrabold text-gray-900 text-sm sm:text-base">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="font-extrabold text-gray-900 text-xs sm:text-base line-clamp-1">
                             {item.productName}
                           </h3>
-                          <p className="text-xs text-gray-500 font-semibold">Store: {item.storeName}</p>
-                          <span className="text-xs text-gray-400 font-medium">Qty: {item.quantity}</span>
+                          <p className="text-[10px] sm:text-xs text-gray-500 font-semibold">Store: {item.storeName}</p>
+                          <span className="text-[10px] text-gray-400 font-medium">Qty: {item.quantity}</span>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-base font-extrabold text-gray-900">
+                      <div className="text-right shrink-0">
+                        <span className="text-xs sm:text-base font-black text-emerald-700 block">
                           GH₵{(item.price * item.quantity).toFixed(2)}
                         </span>
-                        <p className="text-xs text-gray-400">GH₵{item.price.toFixed(2)} each</p>
+                        <p className="text-[10px] text-gray-400">GH₵{item.price.toFixed(2)} each</p>
                       </div>
                     </div>
                   ))}
@@ -184,25 +184,25 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
             </div>
 
             {/* Right: Summary, Payment & Address */}
-            <div className="space-y-6">
+            <div className="space-y-3 sm:space-y-6">
               {/* Summary */}
-              <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-4">
-                <h3 className="font-extrabold text-gray-900 text-base border-b pb-3">Order Summary</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Total Amount</span>
-                    <span className="font-extrabold text-emerald-700 text-lg">
-                      ${order.totalAmount.toFixed(2)}
+              <div className="bg-white rounded-xl sm:rounded-3xl border border-gray-200 p-3.5 sm:p-6 shadow-2xs space-y-3">
+                <h3 className="font-black text-gray-900 text-xs sm:text-base border-b border-gray-100 pb-2">Order Summary</h3>
+                <div className="space-y-1.5 text-xs sm:text-sm">
+                  <div className="flex justify-between items-center text-gray-600">
+                    <span className="font-bold">Total Amount</span>
+                    <span className="font-black text-emerald-700 text-sm sm:text-lg">
+                      GH₵{order.totalAmount.toFixed(2)}
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Payment Method */}
-              <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-3">
-                <div className="flex items-center gap-2 text-gray-900 font-extrabold text-sm">
+              <div className="bg-white rounded-xl sm:rounded-3xl border border-gray-200 p-3.5 sm:p-6 shadow-2xs space-y-2">
+                <div className="flex items-center gap-1.5 text-gray-900 font-extrabold text-xs sm:text-sm">
                   <CreditCard className="h-4 w-4 text-emerald-600" />
-                  Payment Information
+                  <span>Payment Information</span>
                 </div>
                 <p className="text-xs text-gray-600 font-medium">
                   {order.paymentMethod || "Standard Payment"}
@@ -210,13 +210,13 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
               </div>
 
               {/* Shipping Address */}
-              <div className="bg-white rounded-3xl border border-gray-200 p-6 shadow-sm space-y-3">
-                <div className="flex items-center gap-2 text-gray-900 font-extrabold text-sm">
+              <div className="bg-white rounded-xl sm:rounded-3xl border border-gray-200 p-3.5 sm:p-6 shadow-2xs space-y-2">
+                <div className="flex items-center gap-1.5 text-gray-900 font-extrabold text-xs sm:text-sm">
                   <MapPin className="h-4 w-4 text-emerald-600" />
-                  Shipping Destination
+                  <span>Shipping Destination</span>
                 </div>
                 {addr.fullName || addr.name ? (
-                  <div className="text-xs text-gray-600 space-y-1 font-medium">
+                  <div className="text-xs text-gray-600 space-y-0.5 font-medium">
                     <p className="font-bold text-gray-900">{addr.fullName || addr.name}</p>
                     {addr.phoneNumber && <p>{addr.phoneNumber}</p>}
                     <p>{addr.streetAddress || addr.address}</p>

@@ -37,73 +37,74 @@ export default function OrderCard({ order }: OrderCardProps) {
   const targetId = order.fullId || order.orderId;
 
   return (
-    <Card className="p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+    <Card className="p-3 sm:p-5 bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-2xs space-y-2.5">
+      <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h3 className="font-semibold text-gray-900">
+          <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+            <h3 className="font-extrabold text-gray-900 text-xs sm:text-sm">
               Order #{order.orderId}
             </h3>
-            <Badge className={statusInfo.color}>{order.status}</Badge>
+            <Badge className={`${statusInfo.color} text-[9px] sm:text-xs px-2 py-0.2 font-extrabold rounded-full`}>
+              {order.status}
+            </Badge>
           </div>
-          <p className="text-sm text-gray-600">{order.date}</p>
+          <p className="text-[10px] sm:text-xs text-gray-400 font-medium">{order.date}</p>
         </div>
-        <div className="text-left sm:text-right">
-          <p className="text-2xl font-bold text-gray-900">
+
+        <div className="text-right">
+          <span className="text-[10px] text-gray-400 font-semibold uppercase block">Total</span>
+          <span className="text-xs sm:text-lg font-black text-emerald-700">
             GH₵{order.total.toFixed(2)}
-          </p>
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 mb-4 pb-4 border-b">
-        <span className="text-sm text-gray-600">Vendor:</span>
-        <span className="font-medium text-gray-900">{order.vendor.name}</span>
+      <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
+        <span className="font-semibold">Vendor:</span>
+        <span className="font-bold text-gray-800">{order.vendor.name}</span>
         {order.vendor.verified && (
-          <BadgeCheck className="h-4 w-4 text-emerald-600" />
+          <BadgeCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
         )}
       </div>
 
-      <div className="space-y-3 mb-4">
+      <div className="space-y-2 pt-0.5">
         {order.products.map((product, index) => {
           const isUrl = product.image && (product.image.startsWith("http") || product.image.startsWith("/"));
           return (
-            <div key={index} className="flex items-center gap-3">
+            <div key={index} className="flex items-center gap-2.5 bg-gray-50/60 p-1.5 rounded-lg border border-gray-100">
               {isUrl ? (
                 <img
                   src={product.image}
                   alt={product.name}
-                  className="w-16 h-16 object-cover rounded-lg flex-shrink-0 border border-gray-100"
+                  className="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-md flex-shrink-0 border border-gray-200"
                 />
               ) : (
                 <div
-                  className={`w-16 h-16 ${
+                  className={`w-12 h-12 sm:w-14 sm:h-14 ${
                     product.image || "bg-gradient-to-br from-emerald-100 to-emerald-200"
-                  } rounded-lg flex items-center justify-center font-bold text-emerald-800 flex-shrink-0`}
+                  } rounded-md flex items-center justify-center font-bold text-emerald-800 text-xs flex-shrink-0`}
                 >
                   {!product.image && product.name ? product.name[0] : ""}
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-gray-900 truncate">
+                <p className="font-bold text-xs text-gray-900 truncate">
                   {product.name}
                 </p>
-                <p className="text-sm text-gray-600">Qty: {product.quantity}</p>
+                <p className="text-[10px] text-gray-500 font-medium">Qty: {product.quantity}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="flex gap-3">
-        <Link href={`/profile/orders/${targetId}`} className="flex-1">
-          <Button variant="outline" className="w-full gap-2">
-            <Eye className="h-4 w-4" />
-            View Details
+      <div className="pt-1">
+        <Link href={`/profile/orders/${targetId}`} className="block">
+          <Button variant="outline" size="sm" className="w-full gap-1.5 font-bold text-xs h-8 sm:h-9 rounded-xl border-gray-200 hover:bg-gray-50">
+            <Eye className="h-3.5 w-3.5 text-emerald-600" />
+            <span>View Order Details</span>
           </Button>
         </Link>
-        {order.status === "Shipped" && (
-          <Button className="flex-1">Track Order</Button>
-        )}
       </div>
     </Card>
   );

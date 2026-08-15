@@ -95,51 +95,54 @@ export default function OrdersPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6">
           {/* Header & Search */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
                 My Orders
               </h1>
-              <p className="text-gray-600">
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
                 Track and manage your order history
               </p>
             </div>
 
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <div className="relative w-full sm:w-64">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
               <Input
                 type="text"
-                placeholder="Search orders..."
+                placeholder="Search orders by ID or product..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 w-full sm:w-64 bg-white"
+                className="pl-8 h-8 sm:h-10 text-xs rounded-xl bg-white border-gray-200 shadow-2xs"
               />
             </div>
           </div>
 
-          {/* Status Filter Tabs */}
-          <div className="flex gap-2 border-b border-gray-200 overflow-x-auto pb-2 mb-6">
+          {/* Status Filter Touch Pills Bar */}
+          <div className="overflow-x-auto no-scrollbar flex items-center gap-1.5 py-1">
             {[
               { id: "all", label: "All Orders" },
               { id: "processing", label: "Processing" },
               { id: "shipped", label: "Shipped" },
               { id: "delivered", label: "Delivered" },
               { id: "cancelled", label: "Cancelled" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-4 py-2 text-sm font-medium rounded-lg whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-emerald-50 text-emerald-600 font-semibold"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            ].map((tab) => {
+              const isSelected = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                    isSelected
+                      ? "bg-emerald-600 text-white shadow-2xs"
+                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
           {/* Loading State */}
