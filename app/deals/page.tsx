@@ -161,56 +161,56 @@ export default function DealsPage() {
 
       <main className="flex-1 pb-16">
         {/* Hero Section */}
-        <section className="relative bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900 text-white overflow-hidden py-6 sm:py-14 px-3 sm:px-6 lg:px-8 border-b">
+        <section className="relative bg-gradient-to-br from-gray-900 via-emerald-950 to-gray-900 text-white overflow-hidden py-4 sm:py-12 px-3 sm:px-6 lg:px-8 border-b">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500/20 via-transparent to-transparent pointer-events-none" />
 
           <div className="max-w-7xl mx-auto relative z-10">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 sm:gap-8">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-8">
               <div className="space-y-2 sm:space-y-4 max-w-2xl text-center md:text-left">
-                <div className="inline-flex items-center gap-1.5 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/40 text-orange-300 font-extrabold text-[10px] sm:text-xs px-2.5 py-1 rounded-full backdrop-blur-md">
-                  <Flame className="h-3.5 w-3.5 text-orange-400 animate-pulse" />
+                <div className="inline-flex items-center gap-1 bg-gradient-to-r from-orange-500/20 to-amber-500/20 border border-orange-500/40 text-orange-300 font-extrabold text-[9px] sm:text-xs px-2 py-0.5 rounded-full backdrop-blur-md">
+                  <Flame className="h-3 w-3 text-orange-400 animate-pulse" />
                   <span>Exclusive Marketplace Promotions</span>
                 </div>
 
-                <h1 className="text-2xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+                <h1 className="text-xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
                   Today's <span className="text-gradient">Hot Deals</span> & Discounts
                 </h1>
 
-                <p className="text-gray-300 text-xs sm:text-base leading-relaxed">
+                <p className="text-gray-300 text-xs sm:text-base leading-relaxed max-w-xl mx-auto md:mx-0">
                   Discover verified promotional prices, percentage discounts, and flash sales direct from top vendors across Africa.
                 </p>
               </div>
 
               {/* Dynamic Flash Sale Spotlight Widget */}
               {featuredCampaign && !spotlightTime.expired && (
-                <div className="w-full md:w-auto bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-xl flex flex-col items-center md:items-end text-center md:text-right space-y-2 sm:space-y-3">
-                  <div className="flex items-center gap-1.5 text-[10px] sm:text-xs font-extrabold uppercase tracking-wide text-orange-400 bg-orange-500/20 px-2.5 py-0.5 rounded-full border border-orange-500/30">
+                <div className="w-full md:w-auto bg-white/10 backdrop-blur-xl border border-white/15 rounded-xl sm:rounded-3xl p-2.5 sm:p-6 shadow-xl flex flex-col items-center md:items-end text-center md:text-right space-y-1.5 sm:space-y-3">
+                  <div className="flex items-center gap-1 text-[9px] sm:text-xs font-extrabold uppercase tracking-wide text-orange-400 bg-orange-500/20 px-2 py-0.5 rounded-full border border-orange-500/30">
                     <Zap className="h-3 w-3" />
                     <span>{featuredCampaign.badge || featuredCampaign.name}</span>
                   </div>
 
-                  <p className="text-[11px] sm:text-xs text-gray-300 font-medium">Limited-Time Offer Ending In</p>
+                  <p className="text-[10px] sm:text-xs text-gray-300 font-medium">Limited-Time Offer Ending In</p>
 
-                  <div className="flex items-center gap-1.5 font-mono font-black text-sm sm:text-2xl text-white">
+                  <div className="flex items-center gap-1 font-mono font-black text-xs sm:text-2xl text-white">
                     {spotlightTime.days > 0 && (
-                      <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
+                      <div className="bg-black/50 px-1.5 sm:px-3 py-0.5 rounded-md sm:rounded-xl border border-white/10">
                         <span>{spotlightTime.days}</span>
-                        <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Days</span>
+                        <span className="text-[7px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Days</span>
                       </div>
                     )}
-                    <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
+                    <div className="bg-black/50 px-1.5 sm:px-3 py-0.5 rounded-md sm:rounded-xl border border-white/10">
                       <span>{pad(spotlightTime.hours)}</span>
-                      <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Hrs</span>
+                      <span className="text-[7px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Hrs</span>
                     </div>
-                    <span className="text-emerald-400 font-bold">:</span>
-                    <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
+                    <span className="text-emerald-400 font-bold text-xs sm:text-base">:</span>
+                    <div className="bg-black/50 px-1.5 sm:px-3 py-0.5 rounded-md sm:rounded-xl border border-white/10">
                       <span>{pad(spotlightTime.minutes)}</span>
-                      <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Min</span>
+                      <span className="text-[7px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Min</span>
                     </div>
-                    <span className="text-emerald-400 font-bold">:</span>
-                    <div className="bg-black/50 px-2 sm:px-3 py-1 rounded-lg sm:rounded-xl border border-white/10">
+                    <span className="text-emerald-400 font-bold text-xs sm:text-base">:</span>
+                    <div className="bg-black/50 px-1.5 sm:px-3 py-0.5 rounded-md sm:rounded-xl border border-white/10">
                       <span>{pad(spotlightTime.seconds)}</span>
-                      <span className="text-[8px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Sec</span>
+                      <span className="text-[7px] sm:text-[10px] block font-sans text-gray-400 font-semibold uppercase">Sec</span>
                     </div>
                   </div>
                 </div>
