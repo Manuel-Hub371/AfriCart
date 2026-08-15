@@ -372,19 +372,19 @@ function ProductsContent() {
           {/* Product Results Grid (3/4 column) */}
           <div className="lg:col-span-3">
             {isLoading ? (
-              <div className="grid grid-cols-3 sm:grid-cols-3 xl:grid-cols-3 gap-1.5 sm:gap-3 md:gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 gap-2.5 sm:gap-4 md:gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <div key={i} className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-2 sm:p-4 space-y-2 sm:space-y-4 animate-pulse">
-                    <div className="h-28 sm:h-52 bg-gray-200 rounded-lg sm:rounded-xl"></div>
+                  <div key={i} className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-2.5 sm:p-4 space-y-2 sm:space-y-4 animate-pulse">
+                    <div className="h-36 sm:h-52 bg-gray-200 rounded-lg sm:rounded-xl"></div>
                     <div className="h-3 bg-gray-200 rounded w-3/4"></div>
                     <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-                    <div className="h-7 sm:h-10 bg-gray-200 rounded-lg sm:rounded-xl mt-2"></div>
+                    <div className="h-8 sm:h-10 bg-gray-200 rounded-lg sm:rounded-xl mt-2"></div>
                   </div>
                 ))}
               </div>
             ) : productsData?.products?.length > 0 ? (
               <>
-                <div className="grid grid-cols-3 sm:grid-cols-3 xl:grid-cols-3 gap-1.5 sm:gap-3 md:gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-3 gap-2.5 sm:gap-4 md:gap-6">
                   {productsData.products.map((product: any) => (
                     <ProductCard
                       key={product.id}

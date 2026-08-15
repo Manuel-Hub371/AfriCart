@@ -171,21 +171,21 @@ export function ProductCard({
           </div>
         </Link>
 
-        <div className="p-1.5 sm:p-2.5 md:p-3 space-y-1 sm:space-y-1.5">
+        <div className="p-2 sm:p-3 space-y-1 sm:space-y-1.5">
           <div>
             {brand && (
-              <span className="text-[8px] sm:text-[9px] font-extrabold uppercase tracking-wider text-emerald-700 block mb-0.5 truncate">
+              <span className="text-[9px] sm:text-[10px] font-extrabold uppercase tracking-wider text-emerald-700 block mb-0.5 truncate">
                 {brand}
               </span>
             )}
             <Link href={`/product/${id}`}>
-              <h3 className="font-bold text-gray-900 line-clamp-2 hover:text-emerald-600 transition-colors text-[10px] sm:text-xs md:text-sm leading-tight sm:leading-snug">
+              <h3 className="font-bold text-gray-900 line-clamp-2 hover:text-emerald-600 transition-colors text-xs sm:text-sm leading-tight sm:leading-snug">
                 {name}
               </h3>
             </Link>
             {storeName && (
-              <div className="hidden sm:flex items-center gap-1 text-[11px] text-gray-500 mt-0.5">
-                <span className="truncate max-w-[140px]">{storeName}</span>
+              <div className="flex items-center gap-1 text-[10px] sm:text-[11px] text-gray-500 mt-0.5">
+                <span className="truncate max-w-[120px] sm:max-w-[150px]">{storeName}</span>
                 {verified && (
                   <CheckCircle className="h-3 w-3 text-emerald-600 shrink-0" />
                 )}
@@ -193,9 +193,9 @@ export function ProductCard({
             )}
           </div>
 
-          <div className="flex items-center gap-1 text-[9px] sm:text-[11px]">
+          <div className="flex items-center gap-1 text-[10px] sm:text-[11px]">
             <div className="flex items-center gap-0.5">
-              <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-yellow-400 text-yellow-400" />
+              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
               <span className="font-bold text-gray-900">{rating || "5.0"}</span>
             </div>
             <span className="text-gray-400">({reviews || 0})</span>
@@ -203,32 +203,31 @@ export function ProductCard({
 
           {/* Pricing */}
           <div className="flex items-baseline gap-1 sm:gap-1.5 pt-0.5 flex-wrap">
-            <span className="text-xs sm:text-sm md:text-base font-extrabold text-gray-900">
-              GH₵{Number(price).toFixed(0)}
+            <span className="text-sm sm:text-base font-black text-emerald-700">
+              GH₵{Number(price).toFixed(2)}
             </span>
             {isDiscounted && originalPrice && originalPrice > price && (
-              <span className="hidden sm:inline text-[10px] sm:text-[11px] text-gray-400 line-through">
-                GH₵{Number(originalPrice).toFixed(0)}
+              <span className="text-[10px] sm:text-[11px] text-gray-400 line-through font-semibold">
+                GH₵{Number(originalPrice).toFixed(2)}
               </span>
             )}
           </div>
         </div>
       </div>
 
-      <div className="p-1.5 sm:p-2.5 md:p-3 pt-0">
+      <div className="p-2 sm:p-3 pt-0">
         {inStock ? (
           <Button
-            className="w-full h-7 sm:h-8 text-[10px] sm:text-xs font-bold gap-1 sm:gap-1.5 gradient-primary text-white shadow-xs hover:shadow transition-all rounded-lg sm:rounded-xl px-1 sm:px-3"
+            className="w-full h-8 sm:h-9 text-xs font-bold gap-1 gradient-primary text-white shadow-2xs hover:shadow transition-all rounded-xl px-2 sm:px-3"
             size="sm"
             onClick={handleAddToCart}
           >
-            <ShoppingCart className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
-            <span className="hidden sm:inline">Add to Cart</span>
-            <span className="sm:hidden">Add</span>
+            <ShoppingCart className="h-3.5 w-3.5" />
+            <span>Add to Cart</span>
           </Button>
         ) : (
-          <Button className="w-full h-7 sm:h-8 text-[10px] sm:text-xs font-bold rounded-lg sm:rounded-xl px-1" size="sm" variant="outline" disabled>
-            Out
+          <Button className="w-full h-8 sm:h-9 text-xs font-bold rounded-xl px-2" size="sm" variant="outline" disabled>
+            Out of Stock
           </Button>
         )}
       </div>
