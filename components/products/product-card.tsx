@@ -201,35 +201,43 @@ export function ProductCard({
             <span className="text-gray-400">({reviews || 0})</span>
           </div>
 
-          {/* Pricing */}
-          <div className="flex items-baseline gap-1 sm:gap-1.5 pt-0.5 flex-wrap">
-            <span className="text-sm sm:text-base font-black text-emerald-700">
-              GH₵{Number(price).toFixed(2)}
-            </span>
-            {isDiscounted && originalPrice && originalPrice > price && (
-              <span className="text-[10px] sm:text-[11px] text-gray-400 line-through font-semibold">
-                GH₵{Number(originalPrice).toFixed(2)}
+          {/* Pricing & Cart Button in the SAME Row */}
+          <div className="flex items-center justify-between gap-1 pt-1.5 mt-1 border-t border-gray-100">
+            <div className="flex items-baseline gap-1 flex-wrap min-w-0 flex-1">
+              <span className="text-xs sm:text-sm font-black text-emerald-700">
+                GH₵{Number(price).toFixed(2)}
               </span>
+              {isDiscounted && originalPrice && originalPrice > price && (
+                <span className="text-[9px] sm:text-[10px] text-gray-400 line-through font-semibold">
+                  GH₵{Number(originalPrice).toFixed(2)}
+                </span>
+              )}
+            </div>
+
+            {inStock ? (
+              <Button
+                type="button"
+                size="sm"
+                onClick={handleAddToCart}
+                className="h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg sm:rounded-xl gradient-primary text-white shadow-2xs hover:scale-105 transition-all shrink-0 flex items-center justify-center"
+                title="Add to Cart"
+              >
+                <ShoppingCart className="h-3.5 w-3.5" />
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled
+                className="h-7 w-7 sm:h-8 sm:w-8 p-0 rounded-lg sm:rounded-xl text-gray-300 border-gray-200 shrink-0 flex items-center justify-center opacity-60"
+                title="Out of Stock"
+              >
+                <ShoppingCart className="h-3.5 w-3.5" />
+              </Button>
             )}
           </div>
         </div>
-      </div>
-
-      <div className="p-2 sm:p-3 pt-0">
-        {inStock ? (
-          <Button
-            className="w-full h-8 sm:h-9 text-xs font-bold gap-1 gradient-primary text-white shadow-2xs hover:shadow transition-all rounded-xl px-2 sm:px-3"
-            size="sm"
-            onClick={handleAddToCart}
-          >
-            <ShoppingCart className="h-3.5 w-3.5" />
-            <span>Add to Cart</span>
-          </Button>
-        ) : (
-          <Button className="w-full h-8 sm:h-9 text-xs font-bold rounded-xl px-2" size="sm" variant="outline" disabled>
-            Out of Stock
-          </Button>
-        )}
       </div>
     </Card>
   );
