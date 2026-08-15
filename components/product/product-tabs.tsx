@@ -52,34 +52,34 @@ export function ProductTabs({
   return (
     <Tabs defaultValue="description" className="w-full">
       {/* Exactly 4 Navigation Tabs */}
-      <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent gap-1.5 sm:gap-2 flex-wrap">
+      <TabsList className="w-full justify-start border-b border-gray-200 rounded-none h-auto p-0 bg-transparent gap-1 sm:gap-2 flex overflow-x-auto no-scrollbar">
         <TabsTrigger
           value="description"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-black px-2.5 sm:px-6 py-2 sm:py-3.5 gap-1 text-xs sm:text-sm font-bold text-gray-600 whitespace-nowrap"
         >
-          <FileText className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          Description
+          <FileText className="h-3.5 w-3.5" />
+          <span>Overview</span>
         </TabsTrigger>
         <TabsTrigger
           value="reviews"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-black px-2.5 sm:px-6 py-2 sm:py-3.5 gap-1 text-xs sm:text-sm font-bold text-gray-600 whitespace-nowrap"
         >
-          <Star className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          Reviews
+          <Star className="h-3.5 w-3.5" />
+          <span>Reviews</span>
         </TabsTrigger>
         <TabsTrigger
           value="questions"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-black px-2.5 sm:px-6 py-2 sm:py-3.5 gap-1 text-xs sm:text-sm font-bold text-gray-600 whitespace-nowrap"
         >
-          <HelpCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          Q &amp; A
+          <HelpCircle className="h-3.5 w-3.5" />
+          <span>Q &amp; A</span>
         </TabsTrigger>
         <TabsTrigger
           value="shipping"
-          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-extrabold px-3 sm:px-6 py-2.5 sm:py-4 gap-1.5 text-xs sm:text-sm font-bold text-gray-600"
+          className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:font-black px-2.5 sm:px-6 py-2 sm:py-3.5 gap-1 text-xs sm:text-sm font-bold text-gray-600 whitespace-nowrap"
         >
-          <Truck className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-          Policies
+          <Truck className="h-3.5 w-3.5" />
+          <span>Policies</span>
         </TabsTrigger>
       </TabsList>
 

@@ -137,68 +137,70 @@ export function PurchaseActions({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Quantity & Stock */}
-      <div className="space-y-1.5">
-        <label className="block text-[11px] sm:text-xs font-bold uppercase text-gray-700 tracking-wider">
+      <div className="space-y-1">
+        <label className="block text-[10px] sm:text-xs font-bold uppercase text-gray-700 tracking-wider">
           Quantity
         </label>
-        <div className="flex items-center gap-3">
-          <div className="inline-flex items-center border border-gray-200 rounded-xl bg-gray-50 p-0.5">
+        <div className="flex items-center gap-2.5">
+          <div className="inline-flex items-center border border-gray-200 rounded-xl bg-gray-50 p-0.5 shadow-2xs">
             <button
               onClick={decreaseQuantity}
               disabled={quantity <= 1}
-              className="p-1.5 sm:p-2.5 hover:bg-white rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
+              className="p-1 sm:p-2 hover:bg-white rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
             >
-              <Minus className="h-3.5 w-3.5" />
+              <Minus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </button>
-            <span className="px-3 sm:px-5 font-black text-gray-900 text-sm sm:text-base">{quantity}</span>
+            <span className="px-2.5 sm:px-4 font-black text-gray-900 text-xs sm:text-base">{quantity}</span>
             <button
               onClick={increaseQuantity}
               disabled={quantity >= maxQuantity}
-              className="p-1.5 sm:p-2.5 hover:bg-white rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
+              className="p-1 sm:p-2 hover:bg-white rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-gray-700"
             >
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </button>
           </div>
-          <span className="text-[10px] sm:text-xs font-semibold text-gray-500">
+          <span className="text-[10px] sm:text-xs font-bold text-gray-500">
             {maxQuantity} available
           </span>
         </div>
       </div>
 
-      {/* Primary Actions */}
-      <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-1">
+      {/* Primary Desktop/Tablet Actions */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-0.5">
         <Button
           size="lg"
-          className="h-10 sm:h-13 rounded-xl sm:rounded-2xl gap-1.5 gradient-primary text-white font-extrabold text-xs sm:text-base shadow-sm hover:opacity-95"
+          className="h-9 sm:h-12 rounded-xl sm:rounded-2xl gap-1.5 gradient-primary text-white font-extrabold text-xs sm:text-base shadow-2xs hover:opacity-95"
           disabled={!inStock || isLoading}
           onClick={handleAddToCart}
         >
-          {addedToCart ? <Check className="h-4 w-4 text-white" /> : <ShoppingCart className="h-4 w-4" />}
+          {addedToCart ? <Check className="h-3.5 w-3.5 text-white" /> : <ShoppingCart className="h-3.5 w-3.5" />}
           {addedToCart ? "Added!" : "Add to Cart"}
         </Button>
         <Button
           size="lg"
-          className="h-10 sm:h-13 rounded-xl sm:rounded-2xl gap-1.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs sm:text-base shadow-sm"
+          className="h-9 sm:h-12 rounded-xl sm:rounded-2xl gap-1.5 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs sm:text-base shadow-2xs"
           disabled={!inStock || isLoading}
           onClick={handleBuyNow}
         >
-          <Zap className="h-4 w-4 fill-white" />
+          <Zap className="h-3.5 w-3.5 fill-white" />
           Buy Now
         </Button>
       </div>
 
       {/* Sticky Mobile Purchase Bar (<768px) */}
-      <div className="md:hidden fixed bottom-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-gray-200 p-2.5 shadow-2xl flex items-center justify-between gap-2">
-        <div className="flex flex-col pl-1">
-          <span className="text-[10px] font-bold text-gray-500 uppercase">Price</span>
-          <span className="text-sm font-black text-gray-900">GH₵{Number(selectedVariantPrice || 0).toFixed(2)}</span>
+      <div className="md:hidden fixed bottom-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 px-3 py-2 shadow-xl flex items-center justify-between gap-2">
+        <div className="flex flex-col min-w-0">
+          <span className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Price</span>
+          <span className="text-sm font-black text-emerald-700 truncate">
+            GH₵{Number(selectedVariantPrice || 0).toFixed(2)}
+          </span>
         </div>
         <div className="flex items-center gap-1.5 flex-1 justify-end">
           <Button
             size="sm"
-            className="h-10 rounded-xl gap-1 gradient-primary text-white font-bold text-xs flex-1"
+            className="h-9 rounded-xl gap-1 gradient-primary text-white font-extrabold text-xs flex-1 shadow-2xs"
             disabled={!inStock || isLoading}
             onClick={handleAddToCart}
           >
@@ -207,7 +209,7 @@ export function PurchaseActions({
           </Button>
           <Button
             size="sm"
-            className="h-10 rounded-xl gap-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs flex-1"
+            className="h-9 rounded-xl gap-1 bg-orange-600 hover:bg-orange-700 text-white font-extrabold text-xs flex-1 shadow-2xs"
             disabled={!inStock || isLoading}
             onClick={handleBuyNow}
           >

@@ -80,12 +80,12 @@ export function ProductGallery({ images, activeVariantImage, productName, catego
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5 sm:space-y-4">
       {/* Main Image / Video Player */}
       <div
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className="relative aspect-square bg-gray-50 border border-gray-200 rounded-3xl overflow-hidden group shadow-sm"
+        className="relative aspect-square bg-gray-50 border border-gray-200 rounded-2xl sm:rounded-3xl overflow-hidden group shadow-2xs"
       >
         {isVideo ? (
           <video
@@ -109,10 +109,10 @@ export function ProductGallery({ images, activeVariantImage, productName, catego
           <button
             type="button"
             onClick={() => setIsZoomModalOpen(true)}
-            className="absolute top-4 right-4 p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-600 hover:text-white text-gray-700 z-10"
+            className="absolute top-2.5 right-2.5 sm:top-4 sm:right-4 p-2 sm:p-3 bg-white/90 backdrop-blur-sm rounded-full shadow-md hover:bg-emerald-600 hover:text-white text-gray-700 transition-all z-10"
             title="Fullscreen Zoom"
           >
-            <ZoomIn className="h-5 w-5" />
+            <ZoomIn className="h-4 w-4 sm:h-5 sm:w-5" />
           </button>
         )}
 
@@ -122,29 +122,29 @@ export function ProductGallery({ images, activeVariantImage, productName, catego
             <button
               type="button"
               onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-600 hover:text-white text-gray-700 z-10"
+              className="absolute left-2 top-1/2 -translate-y-1/2 p-2 sm:p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:bg-emerald-600 hover:text-white text-gray-700 z-10"
             >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             <button
               type="button"
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-600 hover:text-white text-gray-700 z-10"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 sm:p-2.5 bg-white/90 backdrop-blur-sm rounded-full shadow-md sm:opacity-0 sm:group-hover:opacity-100 transition-all hover:bg-emerald-600 hover:text-white text-gray-700 z-10"
             >
-              <ChevronRight className="h-5 w-5" />
+              <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </>
         )}
 
         {/* Counter Badge */}
-        <div className="absolute bottom-4 right-4 px-3 py-1 bg-black/75 text-white text-xs font-bold rounded-full shadow backdrop-blur-sm z-10">
+        <div className="absolute bottom-2.5 right-2.5 px-2.5 py-0.5 bg-black/75 text-white text-[10px] sm:text-xs font-black rounded-full shadow backdrop-blur-sm z-10">
           {currentImageIndex + 1} / {validImages.length}
         </div>
       </div>
 
       {/* Thumbnail Bar */}
       {validImages.length > 1 && (
-        <div className="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-200">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
           {validImages.map((imgUrl, index) => {
             const isThumbVideo = imgUrl.endsWith(".mp4") || imgUrl.includes("/video/");
             const isSelected = currentImageIndex === index && !activeVariantImage;
@@ -154,7 +154,7 @@ export function ProductGallery({ images, activeVariantImage, productName, catego
                 key={index}
                 type="button"
                 onClick={() => setCurrentImageIndex(index)}
-                className={`relative w-16 h-16 sm:w-20 sm:h-20 aspect-square flex-shrink-0 rounded-2xl overflow-hidden border-2 transition-all bg-gray-100 ${
+                className={`relative w-12 h-12 sm:w-20 sm:h-20 aspect-square flex-shrink-0 rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all bg-gray-100 ${
                   isSelected
                     ? "border-emerald-600 ring-2 ring-emerald-200"
                     : "border-gray-200 hover:border-gray-400"
@@ -162,7 +162,7 @@ export function ProductGallery({ images, activeVariantImage, productName, catego
               >
                 {isThumbVideo ? (
                   <div className="w-full h-full flex items-center justify-center bg-gray-900 text-white">
-                    <Play className="h-5 w-5 fill-white" />
+                    <Play className="h-4 w-4 fill-white" />
                   </div>
                 ) : (
                   <img

@@ -45,24 +45,24 @@ export function ProductInfo({
   };
 
   return (
-    <div className="space-y-2.5">
+    <div className="space-y-2">
       {/* Brand & Badges */}
       <div className="flex items-center gap-1.5 flex-wrap text-[10px] sm:text-xs">
         {brand && (
-          <span className="font-extrabold uppercase text-gray-500 tracking-wider">
+          <span className="font-extrabold uppercase text-gray-400 tracking-wider">
             Brand: <span className="text-gray-900 font-bold">{brand}</span>
           </span>
         )}
 
         {category && (
-          <Badge variant="outline" className="bg-gray-50 text-gray-700 font-bold text-[10px] sm:text-xs px-2 py-0.5">
+          <Badge variant="outline" className="bg-gray-50 text-gray-700 font-bold text-[10px] sm:text-xs px-2 py-0.2 rounded-md border-gray-200">
             {category}
           </Badge>
         )}
 
         {/* Dynamic System Best Seller Badge */}
         {isBestSeller && (
-          <span className="font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2 py-0.5 rounded-full shadow-xs">
+          <span className="font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide bg-gradient-to-r from-amber-500 to-orange-600 text-white px-2 py-0.2 rounded-full shadow-2xs">
             🔥 {bestSellerRank ? `#${bestSellerRank} Best Seller` : "Best Seller"}
           </span>
         )}
@@ -71,7 +71,7 @@ export function ProductInfo({
         {campaigns.map((c) => (
           <span
             key={c.id}
-            className="font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide text-white px-2 py-0.5 rounded-full shadow-xs"
+            className="font-extrabold uppercase text-[9px] sm:text-[10px] tracking-wide text-white px-2 py-0.2 rounded-full shadow-2xs"
             style={{ backgroundColor: c.color || "#EF4444" }}
           >
             {c.badge || c.name}
@@ -86,32 +86,31 @@ export function ProductInfo({
       </div>
 
       {/* Main Title */}
-      <h1 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight leading-snug">
+      <h1 className="text-base sm:text-2xl md:text-3xl font-black text-gray-900 tracking-tight leading-snug">
         {name}
       </h1>
 
       {/* Ratings & Sales Social Proof */}
-      <div className="flex items-center gap-2.5 text-[11px] sm:text-xs flex-wrap pt-0.5">
-        <div className="flex items-center gap-1 bg-amber-50 px-2.5 py-0.5 rounded-lg border border-amber-200">
-          <Star className="h-3.5 w-3.5 text-amber-500 fill-amber-400" />
-          <span className="font-extrabold text-gray-900 text-xs sm:text-sm">
+      <div className="flex items-center gap-2 text-[10px] sm:text-xs flex-wrap pt-0.5">
+        <div className="flex items-center gap-1 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200">
+          <Star className="h-3 w-3 text-amber-500 fill-amber-400" />
+          <span className="font-black text-gray-900 text-xs">
             {Number(rating).toFixed(1)}
           </span>
-          <span className="text-gray-500 font-medium text-[10px] sm:text-xs">({reviews} reviews)</span>
+          <span className="text-gray-500 font-medium text-[10px]">({reviews} reviews)</span>
         </div>
 
         {soldCount > 0 && (
-          <div className="flex items-center gap-1 text-gray-600 font-semibold bg-gray-100 px-3 py-1 rounded-xl">
-            <Package className="h-3.5 w-3.5 text-gray-500" />
-            <span>{soldCount} units sold</span>
-          </div>
+          <span className="text-gray-500 font-semibold">
+            • <strong className="text-gray-900">{soldCount}</strong> sold
+          </span>
         )}
 
         {verified && (
-          <div className="flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">
-            <ShieldCheck className="h-4 w-4 text-emerald-600" />
-            Verified Authentic Product
-          </div>
+          <span className="text-emerald-700 font-bold flex items-center gap-1 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">
+            <CheckCircle className="h-3 w-3 text-emerald-600" />
+            AfriCart Verified
+          </span>
         )}
       </div>
     </div>
