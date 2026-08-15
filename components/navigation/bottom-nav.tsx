@@ -3,45 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Grid, Tag, ShoppingCart, User } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Home, Grid, Store, Tag, User } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
 
 export function BottomNav() {
   const pathname = usePathname();
   const { isAuthenticated } = useAuth();
-  const [cartCount, setCartCount] = useState<number>(0);
-
-  const fetchCartCount = useCallback(async () => {
-    if (!isAuthenticated) {
-      setCartCount(0);
-      return;
-    }
-    try {
-      const res = await fetch("/api/cart");
-      if (res.ok) {
-        const data = await res.json();
-        const total = (data?.items || []).reduce(
-          (sum: number, item: any) => sum + (item.quantity || 1),
-          0
-        );
-        setCartCount(total);
-      }
-    } catch {
-      setCartCount(0);
-    }
-  }, [isAuthenticated]);
-
-  useEffect(() => {
-    fetchCartCount();
-
-    const handleCartUpdate = () => fetchCartCount();
-    window.addEventListener("cart:updated", handleCartUpdate);
-
-    return () => {
-      window.removeEventListener("cart:updated", handleCartUpdate);
-    };
-  }, [fetchCartCount]);
 
   // Hide bottom nav on vendor dashboard or admin workspace routes
   if (pathname?.startsWith("/vendor") || pathname?.startsWith("/admin")) {
@@ -51,8 +18,8 @@ export function BottomNav() {
   const navItems = [
     { label: "Home", href: "/", icon: Home },
     { label: "Products", href: "/products", icon: Grid },
+    { label: "Stores", href: "/stores", icon: Store },
     { label: "Deals", href: "/deals", icon: Tag },
-    { label: "Cart", href: "/cart", icon: ShoppingCart, badge: cartCount },
     { label: "Profile", href: isAuthenticated ? "/profile" : "/auth/login", icon: User },
   ];
 
@@ -73,11 +40,6 @@ export function BottomNav() {
             >
               <div className="relative">
                 <Icon className={`h-5 w-5 ${isActive ? "scale-110 text-emerald-600" : ""}`} />
-                {item.badge !== undefined && item.badge > 0 && (
-                  <Badge className="absolute -top-1.5 -right-2.5 h-4 w-4 flex items-center justify-center p-0 text-[9px] gradient-primary text-white border border-white font-extrabold shadow-xs">
-                    {item.badge > 99 ? "99+" : item.badge}
-                  </Badge>
-                )}
               </div>
               <span className="text-[10px] tracking-tight mt-0.5">{item.label}</span>
               {isActive && (

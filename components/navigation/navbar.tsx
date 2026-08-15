@@ -173,20 +173,19 @@ export function Navbar() {
               </Link>
             )}
 
-            {/* Cart (Desktop) */}
-            {isAuthenticated && (
-              <Link
-                href="/cart"
-                className="hidden md:flex relative p-2 hover:bg-green-50 rounded-xl transition-all duration-200 group"
-              >
-                <ShoppingCart className="h-5 w-5 text-gray-700 group-hover:text-emerald-600 transition-colors" />
-                {cartItemCount > 0 && (
-                  <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs gradient-primary text-white border-2 border-white shadow-lg font-bold">
-                    {cartItemCount > 99 ? "99+" : cartItemCount}
-                  </Badge>
-                )}
-              </Link>
-            )}
+            {/* Cart Icon (Mobile & Desktop) */}
+            <Link
+              href="/cart"
+              className="relative p-2 hover:bg-green-50 rounded-xl transition-all duration-200 group"
+              title="Cart"
+            >
+              <ShoppingCart className="h-5 w-5 text-gray-700 group-hover:text-emerald-600 transition-colors" />
+              {cartItemCount > 0 && (
+                <Badge className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-[10px] sm:text-xs gradient-primary text-white border-2 border-white shadow-lg font-bold">
+                  {cartItemCount > 99 ? "99+" : cartItemCount}
+                </Badge>
+              )}
+            </Link>
 
             {/* Notifications Icon (Mobile & Desktop) */}
             <div className="relative">
