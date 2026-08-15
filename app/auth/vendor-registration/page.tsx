@@ -199,14 +199,30 @@ export default function VendorRegistrationPage() {
         {/* Back Button */}
         <Link 
           href="/auth/register"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-green-600 mb-8 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-emerald-600 mb-4 transition-colors bg-white/80 border border-gray-200 px-3 py-1 rounded-full backdrop-blur-xs shadow-2xs"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back</span>
         </Link>
 
-        {/* Progress Steps */}
-        <div className="mb-8">
+        {/* Mobile Progress Bar (Shown < sm) */}
+        <div className="mb-4 sm:hidden bg-white p-3 rounded-xl border border-gray-100 shadow-2xs space-y-1.5">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-extrabold text-emerald-700 uppercase tracking-wider text-[10px]">
+              Step {currentStep} of {totalSteps}
+            </span>
+            <span className="font-black text-gray-900">{steps[currentStep - 1]?.title}</span>
+          </div>
+          <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+              style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+            />
+          </div>
+        </div>
+
+        {/* Desktop Progress Steps (Shown >= sm) */}
+        <div className="mb-6 hidden sm:block">
           <div className="flex justify-between items-center">
             {steps.map((step, index) => {
               const Icon = step.icon;
@@ -217,23 +233,23 @@ export default function VendorRegistrationPage() {
                 <div key={step.number} className="flex-1 relative">
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                         isCompleted
-                          ? "bg-green-600 text-white"
+                          ? "bg-emerald-600 text-white"
                           : isCurrent
-                          ? "bg-green-600 text-white shadow-lg"
-                          : "bg-gray-200 text-gray-500"
+                          ? "bg-emerald-600 text-white shadow-md"
+                          : "bg-gray-100 text-gray-400"
                       }`}
                     >
                       {isCompleted ? (
-                        <CheckCircle className="h-6 w-6" />
+                        <CheckCircle className="h-5 w-5" />
                       ) : (
-                        <Icon className="h-6 w-6" />
+                        <Icon className="h-5 w-5" />
                       )}
                     </div>
                     <span
-                      className={`text-xs mt-2 font-medium ${
-                        isCurrent ? "text-green-600" : "text-gray-500"
+                      className={`text-[10px] mt-1.5 font-extrabold ${
+                        isCurrent ? "text-emerald-700" : "text-gray-400"
                       }`}
                     >
                       {step.title}
@@ -241,8 +257,8 @@ export default function VendorRegistrationPage() {
                   </div>
                   {index < steps.length - 1 && (
                     <div
-                      className={`absolute top-6 left-1/2 w-full h-0.5 -z-10 ${
-                        isCompleted ? "bg-green-600" : "bg-gray-200"
+                      className={`absolute top-5 left-1/2 w-full h-0.5 -z-10 ${
+                        isCompleted ? "bg-emerald-600" : "bg-gray-200"
                       }`}
                     />
                   )}
@@ -253,27 +269,27 @@ export default function VendorRegistrationPage() {
         </div>
 
         {/* Form Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-gray-100">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-8 md:p-10 border border-gray-100">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">A</span>
+          <div className="mb-6 text-center">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 gradient-primary rounded-xl flex items-center justify-center shadow-md">
+                <span className="text-white font-black text-lg sm:text-xl">A</span>
               </div>
-              <span className="text-2xl font-bold text-gradient">AfriCart</span>
+              <span className="text-xl sm:text-2xl font-black text-gradient">AfriCart</span>
             </div>
-            <h1 className="text-3xl font-extrabold text-gray-900 text-center mb-2">
+            <h1 className="text-xl sm:text-3xl font-black text-gray-900 mb-0.5 tracking-tight">
               Vendor Registration
             </h1>
-            <p className="text-gray-600 text-center">
-              Step {currentStep} of {totalSteps}
+            <p className="text-xs sm:text-sm text-gray-500 font-medium">
+              Step {currentStep} of {totalSteps}: <strong className="text-gray-900">{steps[currentStep - 1]?.title}</strong>
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-semibold">
+              {error}
             </div>
           )}
 
@@ -940,15 +956,15 @@ export default function VendorRegistrationPage() {
           </div>
 
           {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-6 border-t">
+          <div className="flex justify-between mt-6 pt-4 border-t border-gray-100 gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={handlePrevious}
               disabled={currentStep === 1}
-              className="h-12 px-6 rounded-xl"
+              className="h-10 sm:h-12 px-4 sm:px-6 rounded-xl font-bold text-xs sm:text-sm border-gray-200"
             >
-              <ArrowLeft className="h-5 w-5 mr-2" />
+              <ArrowLeft className="h-4 w-4 mr-1.5" />
               Previous
             </Button>
 
@@ -956,19 +972,31 @@ export default function VendorRegistrationPage() {
               <Button
                 type="button"
                 onClick={handleNext}
-                className="gradient-primary text-white h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                className="gradient-primary text-white h-10 sm:h-12 px-5 sm:px-8 rounded-xl font-black text-xs sm:text-sm shadow-md hover:shadow-lg transition-all"
               >
-                Next
-                <ArrowRight className="h-5 w-5 ml-2" />
+                <span>Next</span>
+                <ArrowRight className="h-4 w-4 ml-1.5" />
               </Button>
             ) : (
               <Button
                 type="button"
                 onClick={handleSubmit}
-                disabled={isLoading || !formData.acceptSellerAgreement || !formData.acceptTerms || !formData.acceptPrivacy}
-                className="gradient-primary text-white h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105"
+                disabled={
+                  isLoading ||
+                  !formData.acceptSellerAgreement ||
+                  !formData.acceptTerms ||
+                  !formData.acceptPrivacy
+                }
+                className="gradient-primary text-white h-10 sm:h-12 px-5 sm:px-8 rounded-xl font-black text-xs sm:text-sm shadow-md hover:shadow-lg transition-all"
               >
-                {isLoading ? "Submitting..." : "Submit Application"}
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Submitting...
+                  </span>
+                ) : (
+                  "Complete Registration"
+                )}
               </Button>
             )}
           </div>

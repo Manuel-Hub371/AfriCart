@@ -106,43 +106,43 @@ function RegisterContent() {
 
   return (
     <AuthLayout>
-      <div className="max-w-2xl w-full">
+      <div className="max-w-xl w-full mx-auto">
         {/* Back Button */}
         <Link 
           href="/auth/welcome"
-          className="inline-flex items-center gap-2 text-gray-600 hover:text-green-600 mb-8 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-emerald-600 mb-4 transition-colors bg-white/80 border border-gray-200 px-3 py-1 rounded-full backdrop-blur-xs shadow-2xs"
         >
-          <ArrowLeft className="h-4 w-4" />
-          Back
+          <ArrowLeft className="h-3.5 w-3.5" />
+          <span>Back</span>
         </Link>
 
         {/* Card */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10 border border-gray-100">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-8 md:p-10 border border-gray-100">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">A</span>
+          <div className="text-center mb-6 sm:mb-8">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 gradient-primary rounded-xl flex items-center justify-center shadow-md">
+                <span className="text-white font-black text-lg sm:text-xl">A</span>
               </div>
-              <span className="text-2xl font-bold text-gradient">AfriCart</span>
+              <span className="text-xl sm:text-2xl font-black text-gradient">AfriCart</span>
             </div>
-            <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+            <h1 className="text-xl sm:text-3xl font-black text-gray-900 mb-1 tracking-tight">
               {isVendor ? "Start Selling on AfriCart" : "Create Your Account"}
             </h1>
-            <p className="text-gray-600">
+            <p className="text-xs sm:text-sm text-gray-500 font-medium">
               {isVendor 
                 ? "Join thousands of successful vendors" 
                 : "Join millions of shoppers today"}
             </p>
           </div>
 
-          {/* Social Registration (Optional) */}
-          <div className="space-y-3 mb-6">
+          {/* Social Registration */}
+          <div className="space-y-3 mb-5">
             <Button
               variant="outline"
-              className="w-full h-12 border-2 border-gray-200 hover:border-green-200 hover:bg-green-50 rounded-xl transition-all"
+              className="w-full h-10 sm:h-12 border-gray-200 hover:border-emerald-200 hover:bg-emerald-50/50 rounded-xl text-xs sm:text-sm font-bold transition-all text-gray-700"
             >
-              <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5 mr-2" viewBox="0 0 24 24">
                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                 <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
@@ -152,55 +152,55 @@ function RegisterContent() {
             </Button>
           </div>
 
-          <div className="relative mb-6">
+          <div className="relative mb-5">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">or register with email</span>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-3 bg-white text-gray-400 font-medium">or register with email</span>
             </div>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-xs text-red-600 font-semibold">
+              {error}
             </div>
           )}
 
           {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* Name Fields */}
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
                   First Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     type="text"
                     placeholder="Manuel"
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="pl-12 h-12 rounded-xl border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                    className="pl-10 h-10 sm:h-12 rounded-xl text-xs sm:text-sm border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
                   Last Name <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <User className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     type="text"
                     placeholder="Darko"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="pl-12 h-12 rounded-xl border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                    className="pl-10 h-10 sm:h-12 rounded-xl text-xs sm:text-sm border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     required
                   />
                 </div>
@@ -209,17 +209,17 @@ function RegisterContent() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
                 Email Address <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type="email"
                   placeholder="94jnr200@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="pl-12 h-12 rounded-xl border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  className="pl-10 h-10 sm:h-12 rounded-xl text-xs sm:text-sm border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required
                 />
               </div>
@@ -227,17 +227,17 @@ function RegisterContent() {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
                 Phone Number <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type="tel"
                   placeholder="+233 XX XXX XXXX"
                   value={formData.phone}
                   onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="pl-12 h-12 rounded-xl border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  className="pl-10 h-10 sm:h-12 rounded-xl text-xs sm:text-sm border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required
                 />
               </div>
@@ -245,15 +245,15 @@ function RegisterContent() {
 
             {/* Country */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
                 Country <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10" />
+                <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 z-10" />
                 <select
                   value={formData.country}
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  className="pl-12 h-12 w-full rounded-xl border border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 bg-white"
+                  className="pl-10 h-10 sm:h-12 w-full rounded-xl border border-gray-200 text-xs sm:text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-white"
                   required
                 >
                   <option value="">Select your country</option>
@@ -268,35 +268,35 @@ function RegisterContent() {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
                 Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   placeholder="Create a strong password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="pl-12 pr-12 h-12 rounded-xl border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  className="pl-10 pr-10 h-10 sm:h-12 rounded-xl text-xs sm:text-sm border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
               {/* Password Strength Indicator */}
               {formData.password && (
-                <div className="mt-2 space-y-2">
+                <div className="mt-1.5 space-y-1">
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((level) => (
                       <div
                         key={level}
-                        className={`h-1.5 flex-1 rounded-full ${
+                        className={`h-1 flex-1 rounded-full ${
                           level <= passwordStrength.score
                             ? passwordStrength.color
                             : "bg-gray-200"
@@ -305,8 +305,8 @@ function RegisterContent() {
                     ))}
                   </div>
                   {passwordStrength.label && (
-                    <p className="text-xs text-gray-600">
-                      Password strength: <span className="font-semibold">{passwordStrength.label}</span>
+                    <p className="text-[10px] text-gray-500">
+                      Strength: <span className="font-bold">{passwordStrength.label}</span>
                     </p>
                   )}
                 </div>
@@ -315,32 +315,32 @@ function RegisterContent() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label className="block text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-gray-700 mb-1">
                 Confirm Password <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Confirm your password"
+                  placeholder="Confirm password"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className="pl-12 pr-12 h-12 rounded-xl border-gray-200 focus:border-green-500 focus:ring-2 focus:ring-green-500/20"
+                  className="pl-10 pr-10 h-10 sm:h-12 rounded-xl text-xs sm:text-sm border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                 >
-                  {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
 
             {/* Checkboxes */}
-            <div className="space-y-3 pt-2">
-              <div className="flex items-start gap-3">
+            <div className="space-y-2 pt-1">
+              <div className="flex items-start gap-2">
                 <Checkbox
                   id="terms"
                   checked={formData.acceptTerms}
@@ -349,15 +349,15 @@ function RegisterContent() {
                   }
                   required
                 />
-                <label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
+                <label htmlFor="terms" className="text-xs text-gray-600 leading-snug cursor-pointer font-medium">
                   I accept the{" "}
-                  <Link href="/terms" className="text-green-600 hover:underline font-semibold">
-                    Terms & Conditions
+                  <Link href="/terms" className="text-emerald-600 hover:underline font-bold">
+                    Terms &amp; Conditions
                   </Link>
                 </label>
               </div>
 
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-2">
                 <Checkbox
                   id="privacy"
                   checked={formData.acceptPrivacy}
@@ -366,9 +366,9 @@ function RegisterContent() {
                   }
                   required
                 />
-                <label htmlFor="privacy" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
+                <label htmlFor="privacy" className="text-xs text-gray-600 leading-snug cursor-pointer font-medium">
                   I accept the{" "}
-                  <Link href="/privacy" className="text-green-600 hover:underline font-semibold">
+                  <Link href="/privacy" className="text-emerald-600 hover:underline font-bold">
                     Privacy Policy
                   </Link>
                 </label>
@@ -379,18 +379,18 @@ function RegisterContent() {
             <Button
               type="submit"
               disabled={isLoading || !formData.acceptTerms || !formData.acceptPrivacy}
-              className="w-full gradient-primary text-white h-12 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105 mt-6"
+              className="w-full gradient-primary text-white h-10 sm:h-12 rounded-xl font-black text-xs sm:text-sm shadow-md hover:shadow-lg transition-all mt-4"
             >
               {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
 
           {/* Login Link */}
-          <p className="text-center text-sm text-gray-600 mt-6">
+          <p className="text-center text-xs text-gray-600 mt-5">
             Already have an account?{" "}
             <Link 
               href="/auth/login"
-              className="font-semibold text-green-600 hover:text-green-700"
+              className="font-bold text-emerald-600 hover:text-emerald-700"
             >
               Sign In
             </Link>
