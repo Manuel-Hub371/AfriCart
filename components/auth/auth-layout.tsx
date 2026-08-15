@@ -69,17 +69,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           </div>
 
           {/* Right: Form Content - Scrollable */}
-          <div className="flex items-center justify-center p-4 lg:p-8 min-h-screen">
-            <div className="w-full py-12">
-              {/* Mobile: Show branding at top */}
-              <div className="lg:hidden mb-8 text-center">
-                <div className="flex items-center justify-center gap-3 mb-4">
-                  <div className="w-12 h-12 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                    <span className="text-white font-bold text-xl">A</span>
-                  </div>
-                  <span className="text-2xl font-bold text-gradient">AfriCart</span>
-                </div>
-              </div>
+          <div className="flex items-center justify-center p-3 sm:p-6 lg:p-8 min-h-screen">
+            <div className="w-full py-4 sm:py-8">
               {children}
             </div>
           </div>
