@@ -80,18 +80,18 @@ export default function StoresPage() {
         <StoreDirectoryHeader />
 
         {/* Multi-Attribute Store Search & Filtering Section */}
-        <section className="py-12 bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-slate-900 rounded-3xl p-6 md:p-8 text-white shadow-xl space-y-6">
+        <section className="py-4 sm:py-12 bg-white border-b">
+          <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
+            <div className="bg-slate-900 rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 text-white shadow-xl space-y-4 sm:space-y-6">
               
               {/* Header Title */}
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
                 <div>
-                  <h2 className="text-2xl font-black flex items-center gap-2 text-white">
-                    <SlidersHorizontal className="h-6 w-6 text-emerald-400" />
+                  <h2 className="text-base sm:text-2xl font-black flex items-center gap-1.5 text-white">
+                    <SlidersHorizontal className="h-4 w-4 sm:h-6 sm:w-6 text-emerald-400" />
                     Store Search & Filters
                   </h2>
-                  <p className="text-slate-400 text-sm mt-1">
+                  <p className="text-slate-400 text-[11px] sm:text-sm mt-0.5">
                     Find verified regional sellers by business type, location, and category
                   </p>
                 </div>
@@ -100,44 +100,44 @@ export default function StoresPage() {
                   <Button
                     onClick={handleResetFilters}
                     variant="outline"
-                    className="border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 font-bold text-xs rounded-xl self-start md:self-auto gap-1.5"
+                    className="border-slate-700 bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 font-bold text-[10px] sm:text-xs rounded-lg sm:rounded-xl px-2 sm:px-3 h-7 sm:h-9 flex-shrink-0 gap-1"
                   >
-                    <RotateCcw className="h-3.5 w-3.5" />
-                    Reset All Filters
+                    <RotateCcw className="h-3 w-3" />
+                    Reset
                   </Button>
                 )}
               </div>
 
               {/* Filter Controls Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-4">
                 {/* 1. Keyword / Name Search */}
-                <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <div className="col-span-2 sm:col-span-1">
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Store Name / Keyword
                   </label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                     <Input
                       type="text"
                       placeholder="Search store name..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-9 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 rounded-xl h-11 text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                      className="pl-8 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 rounded-xl h-9 sm:h-11 text-xs sm:text-sm focus:border-emerald-500 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
 
                 {/* 2. Store Category */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Store Category
                   </label>
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
                   >
-                    <option value="all">All Categories (9 Official)</option>
+                    <option value="all">All Categories</option>
                     {OFFICIAL_STORE_CATEGORIES.map((cat) => (
                       <option key={cat.slug} value={cat.slug}>
                         {cat.name}
@@ -148,13 +148,13 @@ export default function StoresPage() {
 
                 {/* 3. Business Location */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <MapPin className="h-3.5 w-3.5 text-emerald-400" /> Location / City
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <MapPin className="h-3 w-3 text-emerald-400" /> Location
                   </label>
                   <select
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
                   >
                     <option value="all">All Locations</option>
                     <option value="Accra">Accra (Greater Accra)</option>
@@ -170,15 +170,15 @@ export default function StoresPage() {
 
                 {/* 4. Business Type */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <Building2 className="h-3.5 w-3.5 text-emerald-400" /> Business Type
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <Building2 className="h-3 w-3 text-emerald-400" /> Business Type
                   </label>
                   <select
                     value={selectedBusinessType}
                     onChange={(e) => setSelectedBusinessType(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
                   >
-                    <option value="all">All Business Types</option>
+                    <option value="all">All Types</option>
                     {OFFICIAL_BUSINESS_TYPES.map((bt) => (
                       <option key={bt.value} value={bt.value}>
                         {bt.name}
@@ -189,13 +189,13 @@ export default function StoresPage() {
 
                 {/* 5. Sort By */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1">
-                    <ArrowUpDown className="h-3.5 w-3.5 text-emerald-400" /> Sort By
+                  <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <ArrowUpDown className="h-3 w-3 text-emerald-400" /> Sort By
                   </label>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full h-11 px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
                   >
                     <option value="rating">Highest Rated</option>
                     <option value="products">Most Products</option>

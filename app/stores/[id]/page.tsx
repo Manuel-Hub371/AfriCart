@@ -307,7 +307,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
         {/* 1. STORE HERO SECTION */}
         <div className="bg-white border-b shadow-sm relative">
           {/* Banner */}
-          <div className="h-56 md:h-72 w-full relative bg-slate-900 overflow-hidden">
+          <div className="h-32 sm:h-56 md:h-72 w-full relative bg-slate-900 overflow-hidden">
             {isBannerUrl ? (
               <img
                 src={store.banner}
@@ -322,89 +322,85 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
           </div>
 
           {/* Hero Header Content */}
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
-            <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 pb-4 sm:pb-8">
+            <div className="relative flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
               
               {/* Store Logo & Details */}
-              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 -mt-20 md:-mt-24 z-10">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-3xl bg-white p-2 shadow-2xl border border-gray-100 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-6 -mt-10 sm:-mt-20 md:-mt-24 z-10">
+                <div className="w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-2xl sm:rounded-3xl bg-white p-1 sm:p-2 shadow-xl border border-gray-100 flex-shrink-0">
                   {isLogoUrl ? (
                     <img
                       src={store.logo}
                       alt={`${store.name} Logo`}
-                      className="w-full h-full object-cover rounded-2xl"
+                      className="w-full h-full object-cover rounded-xl sm:rounded-2xl"
                     />
                   ) : (
-                    <div className="w-full h-full gradient-primary rounded-2xl flex items-center justify-center text-white text-4xl md:text-5xl font-extrabold shadow-inner">
+                    <div className="w-full h-full gradient-primary rounded-xl sm:rounded-2xl flex items-center justify-center text-white text-2xl sm:text-4xl md:text-5xl font-extrabold shadow-inner">
                       {store.name?.[0] || "S"}
                     </div>
                   )}
                 </div>
 
-                <div className="text-center sm:text-left space-y-2 pt-2">
-                  <div className="flex items-center justify-center sm:justify-start gap-3 flex-wrap">
-                    <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+                <div className="text-center sm:text-left space-y-1.5 pt-1 sm:pt-2">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
+                    <h1 className="text-xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
                       {store.name}
                     </h1>
                     {store.verified && (
-                      <Badge className="bg-emerald-600 text-white gap-1 px-3 py-1 text-xs font-semibold shadow-sm">
-                        <CheckCircle className="h-3.5 w-3.5" /> Verified Vendor
+                      <Badge className="bg-emerald-600 text-white gap-1 px-2 py-0.5 text-[10px] sm:text-xs font-semibold shadow-xs">
+                        <CheckCircle className="h-3 w-3" /> Verified Vendor
                       </Badge>
                     )}
                   </div>
 
-                  <p className="text-sm text-gray-600 font-medium flex items-center justify-center sm:justify-start gap-2 flex-wrap">
-                    <span className="flex items-center gap-1 text-amber-500 font-bold">
-                      <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  <p className="text-xs sm:text-sm text-gray-600 font-medium flex items-center justify-center sm:justify-start gap-1.5 flex-wrap">
+                    <span className="flex items-center gap-0.5 text-amber-500 font-bold">
+                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                       {store.rating}
                     </span>
                     <span className="text-gray-400">•</span>
                     <span>{store.numReviews} Reviews</span>
                     <span className="text-gray-400">•</span>
                     <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4 text-emerald-600" /> {store.location}
-                    </span>
-                    <span className="text-gray-400">•</span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4 text-gray-400" /> Member since {joinedYear}
+                      <MapPin className="h-3.5 w-3.5 text-emerald-600" /> {store.location}
                     </span>
                   </p>
 
-                  <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-gray-500 pt-1">
-                    <span className="bg-gray-100 px-3 py-1 rounded-full font-medium text-gray-700">
+                  <div className="flex items-center justify-center sm:justify-start gap-2 text-[10px] sm:text-xs text-gray-500 pt-0.5">
+                    <span className="bg-gray-100 px-2.5 py-0.5 rounded-full font-medium text-gray-700">
                       {store.productCount || 0} Products
                     </span>
-                    <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-semibold border border-emerald-200">
-                      Category: {store.category}
+                    <span className="bg-emerald-50 text-emerald-700 px-2.5 py-0.5 rounded-full font-semibold border border-emerald-200">
+                      {store.category}
                     </span>
                   </div>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-center gap-3 pt-4 md:pt-0 z-10 flex-wrap">
+              <div className="flex items-center justify-center gap-2 pt-2 md:pt-0 z-10 flex-wrap w-full md:w-auto">
                 <Button
                   onClick={handleFollowToggle}
-                  className={`h-11 px-6 rounded-xl font-semibold gap-2 transition-all ${
+                  className={`h-9 sm:h-11 px-4 sm:px-6 rounded-xl font-bold text-xs sm:text-sm gap-1.5 transition-all flex-1 sm:flex-none ${
                     isFollowing 
                       ? "bg-gray-200 text-gray-800 hover:bg-gray-300" 
-                      : "gradient-primary text-white shadow-md hover:shadow-lg hover:scale-105"
+                      : "gradient-primary text-white shadow-sm hover:shadow-md"
                   }`}
                 >
-                  <Heart className={`h-4 w-4 ${isFollowing ? "fill-red-500 text-red-500" : ""}`} />
-                  {isFollowing ? "Following" : "Follow Store"} ({followersCount})
+                  <Heart className={`h-3.5 w-3.5 ${isFollowing ? "fill-red-500 text-red-500" : ""}`} />
+                  {isFollowing ? "Following" : "Follow"} ({followersCount})
                 </Button>
 
                 <Button
                   variant="outline"
                   onClick={handleMessageStore}
                   disabled={isStartingChat}
-                  className="h-11 px-5 rounded-xl border-gray-300 hover:border-emerald-600 hover:bg-emerald-50 text-gray-700 gap-2 font-medium"
+                  className="h-9 sm:h-11 px-3 sm:px-5 rounded-xl border-gray-300 hover:border-emerald-600 hover:bg-emerald-50 text-gray-700 gap-1.5 font-bold text-xs sm:text-sm"
                 >
                   {isStartingChat ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-emerald-600" />
                   ) : (
-                    <MessageCircle className="h-4 w-4 text-emerald-600" />
+                    <MessageCircle className="h-3.5 w-3.5 text-emerald-600" />
                   )}
                   Message
                 </Button>
@@ -412,13 +408,13 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                 <Button
                   variant="outline"
                   onClick={handleShareStore}
-                  className="h-11 px-4 rounded-xl border-gray-300 hover:bg-gray-100 text-gray-700 relative"
+                  className="h-9 sm:h-11 w-9 sm:w-11 p-0 rounded-xl border-gray-300 hover:bg-gray-50 flex items-center justify-center relative"
                   title="Share Store"
                 >
-                  <Share2 className="h-4 w-4" />
+                  <Share2 className="h-3.5 w-3.5 text-gray-600" />
                   {shareSuccess && (
-                    <span className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap">
-                      Link copied!
+                    <span className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] px-2 py-0.5 rounded shadow-md whitespace-nowrap">
+                      Copied!
                     </span>
                   )}
                 </Button>
@@ -429,9 +425,9 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
         </div>
 
         {/* 2. STICKY NAVIGATION TABS */}
-        <div className="sticky top-16 z-30 bg-white border-b shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex gap-2 sm:gap-6 overflow-x-auto no-scrollbar py-3">
+        <div className="sticky top-14 z-30 bg-white border-b shadow-2xs">
+          <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+            <div className="flex gap-1.5 sm:gap-6 overflow-x-auto no-scrollbar py-2">
               {[
                 { id: "products", label: `Products (${store.products?.length || 0})` },
                 { id: "featured", label: "Featured & Best Sellers" },
