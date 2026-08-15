@@ -85,74 +85,88 @@ export default function ReviewsPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">My Reviews</h1>
-            <p className="text-gray-600">
-              Review your purchases and manage your feedback
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6">
+          <div>
+            <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">My Reviews</h1>
+            <p className="text-xs text-gray-500 font-medium mt-0.5">
+              Review your purchases and manage your feedback ({reviews.length})
             </p>
           </div>
 
           <div>
-            <h2 className="text-xl font-semibold mb-4">
-              Your Submitted Reviews ({reviews.length})
-            </h2>
-
             {isLoading ? (
-              <div className="py-12 text-center text-gray-500">
+              <div className="py-8 text-center text-gray-400 text-xs font-semibold">
                 Loading your reviews...
               </div>
             ) : reviews.length === 0 ? (
-              <div className="bg-white rounded-lg border p-8 text-center text-gray-500">
+              <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center text-gray-500 text-xs font-medium">
                 You haven&apos;t submitted any reviews yet.
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {reviews.map((review) => {
                   const formattedDate = new Date(review.createdAt).toLocaleDateString("en-US", {
                     year: "numeric",
-                    month: "long",
+                    month: "short",
                     day: "numeric",
                   });
 
                   return (
-                    <div key={review.id} className="bg-white rounded-lg border p-6">
-                      <div className="flex gap-4">
+                    <div key={review.id} className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3 sm:p-5 shadow-2xs">
+                      <div className="flex gap-3">
                         {review.productImage ? (
                           <img
                             src={review.productImage}
                             alt={review.productName || "Product"}
-                            className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
+                            className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-gray-100 shrink-0"
                           />
                         ) : (
-                          <div className="w-20 h-20 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0 text-emerald-700 font-bold text-lg">
-                            {review.productName ? review.productName[0] : "P"}
+                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-emerald-50 text-emerald-800 rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+                            {review.productName?.[0] || "P"}
                           </div>
                         )}
-                        <div className="flex-1">
-                          <Link
-                            href={`/product/${review.productId}`}
-                            className="font-semibold text-gray-900 hover:text-emerald-600"
-                          >
-                            {review.productName || "Product"}
-                          </Link>
-                          <div className="mt-2">{renderStars(review.rating)}</div>
-                          {review.comment && (
-                            <p className="text-gray-700 mt-3 text-sm">{review.comment}</p>
-                          )}
-                          <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-100">
-                            <p className="text-xs text-gray-500">{formattedDate}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <Link href={`/product/${review.productId}`}>
+                                <h3 className="font-extrabold text-gray-900 text-xs sm:text-base hover:text-emerald-600 truncate">
+                                  {review.productName || "Purchased Product"}
+                                </h3>
+                              </Link>
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <div className="flex gap-0.5">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                      key={star}
+                                      className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                                        star <= review.rating
+                                          ? "fill-amber-400 text-amber-400"
+                                          : "text-gray-200"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-[10px] text-gray-400 font-medium ml-1">
+                                  {formattedDate}
+                                </span>
+                              </div>
+                            </div>
                             <Button
                               variant="ghost"
                               size="sm"
                               disabled={deletingId === review.id}
                               onClick={() => handleDeleteReview(review.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50 gap-1.5"
+                              className="text-gray-400 hover:text-red-600 hover:bg-red-50 h-7 w-7 p-0 rounded-lg"
+                              title="Delete Review"
                             >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
+                              <Trash2 className="h-3.5 w-3.5" />
                             </Button>
                           </div>
+                          {review.comment && (
+                            <p className="text-xs text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 font-medium leading-snug">
+                              &ldquo;{review.comment}&rdquo;
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>

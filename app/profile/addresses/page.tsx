@@ -110,100 +110,108 @@ export default function AddressesPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
-              <h1 className="text-3xl font-bold text-gray-900">My Addresses</h1>
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">My Addresses</h1>
               {!showForm && (
-                <Button onClick={() => setShowForm(true)} className="gap-2 gradient-primary text-white">
-                  <Plus className="h-5 w-5" />
-                  Add New Address
+                <Button onClick={() => setShowForm(true)} className="gap-1 gradient-primary text-white font-bold text-xs h-8 sm:h-9 px-2.5 rounded-xl shadow-2xs">
+                  <Plus className="h-4 w-4" />
+                  <span>Add New</span>
                 </Button>
               )}
             </div>
-            <p className="text-gray-600">
+            <p className="text-xs text-gray-500 font-medium mt-0.5">
               Manage your shipping and billing delivery addresses
             </p>
           </div>
 
           {showForm && (
-            <div className="bg-white rounded-2xl border p-6 mb-8 shadow-sm">
-              <h2 className="text-xl font-semibold mb-4 border-b pb-3">Add New Address</h2>
+            <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-2xs space-y-3">
+              <h2 className="text-sm sm:text-lg font-black text-gray-900 border-b border-gray-100 pb-2">Add New Address</h2>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
+                <div className="p-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-medium">
                   {error}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">First Name *</label>
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">First Name *</label>
                     <Input
                       required
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Last Name *</label>
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Last Name *</label>
                     <Input
                       required
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Phone Number *</label>
+                  <div className="col-span-2 sm:col-span-1">
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Phone Number *</label>
                     <Input
                       required
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Country *</label>
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Country *</label>
                     <Input
                       required
                       value={formData.country}
                       onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Region / State *</label>
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Region / State *</label>
                     <Input
                       required
                       value={formData.region}
                       onChange={(e) => setFormData({ ...formData, region: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">City *</label>
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">City *</label>
                     <Input
                       required
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
-                  <div className="sm:col-span-2">
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Street Address *</label>
+                  <div className="col-span-2">
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Street Address *</label>
                     <Input
                       required
                       value={formData.streetAddress}
                       onChange={(e) => setFormData({ ...formData, streetAddress: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1">Postal Code</label>
+                  <div className="col-span-2">
+                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Postal Code</label>
                     <Input
                       value={formData.postalCode}
                       onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                      className="h-8 sm:h-10 text-xs rounded-xl"
                     />
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 pt-2">
+                <div className="flex items-center gap-2 pt-1">
                   <input
                     type="checkbox"
                     id="isDefault"
@@ -211,16 +219,16 @@ export default function AddressesPage() {
                     onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                     className="w-4 h-4 text-emerald-600 rounded"
                   />
-                  <label htmlFor="isDefault" className="text-sm text-gray-700 cursor-pointer">
+                  <label htmlFor="isDefault" className="text-xs text-gray-700 cursor-pointer font-medium">
                     Set as default delivery address
                   </label>
                 </div>
 
-                <div className="flex justify-end gap-3 pt-4 border-t">
-                  <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
+                <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(false)} className="h-8 text-xs font-bold px-3 rounded-xl">
                     Cancel
                   </Button>
-                  <Button type="submit" disabled={isSubmitting} className="gradient-primary text-white">
+                  <Button type="submit" size="sm" disabled={isSubmitting} className="h-8 text-xs font-bold px-4 rounded-xl gradient-primary text-white">
                     {isSubmitting ? "Saving..." : "Save Address"}
                   </Button>
                 </div>
@@ -229,59 +237,59 @@ export default function AddressesPage() {
           )}
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
               {[1, 2].map((i) => (
-                <div key={i} className="h-44 bg-white rounded-2xl border p-6 animate-pulse"></div>
+                <div key={i} className="h-36 bg-white rounded-xl border p-4 animate-pulse"></div>
               ))}
             </div>
           ) : addresses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
               {addresses.map((address) => (
                 <div
                   key={address.id}
-                  className={`bg-white rounded-2xl border p-6 relative transition-all ${
-                    address.isDefault ? "border-emerald-500 shadow-md ring-2 ring-emerald-500/20" : "hover:border-gray-300"
+                  className={`bg-white rounded-xl sm:rounded-2xl border p-3.5 sm:p-6 relative transition-all ${
+                    address.isDefault ? "border-emerald-500 shadow-xs ring-2 ring-emerald-500/20" : "border-gray-200 hover:border-gray-300"
                   }`}
                 >
                   {address.isDefault && (
-                    <span className="absolute top-4 right-4 flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-100">
-                      <CheckCircle2 className="h-3.5 w-3.5" /> Default Address
+                    <span className="absolute top-3 right-3 flex items-center gap-1 text-[9px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                      <CheckCircle2 className="h-3 w-3" /> Default
                     </span>
                   )}
 
-                  <div className="flex items-center gap-2 mb-3">
-                    <MapPin className="h-5 w-5 text-emerald-600" />
-                    <h3 className="font-bold text-gray-900">
+                  <div className="flex items-center gap-1.5 mb-2">
+                    <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <h3 className="font-extrabold text-gray-900 text-xs sm:text-base">
                       {address.firstName} {address.lastName}
                     </h3>
                   </div>
 
-                  <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                  <p className="text-xs text-gray-600 leading-relaxed mb-2 font-medium">
                     {address.streetAddress}, {address.city}, {address.region}, {address.country}
                     {address.postalCode && ` (${address.postalCode})`}
                   </p>
 
-                  <div className="text-xs text-gray-500 mb-4">Phone: {address.phone}</div>
+                  <div className="text-[10px] sm:text-xs text-gray-500 mb-3 font-semibold">Phone: {address.phone}</div>
 
-                  <div className="flex justify-end pt-3 border-t">
+                  <div className="flex justify-end pt-2 border-t border-gray-100">
                     <Button
                       size="sm"
                       variant="outline"
                       onClick={() => handleDelete(address.id)}
-                      className="text-red-600 border-red-200 hover:bg-red-50"
+                      className="text-red-600 border-red-200 hover:bg-red-50 h-7 text-xs font-bold px-2.5 rounded-lg gap-1"
                     >
-                      <Trash2 className="h-4 w-4 mr-1" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" /> <span>Delete</span>
                     </Button>
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border p-12 text-center">
-              <MapPin className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">No Saved Addresses</h3>
-              <p className="text-sm text-gray-500 mb-6">Add a delivery address to speed up your checkout process.</p>
-              <Button onClick={() => setShowForm(true)} className="gradient-primary text-white">
+            <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center">
+              <MapPin className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+              <h3 className="text-base font-extrabold text-gray-900 mb-1">No Saved Addresses</h3>
+              <p className="text-xs text-gray-500 mb-4">Add a delivery address to speed up your checkout process.</p>
+              <Button onClick={() => setShowForm(true)} className="gradient-primary text-white font-bold text-xs h-8 px-4 rounded-xl shadow-2xs">
                 Add Your First Address
               </Button>
             </div>
