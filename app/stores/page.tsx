@@ -80,18 +80,50 @@ export default function StoresPage() {
         <StoreDirectoryHeader />
 
         {/* Multi-Attribute Store Search & Filtering Section */}
-        <section className="py-4 sm:py-12 bg-white border-b">
-          <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
-            <div className="bg-slate-900 rounded-2xl sm:rounded-3xl p-3.5 sm:p-8 text-white shadow-xl space-y-4 sm:space-y-6">
+        <section className="py-3 sm:py-8 bg-white border-b">
+          <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 space-y-3">
+            
+            {/* Quick Category Touch Pills Bar */}
+            <div className="overflow-x-auto no-scrollbar flex items-center gap-1.5 py-1">
+              <button
+                onClick={() => setSelectedCategory("all")}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                  selectedCategory === "all"
+                    ? "bg-emerald-600 text-white shadow-2xs"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                All Categories
+              </button>
+              {OFFICIAL_STORE_CATEGORIES.map((cat) => {
+                const isSelected = selectedCategory === cat.slug;
+                return (
+                  <button
+                    key={cat.slug}
+                    onClick={() => setSelectedCategory(cat.slug)}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                      isSelected
+                        ? "bg-emerald-600 text-white shadow-2xs"
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Filter Controls Card */}
+            <div className="bg-slate-900 rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 text-white shadow-xl space-y-3.5 sm:space-y-5">
               
               {/* Header Title */}
-              <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-3">
+              <div className="flex items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
                 <div>
-                  <h2 className="text-base sm:text-2xl font-black flex items-center gap-1.5 text-white">
+                  <h2 className="text-sm sm:text-2xl font-black flex items-center gap-1.5 text-white">
                     <SlidersHorizontal className="h-4 w-4 sm:h-6 sm:w-6 text-emerald-400" />
                     Store Search & Filters
                   </h2>
-                  <p className="text-slate-400 text-[11px] sm:text-sm mt-0.5">
+                  <p className="text-slate-400 text-[10px] sm:text-sm mt-0.5">
                     Find verified regional sellers by business type, location, and category
                   </p>
                 </div>
@@ -109,20 +141,20 @@ export default function StoresPage() {
               </div>
 
               {/* Filter Controls Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 sm:gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4">
                 {/* 1. Keyword / Name Search */}
                 <div className="col-span-2 sm:col-span-1">
                   <label className="block text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">
                     Store Name / Keyword
                   </label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400 pointer-events-none" />
                     <Input
                       type="text"
                       placeholder="Search store name..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-8 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 rounded-xl h-9 sm:h-11 text-xs sm:text-sm focus:border-emerald-500 focus:ring-emerald-500"
+                      className="pl-8 bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 rounded-xl h-8 sm:h-11 text-xs focus:border-emerald-500 focus:ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -135,7 +167,7 @@ export default function StoresPage() {
                   <select
                     value={selectedCategory}
                     onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-8 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="all">All Categories</option>
                     {OFFICIAL_STORE_CATEGORIES.map((cat) => (
@@ -154,7 +186,7 @@ export default function StoresPage() {
                   <select
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-8 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="all">All Locations</option>
                     <option value="Accra">Accra (Greater Accra)</option>
@@ -176,7 +208,7 @@ export default function StoresPage() {
                   <select
                     value={selectedBusinessType}
                     onChange={(e) => setSelectedBusinessType(e.target.value)}
-                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-8 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="all">All Types</option>
                     {OFFICIAL_BUSINESS_TYPES.map((bt) => (
@@ -195,7 +227,7 @@ export default function StoresPage() {
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full h-9 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs sm:text-sm font-medium focus:outline-none focus:border-emerald-500"
+                    className="w-full h-8 sm:h-11 px-2 sm:px-3 bg-slate-800 border border-slate-700 text-white rounded-xl text-xs font-medium focus:outline-none focus:border-emerald-500 cursor-pointer"
                   >
                     <option value="rating">Highest Rated</option>
                     <option value="products">Most Products</option>
