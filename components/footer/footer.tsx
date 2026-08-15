@@ -8,23 +8,23 @@ export function Footer() {
     <footer className="bg-gradient-to-br from-gray-900 via-slate-900 to-gray-900 text-gray-300">
       {/* Newsletter Section */}
       <div className="border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-center md:text-left">
-              <h3 className="text-2xl font-bold text-white mb-2">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-8">
+            <div className="text-center md:text-left space-y-1">
+              <h3 className="text-lg sm:text-2xl font-black text-white">
                 Subscribe to Our Newsletter
               </h3>
-              <p className="text-gray-400">
+              <p className="text-xs sm:text-base text-gray-400">
                 Get the latest updates on new products and exclusive deals!
               </p>
             </div>
-            <div className="flex w-full md:w-auto gap-2">
+            <div className="flex w-full md:w-auto gap-2 max-w-md">
               <Input
                 type="email"
-                placeholder="Enter your email"
-                className="h-12 px-4 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-green-500 focus:ring-2 focus:ring-green-500/20 rounded-xl min-w-[280px]"
+                placeholder="Enter your email address"
+                className="h-9 sm:h-12 px-3 sm:px-4 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500 focus:border-green-500 text-xs sm:text-sm rounded-xl"
               />
-              <Button className="gradient-primary h-12 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all hover:scale-105">
+              <Button className="gradient-primary h-9 sm:h-12 px-4 sm:px-6 text-xs sm:text-sm font-bold rounded-xl shadow-md flex-shrink-0">
                 Subscribe
               </Button>
             </div>

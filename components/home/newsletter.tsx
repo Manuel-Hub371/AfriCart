@@ -4,38 +4,38 @@ import { Mail, Send } from "lucide-react";
 
 export function Newsletter() {
   return (
-    <section className="py-8 sm:py-12 md:py-16 relative overflow-hidden">
+    <section className="py-6 sm:py-12 md:py-16 relative overflow-hidden">
       {/* Background Gradient */}
       <div className="absolute inset-0 gradient-primary opacity-95"></div>
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTItNS4zNzMgMTIgMTItMTItNS4zNzMtMTItMTJ6bTAgMjhjMC02LjYyNyA1LjM3My0xMiAxMi0xMnMxMiA1LjM3MyAxMiAxMi01LjM3MyAxMi0xMiAxMi0xMi01LjM3My0xMi0xMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTItNS4zNzMgMTIgMTItMTItNS4zNzMtMTItMTJ6bTAgMjhjMC02LjYyNyA1LjM3My0xMiAxMi0xMnMxMiA1LjM3MyAxMiAxMi01LjM3MyAxMiAxMiAxMi0xMi01LjM3My0xMi0xMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
 
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 sm:mb-6 shadow-xl">
-          <Mail className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
+        <div className="inline-flex items-center justify-center w-10 h-10 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-3 sm:mb-6 shadow-md">
+          <Mail className="h-5 w-5 sm:h-8 sm:w-8 text-white" />
         </div>
 
-        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2 sm:mb-4">
+        <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2 sm:mb-4">
           Stay in the Loop! 💌
         </h2>
-        <p className="text-xs sm:text-base text-white/90 mb-6 max-w-xl mx-auto leading-relaxed">
+        <p className="text-xs sm:text-base text-white/90 mb-4 sm:mb-6 max-w-xl mx-auto leading-relaxed">
           Subscribe to our newsletter and be the first to know about new
           products, exclusive deals, and special offers delivered to your inbox.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-2.5 max-w-lg mx-auto">
+        <div className="flex flex-row gap-2 max-w-lg mx-auto">
           <div className="relative flex-1">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-3.5 w-3.5" />
             <Input
               type="email"
               placeholder="Enter your email address"
-              className="pl-9 pr-3 h-10 sm:h-12 bg-white border-0 shadow-lg rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-white/50 transition-all"
+              className="pl-8 sm:pl-9 pr-3 h-9 sm:h-12 bg-white border-0 shadow-md rounded-xl text-xs sm:text-sm focus:ring-2 focus:ring-white/50 transition-all"
             />
           </div>
           <Button
             size="sm"
-            className="bg-white text-green-700 hover:bg-gray-100 h-10 sm:h-12 px-6 rounded-xl shadow-lg font-bold text-xs sm:text-sm hover:scale-105 transition-all duration-300"
+            className="bg-white text-green-700 hover:bg-gray-100 h-9 sm:h-12 px-4 sm:px-6 rounded-xl shadow-md font-bold text-xs sm:text-sm transition-all"
           >
-            <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5" />
+            <Send className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1" />
             Subscribe
           </Button>
         </div>
