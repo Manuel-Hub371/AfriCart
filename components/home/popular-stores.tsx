@@ -29,13 +29,13 @@ export function PopularStores() {
   }, []);
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-8 sm:py-12 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
             Popular Stores
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-xs sm:text-sm text-gray-600">
             Shop directly from trusted and verified sellers on AfriCart
           </p>
         </div>

@@ -26,13 +26,13 @@ export function NewArrivals() {
   }, []);
 
   return (
-    <section className="py-16 bg-gray-50 border-t">
+    <section className="py-8 sm:py-12 md:py-16 bg-gray-50 border-t">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 text-center md:text-left">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
+        <div className="mb-6 sm:mb-10 text-center md:text-left">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-1">
             New <span className="text-gradient">Arrivals</span>
           </h2>
-          <p className="text-gray-600 text-base">
+          <p className="text-xs sm:text-sm text-gray-600">
             Check out the latest products added to our marketplace
           </p>
         </div>

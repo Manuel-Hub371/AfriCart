@@ -26,18 +26,18 @@ export function FeaturedProducts() {
   }, []);
 
   return (
-    <section className="section-padding bg-white">
+    <section className="py-8 sm:py-12 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <div className="inline-block mb-4">
-            <span className="inline-flex items-center px-4 py-2 rounded-full bg-green-100 text-green-700 text-sm font-semibold">
+        <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-block mb-2 sm:mb-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs sm:text-sm font-semibold">
               ⭐ Trending Now
             </span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
             Featured <span className="text-gradient">Products</span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
             Discover our handpicked selection of amazing products from verified sellers
           </p>
         </div>

@@ -31,26 +31,26 @@ export function SpecialDeals() {
   }, []);
 
   return (
-    <section className="section-padding bg-gradient-to-br from-orange-50 via-white to-red-50">
+    <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-br from-orange-50 via-white to-red-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-3xl overflow-hidden shadow-2xl">
+        <div className="relative bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
           {/* Pattern Overlay */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTItNS4zNzMgMTItMTIgMTItMTItNS4zNzMtMTItMTJ6bTAgMjhjMC02LjYyNyA1LjM3My0xMiAxMi0xMnMxMiA1LjM3MyAxMiAxMi01LjM3MyAxMi0xMiAxMi0xMi01LjM3My0xMi0xMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTItNS4zNzMgMTIgMTItMTItNS4zNzMtMTItMTJ6bTAgMjhjMC02LjYyNyA1LjM3My0xMiAxMi0xMnMxMiA1LjM3MyAxMiAxMi01LjM3MyAxMi0xMiAxMi0xMi01LjM3My0xMi0xMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-20"></div>
 
-          <div className="relative grid lg:grid-cols-2 gap-12 p-8 md:p-16 items-center">
+          <div className="relative grid lg:grid-cols-2 gap-6 p-6 sm:p-10 md:p-14 items-center">
             {/* Left: Content */}
-            <div className="space-y-8 text-white">
-              <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg">
-                <Tag className="h-4 w-4" />
-                <span className="text-sm font-bold">Limited Time Offer 🔥</span>
+            <div className="space-y-4 sm:space-y-6 text-white">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 shadow-sm">
+                <Tag className="h-3.5 w-3.5" />
+                <span className="text-xs font-bold">Limited Time Offer 🔥</span>
               </div>
 
               <div>
-                <h2 className="text-4xl md:text-5xl font-extrabold mb-6 leading-tight">
+                <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-2 sm:mb-4 leading-tight">
                   Weekend Flash Sale
                 </h2>
-                <p className="text-xl text-white/90 leading-relaxed">
-                  Get up to <span className="font-bold text-2xl">50% OFF</span> on selected electronics and accessories. Hurry
+                <p className="text-xs sm:text-sm md:text-base text-white/90 leading-relaxed">
+                  Get up to <span className="font-bold text-base sm:text-xl">50% OFF</span> on selected electronics and accessories. Hurry
                   before the deals expire!
                 </p>
               </div>
