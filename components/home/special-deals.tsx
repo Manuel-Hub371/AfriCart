@@ -56,46 +56,46 @@ export function SpecialDeals() {
               </div>
 
               {/* Countdown Timer */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Clock className="h-6 w-6" />
-                  <span className="text-lg font-semibold">Sale ends in:</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-white/90">
+                  <Clock className="h-4 w-4" />
+                  <span>Sale ends in:</span>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex gap-2 items-center">
                   {[
                     { value: timeLeft.hours, label: "Hours" },
-                    { value: timeLeft.minutes, label: "Minutes" },
-                    { value: timeLeft.seconds, label: "Seconds" }
+                    { value: timeLeft.minutes, label: "Mins" },
+                    { value: timeLeft.seconds, label: "Secs" }
                   ].map((item, index) => (
-                    <div key={item.label}>
-                      <div className="bg-white/20 backdrop-blur-sm border border-white/30 px-5 py-4 rounded-2xl shadow-xl">
-                        <div className="text-4xl font-extrabold">
+                    <div key={item.label} className="flex items-center gap-2">
+                      <div className="bg-white/20 backdrop-blur-sm border border-white/30 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl text-center shadow-md min-w-[54px] sm:min-w-[64px]">
+                        <div className="text-lg sm:text-2xl font-black text-white">
                           {String(item.value).padStart(2, "0")}
                         </div>
-                        <div className="text-xs text-white/80 font-semibold mt-1">
+                        <div className="text-[9px] sm:text-[10px] text-white/80 font-bold uppercase tracking-tight">
                           {item.label}
                         </div>
                       </div>
                       {index < 2 && (
-                        <div className="flex items-center justify-center text-3xl font-bold mx-2 h-full">
-                          :
-                        </div>
+                        <span className="text-lg sm:text-xl font-bold text-white/80">:</span>
                       )}
                     </div>
                   ))}
                 </div>
               </div>
 
-              <Link href="/deals">
-                <Button size="lg" className="bg-white text-orange-600 hover:bg-gray-50 h-14 px-10 rounded-xl shadow-2xl font-bold text-base hover:scale-105 transition-all duration-300">
-                  Shop Deals Now →
-                </Button>
-              </Link>
+              <div className="pt-1">
+                <Link href="/deals">
+                  <Button size="sm" className="w-full sm:w-auto bg-white text-orange-600 hover:bg-gray-100 h-10 sm:h-12 px-6 rounded-xl shadow-lg font-extrabold text-xs sm:text-sm">
+                    Shop Deals Now →
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             {/* Right: Product Grid */}
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-4">
+            <div className="relative mt-4 lg:mt-0">
+              <div className="grid grid-cols-2 gap-2.5 sm:gap-4">
                 {[
                   { gradient: "from-orange-100 to-orange-300", discount: "50%" },
                   { gradient: "from-red-100 to-red-300", discount: "40%" },
@@ -104,12 +104,12 @@ export function SpecialDeals() {
                 ].map((item, index) => (
                   <div 
                     key={index}
-                    className={`bg-white p-5 rounded-3xl shadow-2xl card-hover ${index % 2 === 1 ? 'mt-8' : ''}`}
+                    className={`bg-white p-3 sm:p-4 rounded-2xl shadow-xl card-hover ${index % 2 === 1 ? 'mt-3 sm:mt-6' : ''}`}
                   >
-                    <div className={`aspect-square bg-gradient-to-br ${item.gradient} rounded-2xl mb-3 relative overflow-hidden`}>
+                    <div className={`aspect-square bg-gradient-to-br ${item.gradient} rounded-xl mb-2 relative overflow-hidden`}>
                       <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/10"></div>
                     </div>
-                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold shadow-lg">
+                    <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white font-extrabold text-[9px] sm:text-xs">
                       -{item.discount}
                     </Badge>
                   </div>
@@ -117,10 +117,10 @@ export function SpecialDeals() {
               </div>
 
               {/* Floating Badge */}
-              <div className="absolute -top-6 -right-6 bg-gradient-to-br from-yellow-400 to-orange-500 text-white px-8 py-4 rounded-3xl shadow-2xl transform rotate-12 animate-float">
-                <p className="text-2xl font-extrabold">UP TO</p>
-                <p className="text-4xl font-extrabold">50%</p>
-                <p className="text-sm font-bold">OFF!</p>
+              <div className="hidden sm:block absolute -top-4 -right-4 bg-gradient-to-br from-yellow-400 to-orange-500 text-white px-5 py-2.5 rounded-2xl shadow-xl transform rotate-12 animate-float">
+                <p className="text-xs font-extrabold">UP TO</p>
+                <p className="text-2xl font-extrabold leading-none">50%</p>
+                <p className="text-[10px] font-bold">OFF!</p>
               </div>
             </div>
           </div>

@@ -32,39 +32,39 @@ export function Footer() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-16">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-6 gap-6 sm:gap-8 mb-8 sm:mb-12">
           {/* Brand Column */}
-          <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-3 mb-6 group">
-              <div className="w-11 h-11 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-xl">A</span>
+          <div className="col-span-2 lg:col-span-2 mb-2 lg:mb-0">
+            <Link href="/" className="flex items-center gap-2 mb-3 sm:mb-6 group">
+              <div className="w-8 h-8 sm:w-11 sm:h-11 gradient-primary rounded-xl flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-base sm:text-xl">A</span>
               </div>
-              <span className="text-2xl font-bold text-white">AfriCart</span>
+              <span className="text-lg sm:text-2xl font-bold text-white">AfriCart</span>
             </Link>
-            <p className="text-sm text-gray-400 mb-6 leading-relaxed">
+            <p className="text-xs sm:text-sm text-gray-400 mb-4 sm:mb-6 leading-relaxed max-w-sm">
               Your trusted multi-vendor marketplace for quality products from
-              verified sellers. Shop with confidence and enjoy seamless delivery.
+              verified sellers across Africa.
             </p>
             
             {/* Contact Info */}
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center gap-3 text-sm text-gray-400 hover:text-white transition-colors">
-                <MapPin className="h-4 w-4 text-green-400" />
+            <div className="space-y-2 mb-4 sm:mb-6">
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
+                <MapPin className="h-3.5 w-3.5 text-green-400 flex-shrink-0" />
                 <span>123 Market Street, Lagos, Nigeria</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-400 hover:text-white transition-colors">
-                <Phone className="h-4 w-4 text-green-400" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
+                <Phone className="h-3.5 w-3.5 text-green-400 flex-shrink-0" />
                 <span>+234 800 123 4567</span>
               </div>
-              <div className="flex items-center gap-3 text-sm text-gray-400 hover:text-white transition-colors">
-                <Mail className="h-4 w-4 text-green-400" />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
+                <Mail className="h-3.5 w-3.5 text-green-400 flex-shrink-0" />
                 <span>support@africart.com</span>
               </div>
             </div>
 
             {/* Social Links */}
-            <div className="flex gap-3">
+            <div className="flex gap-2 sm:gap-3">
               {[
                 { icon: Facebook, href: "#" },
                 { icon: Twitter, href: "#" },
@@ -77,9 +77,9 @@ export function Footer() {
                   <a
                     key={index}
                     href={social.href}
-                    className="w-10 h-10 bg-gray-800 hover:bg-gradient-to-br hover:from-green-600 hover:to-emerald-600 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-lg group"
+                    className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-800 hover:bg-gradient-to-br hover:from-green-600 hover:to-emerald-600 rounded-lg sm:rounded-xl flex items-center justify-center transition-all duration-300 group"
                   >
-                    <Icon className="h-4 w-4 text-gray-400 group-hover:text-white transition-colors" />
+                    <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-gray-400 group-hover:text-white transition-colors" />
                   </a>
                 );
               })}
@@ -88,12 +88,11 @@ export function Footer() {
 
           {/* Marketplace Column */}
           <div>
-            <h3 className="text-white font-bold mb-5 text-sm uppercase tracking-wider">Marketplace</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-white font-bold mb-3 sm:mb-5 text-xs sm:text-sm uppercase tracking-wider">Marketplace</h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
               {["About Us", "Contact", "Careers", "Press", "Blog"].map((item) => (
                 <li key={item}>
-                  <Link href={`/${item.toLowerCase().replace(" ", "")}`} className="hover:text-green-400 transition-colors flex items-center group">
-                    <span className="w-0 h-px bg-green-400 group-hover:w-4 transition-all mr-0 group-hover:mr-2"></span>
+                  <Link href={`/${item.toLowerCase().replace(" ", "")}`} className="hover:text-green-400 transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -103,12 +102,11 @@ export function Footer() {
 
           {/* Customer Column */}
           <div>
-            <h3 className="text-white font-bold mb-5 text-sm uppercase tracking-wider">Customer</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-white font-bold mb-3 sm:mb-5 text-xs sm:text-sm uppercase tracking-wider">Customer</h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
               {["Help Center", "Shipping Info", "Returns", "FAQs", "Track Order"].map((item) => (
                 <li key={item}>
-                  <Link href={`/${item.toLowerCase().replace(" ", "")}`} className="hover:text-green-400 transition-colors flex items-center group">
-                    <span className="w-0 h-px bg-green-400 group-hover:w-4 transition-all mr-0 group-hover:mr-2"></span>
+                  <Link href={`/${item.toLowerCase().replace(" ", "")}`} className="hover:text-green-400 transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -118,12 +116,11 @@ export function Footer() {
 
           {/* Seller Column */}
           <div>
-            <h3 className="text-white font-bold mb-5 text-sm uppercase tracking-wider">Seller</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-white font-bold mb-3 sm:mb-5 text-xs sm:text-sm uppercase tracking-wider">Seller</h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
               {["Become a Seller", "Seller Guide", "Seller Dashboard", "Seller Support"].map((item) => (
                 <li key={item}>
-                  <Link href={`/${item.toLowerCase().replace(/ /g, "-")}`} className="hover:text-green-400 transition-colors flex items-center group">
-                    <span className="w-0 h-px bg-green-400 group-hover:w-4 transition-all mr-0 group-hover:mr-2"></span>
+                  <Link href={`/${item.toLowerCase().replace(/ /g, "-")}`} className="hover:text-green-400 transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -133,12 +130,11 @@ export function Footer() {
 
           {/* Legal Column */}
           <div>
-            <h3 className="text-white font-bold mb-5 text-sm uppercase tracking-wider">Legal</h3>
-            <ul className="space-y-3 text-sm">
+            <h3 className="text-white font-bold mb-3 sm:mb-5 text-xs sm:text-sm uppercase tracking-wider">Legal</h3>
+            <ul className="space-y-2 text-xs sm:text-sm text-gray-400">
               {["Privacy Policy", "Terms & Conditions", "Cookie Policy", "Disclaimer"].map((item) => (
                 <li key={item}>
-                  <Link href={`/${item.toLowerCase().replace(/ /g, "-").replace("&", "")}`} className="hover:text-green-400 transition-colors flex items-center group">
-                    <span className="w-0 h-px bg-green-400 group-hover:w-4 transition-all mr-0 group-hover:mr-2"></span>
+                  <Link href={`/${item.toLowerCase().replace(/ /g, "-").replace("&", "")}`} className="hover:text-green-400 transition-colors">
                     {item}
                   </Link>
                 </li>
@@ -148,12 +144,12 @@ export function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-800">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-400">
+        <div className="pt-6 border-t border-gray-800">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+            <p className="text-xs text-gray-400 text-center sm:text-left">
               © 2024 AfriCart. All rights reserved. Made with <span className="text-red-500">❤</span> in Africa
             </p>
-            <div className="flex gap-6 text-sm">
+            <div className="flex gap-4 text-xs text-gray-400">
               {["Sitemap", "Accessibility", "Security"].map((item) => (
                 <Link key={item} href={`/${item.toLowerCase()}`} className="hover:text-green-400 transition-colors">
                   {item}

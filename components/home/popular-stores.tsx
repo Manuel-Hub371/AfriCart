@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, Package, CheckCircle, MapPin } from "lucide-react";
+import { Star, Package, CheckCircle, MapPin, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 export function PopularStores() {
@@ -121,14 +121,21 @@ export function PopularStores() {
                         </div>
                       </div>
                     </div>
+                  </div>
 
-                    <p className="text-xs text-gray-500 mt-3 line-clamp-2">
-                      {store.description || "Verified regional seller offering high quality products on AfriCart."}
-                    </p>
+                  <div className="px-3 pb-3 sm:px-6 sm:pb-6 flex items-center justify-between border-t pt-3 gap-2">
+                    <div className="flex items-center gap-1 text-[10px] sm:text-xs text-gray-500 truncate">
+                      <MapPin className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-emerald-600 flex-shrink-0" />
+                      <span className="truncate">{store.location || "Ghana"}</span>
+                    </div>
 
-                    <Link href={storeHref} className="block mt-5">
-                      <Button className="w-full h-11 rounded-2xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white">
-                        Visit Store →
+                    <Link href={storeHref} className="flex-shrink-0">
+                      <Button
+                        size="sm"
+                        className="h-8 sm:h-10 text-xs font-bold gap-1 bg-emerald-600 text-white rounded-xl shadow-xs hover:shadow transition-all px-3"
+                      >
+                        Visit Store
+                        <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4" />
                       </Button>
                     </Link>
                   </div>
