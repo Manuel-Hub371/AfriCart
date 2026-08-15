@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Search, ShoppingCart, Bell, User, Menu, X, Heart, Package, Store, Tag } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -89,93 +90,95 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    router.push(`/products?query=${encodeURIComponent(searchQuery.trim())}`);
+  };
+
   return (
     <nav
       className={`sticky top-0 z-50 transition-all duration-300 ${
         isScrolled ? "bg-white/95 backdrop-blur-lg shadow-lg" : "bg-white shadow-sm"
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 md:h-16 gap-2">
           {/* Left: Logo */}
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-11 h-11 gradient-primary rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
-                <span className="text-white font-bold text-xl">A</span>
+          <div className="flex items-center gap-4 shrink-0">
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 md:w-11 md:h-11 gradient-primary rounded-xl flex items-center justify-center shadow-md group-hover:shadow-xl transition-all duration-300 group-hover:scale-105">
+                <span className="text-white font-bold text-base md:text-xl">A</span>
               </div>
-              <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+              <span className="text-lg md:text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
                 AfriCart
               </span>
             </Link>
 
             {/* Center: Navigation Links (Desktop) */}
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-1 lg:gap-2">
               <Link
                 href="/"
-                className="px-4 py-2 text-gray-700 hover:text-emerald-600 font-medium transition-all duration-200 rounded-lg hover:bg-green-50 relative group"
+                className="px-3 py-2 text-gray-700 hover:text-emerald-600 font-medium transition-all duration-200 rounded-lg hover:bg-green-50 relative group text-sm"
               >
                 Home
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/products"
-                className="px-4 py-2 text-gray-700 hover:text-emerald-600 font-medium transition-all duration-200 rounded-lg hover:bg-green-50 relative group"
+                className="px-3 py-2 text-gray-700 hover:text-emerald-600 font-medium transition-all duration-200 rounded-lg hover:bg-green-50 relative group text-sm"
               >
                 Products
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/deals"
-                className="px-4 py-2 text-orange-600 hover:text-orange-700 font-extrabold transition-all duration-200 rounded-lg hover:bg-orange-50 relative group flex items-center gap-1.5"
+                className="px-3 py-2 text-orange-600 hover:text-orange-700 font-extrabold transition-all duration-200 rounded-lg hover:bg-orange-50 relative group flex items-center gap-1.5 text-sm"
               >
                 <Tag className="h-4 w-4 text-orange-500" />
                 Deals
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-orange-500 to-amber-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
               <Link
                 href="/stores"
-                className="px-4 py-2 text-gray-700 hover:text-emerald-600 font-medium transition-all duration-200 rounded-lg hover:bg-green-50 relative group"
+                className="px-3 py-2 text-gray-700 hover:text-emerald-600 font-medium transition-all duration-200 rounded-lg hover:bg-green-50 relative group text-sm"
               >
                 Stores
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-green-600 to-emerald-600 transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </div>
           </div>
 
-          {/* Center: Search Bar (Desktop) */}
-          <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
+          {/* Center: Search Bar (Mobile & Desktop) */}
+          <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md mx-1 sm:mx-4">
             <div className="relative w-full group">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 transition-colors group-focus-within:text-emerald-600" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4 transition-colors group-focus-within:text-emerald-600" />
               <Input
                 type="text"
-                placeholder="Search products, stores or brands..."
-                className="pl-12 pr-4 w-full h-11 rounded-full border-gray-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 transition-all"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="pl-9 pr-3 w-full h-9 sm:h-10 rounded-full text-xs sm:text-sm border-gray-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 transition-all bg-gray-50/80 sm:bg-white"
               />
             </div>
-          </div>
+          </form>
 
-          {/* Right: Icons */}
-          <div className="flex items-center gap-2">
-            {/* Search Icon (Mobile) */}
-            <button className="lg:hidden p-2.5 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-105">
-              <Search className="h-5 w-5 text-gray-700" />
-            </button>
-
+          {/* Right: Icons & Actions */}
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {/* Show these only when authenticated */}
             {isAuthenticated ? (
               <>
-                {/* Wishlist */}
+                {/* Wishlist (Desktop) */}
                 <Link
                   href="/profile/wishlist"
-                  className="hidden sm:flex relative p-2.5 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-105 group"
+                  className="hidden sm:flex relative p-2 hover:bg-green-50 rounded-xl transition-all duration-200 group"
                 >
                   <Heart className="h-5 w-5 text-gray-700 group-hover:text-emerald-600 transition-colors" />
                 </Link>
 
-                {/* Cart */}
+                {/* Cart (Desktop) */}
                 <Link
                   href="/cart"
-                  className="relative p-2.5 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-105 group"
+                  className="hidden md:flex relative p-2 hover:bg-green-50 rounded-xl transition-all duration-200 group"
                 >
                   <ShoppingCart className="h-5 w-5 text-gray-700 group-hover:text-emerald-600 transition-colors" />
                   {cartItemCount > 0 && (
@@ -189,13 +192,13 @@ export function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setNotificationsOpen(!notificationsOpen)}
-                    className="relative p-2.5 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-105 group"
+                    className="relative p-2 hover:bg-green-50 rounded-xl transition-all duration-200 group"
                   >
-                    <Bell className="h-5 w-5 text-gray-700 group-hover:text-emerald-600 transition-colors" />
+                    <Bell className="h-4 sm:h-5 w-4 sm:w-5 text-gray-700 group-hover:text-emerald-600 transition-colors" />
                     {unreadNotifications > 0 && (
                       <Badge
                         variant="destructive"
-                        className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs border-2 border-white shadow-lg bg-red-600 text-white font-bold"
+                        className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-[10px] sm:text-xs border-2 border-white shadow-lg bg-red-600 text-white font-bold"
                       >
                         {unreadNotifications > 99 ? "99+" : unreadNotifications}
                       </Badge>
@@ -203,33 +206,33 @@ export function Navbar() {
                   </button>
 
                   {notificationsOpen && (
-                    <div className="absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 overflow-hidden animate-slide-up">
-                      <div className="px-5 py-4 border-b bg-gradient-to-r from-green-50 to-emerald-50 flex items-center justify-between">
-                        <h3 className="font-bold text-gray-900">Notifications</h3>
+                    <div className="absolute right-0 mt-3 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 overflow-hidden animate-slide-up z-50">
+                      <div className="px-4 py-3 border-b bg-gradient-to-r from-green-50 to-emerald-50 flex items-center justify-between">
+                        <h3 className="font-bold text-gray-900 text-sm">Notifications</h3>
                         {unreadNotifications > 0 && (
-                          <span className="text-xs bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
                             {unreadNotifications} new
                           </span>
                         )}
                       </div>
-                      <div className="max-h-96 overflow-y-auto divide-y divide-gray-100">
+                      <div className="max-h-80 overflow-y-auto divide-y divide-gray-100">
                         {notifications.length > 0 ? (
                           notifications.slice(0, 5).map((n: any) => (
                             <div
                               key={n.id}
-                              className={`px-5 py-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                              className={`px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors ${
                                 !n.isRead && !n.read ? "bg-emerald-50/40" : ""
                               }`}
                             >
-                              <div className="flex gap-3">
-                                <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 flex-shrink-0">
+                              <div className="flex gap-2.5">
+                                <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-700 flex-shrink-0">
                                   <Package className="h-4 w-4" />
                                 </div>
                                 <div className="flex-1">
-                                  <p className="text-sm font-semibold text-gray-900">
+                                  <p className="text-xs font-semibold text-gray-900">
                                     {n.title || "Notification"}
                                   </p>
-                                  <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                                  <p className="text-[11px] text-gray-500 mt-0.5 line-clamp-2">
                                     {n.message || n.content || "System update"}
                                   </p>
                                 </div>
@@ -237,12 +240,12 @@ export function Navbar() {
                             </div>
                           ))
                         ) : (
-                          <div className="px-5 py-8 text-center text-xs text-gray-500">
+                          <div className="px-4 py-6 text-center text-xs text-gray-500">
                             No notifications yet
                           </div>
                         )}
                       </div>
-                      <div className="px-5 py-3 border-t bg-gray-50 text-center">
+                      <div className="px-4 py-2.5 border-t bg-gray-50 text-center">
                         <Link
                           href="/profile/notifications"
                           onClick={() => setNotificationsOpen(false)}
@@ -255,17 +258,17 @@ export function Navbar() {
                   )}
                 </div>
 
-                {/* Profile Dropdown (Authenticated) */}
-                <div className="relative">
+                {/* Profile Dropdown (Desktop) */}
+                <div className="hidden md:relative md:block">
                   <button
                     onClick={() => setProfileOpen(!profileOpen)}
-                    className="p-2.5 hover:bg-green-50 rounded-xl transition-all duration-200 hover:scale-105 group"
+                    className="p-2 hover:bg-green-50 rounded-xl transition-all duration-200 group"
                   >
                     <User className="h-5 w-5 text-gray-700 group-hover:text-emerald-600 transition-colors" />
                   </button>
 
                   {profileOpen && (
-                    <div className="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 overflow-hidden animate-slide-up">
+                    <div className="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-2xl ring-1 ring-gray-100 overflow-hidden animate-slide-up z-50">
                       <div className="px-5 py-4 border-b bg-gradient-to-r from-green-50 to-emerald-50">
                         <p className="text-sm font-bold text-gray-900">
                           {user ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || "User Account" : "User Account"}
@@ -324,72 +327,52 @@ export function Navbar() {
                 </div>
               </>
             ) : (
-              /* Show Login and Sign Up when not authenticated */
-              <>
-                <Link
-                  href="/auth/login"
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition-colors"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/auth/welcome"
-                  className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-lg transition-all shadow-md hover:shadow-lg font-bold"
-                >
-                  Sign Up
-                </Link>
-              </>
+              /* Show Login when not authenticated */
+              <Link
+                href="/auth/login"
+                className="px-2.5 py-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 rounded-lg transition-colors"
+              >
+                Login
+              </Link>
             )}
 
-            {/* Mobile Menu Toggle */}
+            {/* Mobile Menu Toggle (Desktop Menu fallback) */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2.5 hover:bg-green-50 rounded-xl transition-all duration-200"
+              className="md:hidden p-1.5 hover:bg-green-50 rounded-lg transition-all duration-200"
             >
               {mobileMenuOpen ? (
-                <X className="h-6 w-6 text-gray-700" />
+                <X className="h-5 w-5 text-gray-700" />
               ) : (
-                <Menu className="h-6 w-6 text-gray-700" />
+                <Menu className="h-5 w-5 text-gray-700" />
               )}
             </button>
           </div>
         </div>
-
-        {/* Mobile Search Bar */}
-        <div className="lg:hidden pb-4">
-          <div className="relative group">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 transition-colors group-focus-within:text-emerald-600" />
-            <Input
-              type="text"
-              placeholder="Search products, stores or brands..."
-              className="pl-12 pr-4 w-full h-11 rounded-full border-gray-200 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-600/20 transition-all"
-            />
-          </div>
-        </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu Drawer */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t bg-gradient-to-b from-white to-green-50/30 animate-slide-up">
-          <div className="px-4 py-4 space-y-1">
+        <div className="md:hidden border-t bg-white shadow-xl animate-slide-up">
+          <div className="px-4 py-3 space-y-1">
             <Link
               href="/"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-3 text-gray-700 hover:bg-green-50 rounded-xl font-medium transition-all duration-200 hover:pl-6"
+              className="block px-3 py-2 text-gray-700 hover:bg-green-50 rounded-lg font-medium text-sm transition-all"
             >
               Home
             </Link>
             <Link
               href="/products"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-3 text-gray-700 hover:bg-green-50 rounded-xl font-medium transition-all duration-200 hover:pl-6"
+              className="block px-3 py-2 text-gray-700 hover:bg-green-50 rounded-lg font-medium text-sm transition-all"
             >
               Products
             </Link>
             <Link
               href="/deals"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-3 text-orange-600 font-extrabold hover:bg-orange-50 rounded-xl transition-all duration-200 hover:pl-6 flex items-center gap-2"
+              className="block px-3 py-2 text-orange-600 font-extrabold hover:bg-orange-50 rounded-lg text-sm transition-all flex items-center gap-2"
             >
               <Tag className="h-4 w-4 text-orange-500" />
               Deals & Promotions
@@ -397,25 +380,34 @@ export function Navbar() {
             <Link
               href="/stores"
               onClick={() => setMobileMenuOpen(false)}
-              className="block px-4 py-3 text-gray-700 hover:bg-green-50 rounded-xl font-medium transition-all duration-200 hover:pl-6"
+              className="block px-3 py-2 text-gray-700 hover:bg-green-50 rounded-lg font-medium text-sm transition-all"
             >
               Stores
             </Link>
+            {user?.roles?.includes("VENDOR") && (
+              <Link
+                href="/vendor"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block px-3 py-2 text-emerald-700 hover:bg-emerald-50 rounded-lg font-bold text-sm transition-all flex items-center gap-2"
+              >
+                <Store className="h-4 w-4" />
+                Vendor Dashboard
+              </Link>
+            )}
 
-            {/* Show Login/Sign Up in mobile menu when not authenticated */}
             {!isAuthenticated && (
               <div className="border-t my-2 pt-2 space-y-2">
                 <Link
                   href="/auth/login"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-3 text-gray-700 hover:bg-green-50 rounded-xl font-medium transition-all duration-200 hover:pl-6"
+                  className="block px-3 py-2 text-gray-700 hover:bg-green-50 rounded-lg font-medium text-sm text-center"
                 >
                   Login
                 </Link>
                 <Link
                   href="/auth/welcome"
                   onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-3 text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 rounded-xl font-medium transition-all duration-200 text-center shadow-md hover:shadow-lg mx-2"
+                  className="block px-3 py-2 text-white gradient-primary rounded-lg font-bold text-sm text-center shadow-md"
                 >
                   Sign Up
                 </Link>
