@@ -222,8 +222,8 @@ export default function DealsPage() {
         {/* Main Content Area */}
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-8 space-y-3 sm:space-y-6">
           
-          {/* Touch Category Pills Bar */}
-          <div className="overflow-x-auto no-scrollbar flex items-center gap-1.5 py-1">
+          {/* Touch Category Pills Bar (Mobile/Tablet Only) */}
+          <div className="overflow-x-auto no-scrollbar flex items-center gap-1.5 py-1 lg:hidden">
             <button
               onClick={() => {
                 setSelectedCategory("");
