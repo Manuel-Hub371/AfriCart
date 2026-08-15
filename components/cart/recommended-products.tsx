@@ -31,16 +31,16 @@ export function RecommendedProducts() {
         You May Also Like
       </h2>
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white rounded-xl border p-4 space-y-4 animate-pulse">
-              <div className="h-48 bg-gray-200 rounded-lg"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+            <div key={i} className="bg-white rounded-xl border p-2.5 space-y-2 animate-pulse">
+              <div className="h-32 bg-gray-200 rounded-lg"></div>
+              <div className="h-3 bg-gray-200 rounded w-3/4"></div>
             </div>
           ))}
         </div>
       ) : products.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6">
           {products.map((product) => (
             <ProductCard
               key={product.id}

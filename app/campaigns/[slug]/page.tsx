@@ -189,7 +189,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ slug:
               No active products assigned to this campaign.
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
               {products.map((p) => (
                 <ProductCard
                   key={p.id}
