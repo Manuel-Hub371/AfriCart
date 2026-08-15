@@ -631,7 +631,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
 
                 {/* Product Cards Grid */}
                 {paginatedProducts.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-3 gap-1.5 sm:gap-3 md:gap-6">
                     {paginatedProducts.map((product: any) => (
                       <ProductCard
                         key={product.id}
@@ -719,7 +719,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                     <Sparkles className="h-6 w-6 text-amber-500" />
                     <h2 className="text-2xl font-extrabold text-gray-900">Featured Store Products</h2>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
                     {featuredProducts.map((product: any) => (
                       <ProductCard
                         key={product.id}
@@ -755,7 +755,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
                   <h2 className="text-2xl font-extrabold text-gray-900">Best Sellers</h2>
                 </div>
                 {bestSellers.length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
                     {bestSellers.slice(0, 4).map((product: any) => (
                       <ProductCard
                         key={product.id}
@@ -812,7 +812,7 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
               </div>
 
               {storeDeals.length > 0 ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-3 md:gap-6">
                   {storeDeals.map((product: any) => (
                     <ProductCard
                       key={product.id}

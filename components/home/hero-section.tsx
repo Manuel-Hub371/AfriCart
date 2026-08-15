@@ -36,63 +36,63 @@ export function HeroSection() {
         <div className="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-float" style={{animationDelay: '4s'}}></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 md:py-32">
+        <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
           {/* Left: Content */}
-          <div className="space-y-8 animate-slide-up">
+          <div className="space-y-6 sm:space-y-8 animate-slide-up">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 border border-green-200 shadow-sm">
-              <Sparkles className="h-4 w-4 text-green-600" />
-              <span className="text-sm font-semibold text-green-700">
+            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-green-100 border border-green-200 shadow-sm">
+              <Sparkles className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-green-600" />
+              <span className="text-xs sm:text-sm font-semibold text-green-700">
                 {stats.totalCustomers > 0 ? `Trusted by ${stats.totalCustomers}+ registered shoppers` : "Multi-Vendor Marketplace"}
               </span>
             </div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-gray-900 leading-tight">
               Discover{" "}
               <span className="text-gradient">Everything</span>
               <br />You Need
             </h1>
             
-            <p className="text-xl md:text-2xl text-gray-600 leading-relaxed max-w-xl">
+            <p className="text-base sm:text-xl md:text-2xl text-gray-600 leading-relaxed max-w-xl">
               Shop from verified regional sellers, explore thousands of products, and enjoy a seamless shopping experience with fast delivery.
             </p>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-8 pt-4">
+            <div className="flex flex-wrap gap-6 sm:gap-8 pt-2 sm:pt-4">
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <TrendingUp className="h-5 w-5 text-green-600" />
-                  <span className="text-3xl font-bold text-gray-900">{stats.totalProducts}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                  <TrendingUp className="h-4 sm:h-5 w-4 sm:w-5 text-green-600" />
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalProducts}</span>
                 </div>
-                <p className="text-sm text-gray-600">Active Products</p>
+                <p className="text-xs sm:text-sm text-gray-600">Active Products</p>
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Store className="h-5 w-5 text-green-600" />
-                  <span className="text-3xl font-bold text-gray-900">{stats.totalStores}</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                  <Store className="h-4 sm:h-5 w-4 sm:w-5 text-green-600" />
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-900">{stats.totalStores}</span>
                 </div>
-                <p className="text-sm text-gray-600">Verified Stores</p>
+                <p className="text-xs sm:text-sm text-gray-600">Verified Stores</p>
               </div>
               <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Zap className="h-5 w-5 text-green-600" />
-                  <span className="text-3xl font-bold text-gray-900">24/7</span>
+                <div className="flex items-center gap-1.5 sm:gap-2 mb-1">
+                  <Zap className="h-4 sm:h-5 w-4 sm:w-5 text-green-600" />
+                  <span className="text-2xl sm:text-3xl font-bold text-gray-900">24/7</span>
                 </div>
-                <p className="text-sm text-gray-600">Fulfillment</p>
+                <p className="text-xs sm:text-sm text-gray-600">Fulfillment</p>
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 pt-2">
-              <Link href="/products">
-                <Button size="lg" className="gradient-primary text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 h-14 px-8 text-base rounded-xl">
-                  <ShoppingBag className="h-5 w-5 mr-2" />
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+              <Link href="/products" className="w-full sm:w-auto">
+                <Button size="lg" className="w-full sm:w-auto gradient-primary text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base rounded-xl font-bold">
+                  <ShoppingBag className="h-4 sm:h-5 w-4 sm:w-5 mr-2" />
                   Shop Now
                 </Button>
               </Link>
-              <Link href="/stores">
-                <Button size="lg" variant="outline" className="border-2 border-green-200 hover:border-green-300 hover:bg-green-50 h-14 px-8 text-base rounded-xl transition-all duration-300">
-                  <Store className="h-5 w-5 mr-2" />
+              <Link href="/stores" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-green-200 hover:border-green-300 hover:bg-green-50 h-12 sm:h-14 px-6 sm:px-8 text-sm sm:text-base rounded-xl transition-all duration-300 font-bold">
+                  <Store className="h-4 sm:h-5 w-4 sm:w-5 mr-2" />
                   Explore Stores
                 </Button>
               </Link>

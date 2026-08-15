@@ -35,6 +35,7 @@ export function PurchaseActions({
   inStock,
   maxQuantity,
   selectedVariantId,
+  selectedVariantPrice,
   productName = "Product",
   storeId,
 }: PurchaseActionsProps) {
@@ -184,6 +185,34 @@ export function PurchaseActions({
           <Zap className="h-5 w-5 fill-white" />
           Buy Now
         </Button>
+      </div>
+
+      {/* Sticky Mobile Purchase Bar (<768px) */}
+      <div className="md:hidden fixed bottom-14 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-gray-200 p-2.5 shadow-2xl flex items-center justify-between gap-2">
+        <div className="flex flex-col pl-1">
+          <span className="text-[10px] font-bold text-gray-500 uppercase">Price</span>
+          <span className="text-sm font-black text-gray-900">GH₵{Number(selectedVariantPrice || 0).toFixed(2)}</span>
+        </div>
+        <div className="flex items-center gap-1.5 flex-1 justify-end">
+          <Button
+            size="sm"
+            className="h-10 rounded-xl gap-1 gradient-primary text-white font-bold text-xs flex-1"
+            disabled={!inStock || isLoading}
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            {addedToCart ? "Added" : "Add to Cart"}
+          </Button>
+          <Button
+            size="sm"
+            className="h-10 rounded-xl gap-1 bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs flex-1"
+            disabled={!inStock || isLoading}
+            onClick={handleBuyNow}
+          >
+            <Zap className="h-3.5 w-3.5 fill-white" />
+            Buy Now
+          </Button>
+        </div>
       </div>
 
       {/* Secondary Product Actions Toolbar */}
