@@ -46,15 +46,15 @@ export function ActiveFilters({
   if (!hasFilters) return null;
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 shadow-sm mb-6 flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="font-bold text-gray-700 uppercase tracking-wider mr-1">
-          Active Filters:
+    <div className="bg-white border border-gray-200 rounded-xl sm:rounded-2xl p-2.5 sm:p-4 shadow-2xs mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2">
+      <div className="flex flex-wrap items-center gap-1.5 text-[11px] sm:text-xs">
+        <span className="font-extrabold text-gray-700 uppercase tracking-wider mr-0.5">
+          Active:
         </span>
 
         {/* Search Query Pill */}
         {query && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
             Search: &quot;{query}&quot;
             <button
               onClick={onRemoveQuery}
@@ -72,7 +72,7 @@ export function ActiveFilters({
           return (
             <span
               key={catSlug}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-semibold"
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold"
             >
               {displayName}
               <button
@@ -88,7 +88,7 @@ export function ActiveFilters({
 
         {/* Rating Pill */}
         {rating && rating > 0 && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200 font-semibold">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-200 font-bold">
             {rating}★ &amp; up
             <button
               onClick={onRemoveRating}
