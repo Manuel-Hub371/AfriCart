@@ -90,38 +90,38 @@ export default function DashboardPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-4 sm:space-y-8">
           {/* Welcome */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-1">
+          <div>
+            <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
               Welcome back{user?.firstName ? `, ${user.firstName}` : ""}! 👋
             </h1>
-            <p className="text-gray-500 text-sm">
-              Here&apos;s what&apos;s happening with your account
+            <p className="text-xs text-gray-500 font-medium mt-0.5">
+              Here&apos;s an overview of your account activity & orders.
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="flex items-center gap-2 p-4 mb-6 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
               <AlertCircle className="h-4 w-4 flex-shrink-0" />
-              {error}
+              <span>{error}</span>
               <button
                 onClick={fetchDashboard}
-                className="ml-auto text-xs underline hover:no-underline"
+                className="ml-auto text-xs font-bold underline hover:no-underline"
               >
                 Retry
               </button>
             </div>
           )}
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Stats Grid - 2 columns on mobile */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
             {loading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-28 bg-white rounded-xl border animate-pulse"
+                  className="h-20 sm:h-28 bg-white rounded-xl border animate-pulse"
                 />
               ))
             ) : (
@@ -131,66 +131,66 @@ export default function DashboardPage() {
                   label="Total Orders"
                   value={data?.stats.totalOrders ?? 0}
                   iconColor="text-blue-600"
-                  iconBg="bg-blue-100"
+                  iconBg="bg-blue-50"
                 />
                 <StatCard
                   icon={Heart}
-                  label="Wishlist Items"
+                  label="Wishlist"
                   value={data?.stats.wishlistCount ?? 0}
                   iconColor="text-pink-600"
-                  iconBg="bg-pink-100"
+                  iconBg="bg-pink-50"
                 />
                 <StatCard
                   icon={Star}
-                  label="Reviews Written"
+                  label="Reviews"
                   value={data?.stats.reviewCount ?? 0}
                   iconColor="text-amber-600"
-                  iconBg="bg-amber-100"
+                  iconBg="bg-amber-50"
                 />
                 <StatCard
                   icon={DollarSign}
                   label="Total Spent"
-                  value={`$${(data?.stats.totalSpend ?? 0).toFixed(2)}`}
+                  value={`GH₵${(data?.stats.totalSpend ?? 0).toFixed(0)}`}
                   iconColor="text-emerald-600"
-                  iconBg="bg-emerald-100"
+                  iconBg="bg-emerald-50"
                 />
               </>
             )}
           </div>
 
           {/* Recent Orders */}
-          <div className="mb-10">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-2xl font-bold text-gray-900">Recent Orders</h2>
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base sm:text-2xl font-black text-gray-900">Recent Orders</h2>
               <Link href="/profile/orders">
-                <Button variant="outline" className="gap-2">
-                  View All
-                  <ArrowRight className="h-4 w-4" />
+                <Button variant="outline" size="sm" className="gap-1 text-xs font-bold h-7 sm:h-9 px-2.5 rounded-xl">
+                  <span>View All</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {Array.from({ length: 2 }).map((_, i) => (
-                  <div key={i} className="h-40 bg-white rounded-xl border animate-pulse" />
+                  <div key={i} className="h-32 bg-white rounded-xl border animate-pulse" />
                 ))}
               </div>
             ) : !data?.recentOrders.length ? (
-              <div className="text-center py-12 bg-white rounded-xl border-2 border-dashed border-gray-200">
-                <ShoppingBag className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-gray-500 font-medium">No orders yet</p>
-                <p className="text-sm text-gray-400 mt-1">
+              <div className="text-center py-8 sm:py-12 bg-white rounded-2xl border border-dashed border-gray-200 p-4">
+                <ShoppingBag className="h-10 w-10 text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-700 font-bold text-sm">No orders yet</p>
+                <p className="text-xs text-gray-400 mt-0.5">
                   Your orders will appear here once you make a purchase.
                 </p>
-                <Link href="/products" className="mt-4 inline-block">
-                  <Button size="sm" className="mt-4">
+                <Link href="/products" className="mt-3 inline-block">
+                  <Button size="sm" className="gradient-primary text-white font-bold text-xs h-8 px-4 rounded-xl shadow-2xs">
                     Start Shopping
                   </Button>
                 </Link>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
                 {data.recentOrders.map((order) => (
                   <OrderCard key={order.fullId} order={order} />
                 ))}
@@ -198,84 +198,87 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Recommended Products (real — newest active products) */}
+          {/* Recommended Products */}
           <div>
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-2xl font-bold text-gray-900">Recommended for You</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-base sm:text-2xl font-black text-gray-900">Recommended for You</h2>
               <Link href="/products">
-                <Button variant="outline" className="gap-2">
-                  View All
-                  <ArrowRight className="h-4 w-4" />
+                <Button variant="outline" size="sm" className="gap-1 text-xs font-bold h-7 sm:h-9 px-2.5 rounded-xl">
+                  <span>View All</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </Button>
               </Link>
             </div>
 
             {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
                 {Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-64 bg-white rounded-xl border animate-pulse" />
+                  <div key={i} className="h-56 bg-white rounded-xl border animate-pulse" />
                 ))}
               </div>
             ) : !data?.featuredProducts.length ? (
-              <div className="text-center py-10 bg-white rounded-xl border">
-                <p className="text-gray-400">No products available right now</p>
+              <div className="text-center py-8 bg-white rounded-xl border p-4">
+                <p className="text-gray-400 text-xs">No products available right now</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-6">
                 {data.featuredProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="bg-white rounded-xl border overflow-hidden hover:shadow-lg transition-shadow group"
+                    className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 overflow-hidden hover:shadow-md transition-all group flex flex-col justify-between"
                   >
-                    <Link href={`/product/${product.id}`}>
-                      {product.image ? (
-                        <img
-                          src={product.image}
-                          alt={product.name}
-                          className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="h-48 bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-3xl">
-                          {product.name[0]}
-                        </div>
-                      )}
-                    </Link>
-                    <div className="p-4">
+                    <div>
                       <Link href={`/product/${product.id}`}>
-                        <h3 className="font-semibold text-gray-900 mb-1 truncate hover:text-emerald-600">
-                          {product.name}
-                        </h3>
-                      </Link>
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-lg font-bold text-emerald-600">
-                            ${product.price.toFixed(2)}
-                          </span>
-                        </div>
-                        {product.rating > 0 && (
-                          <div className="flex items-center gap-1">
-                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                            <span className="text-xs text-gray-600">
-                              {product.rating.toFixed(1)}
-                            </span>
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="h-32 sm:h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="h-32 sm:h-48 bg-gradient-to-br from-emerald-100 to-emerald-200 flex items-center justify-center text-emerald-700 font-bold text-2xl">
+                            {product.name[0]}
                           </div>
                         )}
+                      </Link>
+                      <div className="p-2 sm:p-4 space-y-1">
+                        <Link href={`/product/${product.id}`}>
+                          <h3 className="font-bold text-gray-900 text-xs sm:text-sm truncate hover:text-emerald-600">
+                            {product.name}
+                          </h3>
+                        </Link>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs sm:text-base font-black text-emerald-700">
+                            GH₵{product.price.toFixed(2)}
+                          </span>
+                          {product.rating > 0 && (
+                            <div className="flex items-center gap-0.5 text-[10px] sm:text-xs">
+                              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                              <span className="font-bold text-gray-800">
+                                {product.rating.toFixed(1)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        {product.stock <= 0 && (
+                          <p className="text-[10px] text-red-500 font-bold">Out of Stock</p>
+                        )}
                       </div>
-                      {product.stock <= 0 && (
-                        <p className="text-xs text-red-500 mb-2 font-medium">Out of Stock</p>
-                      )}
+                    </div>
+
+                    <div className="p-2 sm:p-4 pt-0">
                       <Button
-                        className="w-full gap-2"
+                        className="w-full gap-1 h-7 sm:h-9 text-[10px] sm:text-xs font-bold gradient-primary text-white rounded-lg sm:rounded-xl"
                         size="sm"
                         disabled={product.stock <= 0 || addingToCart === product.id}
                         onClick={() => handleAddToCart(product.id)}
                       >
                         {addingToCart === product.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         ) : (
-                          <ShoppingCart className="h-4 w-4" />
+                          <ShoppingCart className="h-3.5 w-3.5" />
                         )}
-                        {addingToCart === product.id ? "Adding..." : "Add to Cart"}
+                        <span>{addingToCart === product.id ? "Adding..." : "Add to Cart"}</span>
                       </Button>
                     </div>
                   </div>

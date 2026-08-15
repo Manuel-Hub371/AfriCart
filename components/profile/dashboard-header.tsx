@@ -9,17 +9,17 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   return (
-    <header className="lg:hidden sticky top-0 z-30 bg-white border-b px-4 py-3">
-      <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-emerald-600">AfriCart</h1>
+    <header className="lg:hidden sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-gray-200 px-3 py-2 flex items-center justify-between">
+      <div className="flex items-center gap-2">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={onMenuClick}
-          className="lg:hidden"
+          className="lg:hidden h-8 w-8 p-0"
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-5 w-5 text-gray-700" />
         </Button>
+        <h1 className="text-base font-extrabold text-emerald-600 tracking-tight">AfriCart Dashboard</h1>
       </div>
     </header>
   );
