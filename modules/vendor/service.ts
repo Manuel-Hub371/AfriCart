@@ -1,4 +1,5 @@
 import { vendorRepository } from "./repository";
+import { normalizeImages } from "@/lib/image-utils";
 import { isBestSellerProduct } from "@/modules/catalog/best-seller-calculator";
 import { domainEvents, EVENT_TOPICS } from "@/lib/events";
 import {
@@ -33,7 +34,7 @@ function toVendorProductDTO(product: any): VendorProductDTO {
     description: product.description ?? null,
     price: Number(product.price),
     categoryName: product.categoryName ?? null,
-    images: product.images ?? [],
+    images: normalizeImages(product.images),
     stock: product.stock,
     weight: product.weight ? Number(product.weight) : null,
     dimensions: product.dimensions ?? null,
@@ -45,7 +46,7 @@ function toVendorProductDTO(product: any): VendorProductDTO {
           price: v.price ? Number(v.price) : Number(product.price),
           stock: v.stock !== undefined ? Number(v.stock) : product.stock,
           attributes: v.attributes || v.options || {},
-          images: Array.isArray(v.images) ? v.images : [],
+          images: normalizeImages(v.images),
         }))
       : [],
     shippingPolicyIds: Array.isArray(product.shippingPolicies) ? product.shippingPolicies.map((sp: any) => sp.shippingPolicyId) : [],

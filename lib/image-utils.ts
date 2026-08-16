@@ -69,8 +69,8 @@ export function extractCoverImage(
   // Strip wrapping quotes
   url = url.replace(/^['"]+|['"]+$/g, "").trim();
 
-  // If comma separated, extract first item
-  if (url.includes(",")) {
+  // If comma separated and NOT a base64 data URI, extract first item
+  if (url.includes(",") && !url.startsWith("data:")) {
     url = url.split(",")[0].trim();
   }
 
@@ -91,6 +91,104 @@ export function extractCoverImage(
   }
 
   return url;
+}
+
+/**
+ * Normalizes any image input (Array of URLs, Array of image objects, single URL string, JSON string, or object)
+ * into a clean array of valid image URL strings.
+ */
+export function normalizeImages(imageInput: any): string[] {
+  if (!imageInput) return [];
+
+  const parseItem = (item: any): string => {
+    if (!item) return "";
+    if (typeof item === "string") {
+      const trimmed = item.trim();
+      if (!trimmed) return "";
+      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parseItem(parsed[0]);
+          }
+        } catch {
+          return trimmed;
+        }
+      } else if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return parseItem(parsed);
+        } catch {
+          return trimmed;
+        }
+      }
+      return trimmed;
+    }
+
+    if (typeof item === "object") {
+      return (
+        item.url ||
+        item.src ||
+        item.path ||
+        item.link ||
+        item.secure_url ||
+        item.image ||
+        ""
+      );
+    }
+
+    return "";
+  };
+
+  let list: string[] = [];
+
+  if (Array.isArray(imageInput)) {
+    for (const item of imageInput) {
+      const candidate = parseItem(item);
+      if (candidate) list.push(candidate);
+    }
+  } else if (typeof imageInput === "string" && imageInput.trim()) {
+    const str = imageInput.trim();
+    if (str.startsWith("[") && str.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(str);
+        if (Array.isArray(parsed)) {
+          for (const item of parsed) {
+            const candidate = parseItem(item);
+            if (candidate) list.push(candidate);
+          }
+        }
+      } catch {
+        list.push(str);
+      }
+    } else if (str.includes(",") && !str.startsWith("data:")) {
+      list = str.split(",").map((s) => s.trim()).filter(Boolean);
+    } else {
+      list.push(str);
+    }
+  } else if (typeof imageInput === "object") {
+    const candidate = parseItem(imageInput);
+    if (candidate) list.push(candidate);
+  }
+
+  return list
+    .map((url) => {
+      url = url.replace(/^['"]+|['"]+$/g, "").trim();
+      if (
+        !url.startsWith("http://") &&
+        !url.startsWith("https://") &&
+        !url.startsWith("/") &&
+        !url.startsWith("data:") &&
+        !url.startsWith("blob:")
+      ) {
+        url = `/${url}`;
+      }
+      if (url.includes("example.com") || url.includes("placeholder.com")) {
+        return "";
+      }
+      return url;
+    })
+    .filter(Boolean);
 }
 
 /**

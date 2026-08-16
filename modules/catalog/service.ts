@@ -1,5 +1,6 @@
 import { catalogRepository, CatalogRepository } from "./repository";
 import { isBestSellerProduct } from "./best-seller-calculator";
+import { normalizeImages } from "@/lib/image-utils";
 import {
   GetProductsQueryInput,
   PaginatedProductsResponseDTO,
@@ -67,7 +68,7 @@ export class CatalogService {
         reviewCount: p.numReviews || 0,
 
         category: p.categoryName,
-        images: Array.isArray(p.images) ? (p.images as string[]) : [],
+        images: normalizeImages(p.images),
         stock: p.stock,
         rating: p.rating,
         numReviews: p.numReviews,
@@ -188,7 +189,7 @@ export class CatalogService {
 
       campaigns,
       category: product.categoryName || st?.category || "General",
-      images: Array.isArray(product.images) ? (product.images as string[]) : [],
+      images: normalizeImages(product.images),
       stock: product.stock,
       views: product.views,
       rating: product.rating,
@@ -512,7 +513,7 @@ export class CatalogService {
           isBestSeller,
           bestSellerScore: p.bestSellerScore || 0,
           bestSellerRank: isBestSeller ? index + 1 : null,
-          images: Array.isArray(p.images) ? (p.images as string[]) : [],
+          images: normalizeImages(p.images),
           stock: p.stock,
           rating: p.rating,
           numReviews: p.numReviews,

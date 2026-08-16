@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { resolveCampaignPricing, extractCampaigns } from "@/lib/campaign-pricing";
 import { isBestSellerProduct } from "@/modules/catalog/best-seller-calculator";
+import { normalizeImages } from "@/lib/image-utils";
 
 // GET /api/campaigns/[slug]
 export async function GET(
@@ -89,7 +90,7 @@ export async function GET(
         bestSellerRank: isBestSeller ? index + 1 : null,
 
         category: p.categoryName,
-        images: Array.isArray(p.images) ? p.images : [],
+        images: normalizeImages(p.images),
         stock: p.stock,
         rating: p.rating,
         numReviews: p.numReviews,

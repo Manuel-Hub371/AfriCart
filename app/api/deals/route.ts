@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { resolveCampaignPricing, extractCampaigns } from "@/lib/campaign-pricing";
 import { isBestSellerProduct } from "@/modules/catalog/best-seller-calculator";
+import { normalizeImages } from "@/lib/image-utils";
 
 // GET /api/deals — Global Marketplace Deals Engine
 export async function GET(req: NextRequest) {
@@ -227,7 +228,7 @@ export async function GET(req: NextRequest) {
           isBestSeller,
           bestSellerScore: p.bestSellerScore || 0,
           isFeatured: p.isFeatured,
-          images: Array.isArray(p.images) ? (p.images as string[]) : [],
+          images: normalizeImages(p.images),
           store: {
             id: p.store.id,
             name: p.store.name,
