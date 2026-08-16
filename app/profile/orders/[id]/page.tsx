@@ -17,6 +17,7 @@ import {
   Truck,
 } from "lucide-react";
 import Link from "next/link";
+import { extractCoverImage, getCategoryFallbackImage } from "@/lib/image-utils";
 
 interface OrderDetail {
   id: string;
@@ -149,20 +150,25 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                 </h2>
 
                 <div className="divide-y divide-gray-100">
-                  {order.orderItems.map((item) => (
-                    <div key={item.id} className="py-2.5 sm:py-4 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        {item.productImage ? (
+                  {order.orderItems.map((item) => {
+                    const coverImage = extractCoverImage(item.productImage, item.productName);
+                    const itemImg = coverImage || getCategoryFallbackImage(item.productName);
+
+                    return (
+                      <div key={item.id} className="py-2.5 sm:py-4 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5">
                           <img
-                            src={item.productImage}
+                            src={itemImg}
                             alt={item.productName}
                             className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-gray-200 flex-shrink-0"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              const fallback = getCategoryFallbackImage(item.productName);
+                              if (target.src !== fallback) {
+                                target.src = fallback;
+                              }
+                            }}
                           />
-                        ) : (
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 flex-shrink-0">
-                            <Package className="h-5 w-5" />
-                          </div>
-                        )}
                         <div className="min-w-0 flex-1">
                           <h3 className="font-extrabold text-gray-900 text-xs sm:text-base line-clamp-1">
                             {item.productName}
@@ -178,8 +184,9 @@ export default function OrderDetailsPage({ params }: { params: Promise<{ id: str
                         <p className="text-[10px] text-gray-400">GH₵{item.price.toFixed(2)} each</p>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  );
+                })}
+              </div>
               </div>
             </div>
 

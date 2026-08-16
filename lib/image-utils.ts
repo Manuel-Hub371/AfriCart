@@ -1,59 +1,78 @@
 /**
  * Safely extracts the primary cover image URL from any product image field format
- * (Array of URLs, single URL, JSON-encoded array string, or comma-separated string).
+ * (Array of URLs, Array of image objects, single URL string, JSON string, or object).
  */
 export function extractCoverImage(
-  image: string | string[] | null | undefined,
+  image: any,
   productName?: string,
   categoryOrBrand?: string
 ): string {
   if (!image) return "";
 
+  const parseItem = (item: any): string => {
+    if (!item) return "";
+    if (typeof item === "string") {
+      const trimmed = item.trim();
+      if (!trimmed) return "";
+
+      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parseItem(parsed[0]);
+          }
+        } catch {
+          return trimmed;
+        }
+      } else if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          return parseItem(parsed);
+        } catch {
+          return trimmed;
+        }
+      }
+      return trimmed;
+    }
+
+    if (typeof item === "object") {
+      return (
+        item.url ||
+        item.src ||
+        item.path ||
+        item.link ||
+        item.secure_url ||
+        item.image ||
+        ""
+      );
+    }
+
+    return "";
+  };
+
   let url = "";
 
   if (Array.isArray(image)) {
     for (const item of image) {
-      if (typeof item === "string" && item.trim()) {
-        const trimmed = item.trim();
-        if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
-          try {
-            const parsed = JSON.parse(trimmed);
-            if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === "string") {
-              url = parsed[0].trim();
-              break;
-            }
-          } catch {
-            url = trimmed;
-            break;
-          }
-        } else {
-          url = trimmed;
-          break;
-        }
+      const candidate = parseItem(item);
+      if (candidate) {
+        url = candidate;
+        break;
       }
     }
-  } else if (typeof image === "string" && image.trim()) {
-    const str = image.trim();
-    if (str.startsWith("[") && str.endsWith("]")) {
-      try {
-        const parsed = JSON.parse(str);
-        if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === "string") {
-          url = parsed[0].trim();
-        }
-      } catch {
-        url = str;
-      }
-    } else if (str.includes(",")) {
-      url = str.split(",")[0].trim();
-    } else {
-      url = str;
-    }
+  } else {
+    url = parseItem(image);
   }
 
   if (!url) return "";
 
   // Strip wrapping quotes
   url = url.replace(/^['"]+|['"]+$/g, "").trim();
+
+  // If comma separated, extract first item
+  if (url.includes(",")) {
+    url = url.split(",")[0].trim();
+  }
 
   // Normalize relative image paths missing a leading slash
   if (

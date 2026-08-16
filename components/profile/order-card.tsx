@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BadgeCheck, Eye, Package } from "lucide-react";
 import Link from "next/link";
+import { extractCoverImage, getCategoryFallbackImage } from "@/lib/image-utils";
 
 interface OrderCardProps {
   order: {
@@ -69,24 +70,23 @@ export default function OrderCard({ order }: OrderCardProps) {
 
       <div className="space-y-2 pt-0.5">
         {order.products.map((product, index) => {
-          const isUrl = product.image && (product.image.startsWith("http") || product.image.startsWith("/"));
+          const coverImage = extractCoverImage((product as any).images || product.image, product.name);
+          const imgSrc = coverImage || getCategoryFallbackImage(product.name);
+
           return (
             <div key={index} className="flex items-center gap-2.5 bg-gray-50/60 p-1.5 rounded-lg border border-gray-100">
-              {isUrl ? (
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-md flex-shrink-0 border border-gray-200"
-                />
-              ) : (
-                <div
-                  className={`w-12 h-12 sm:w-14 sm:h-14 ${
-                    product.image || "bg-gradient-to-br from-emerald-100 to-emerald-200"
-                  } rounded-md flex items-center justify-center font-bold text-emerald-800 text-xs flex-shrink-0`}
-                >
-                  {!product.image && product.name ? product.name[0] : ""}
-                </div>
-              )}
+              <img
+                src={imgSrc}
+                alt={product.name}
+                className="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-md flex-shrink-0 border border-gray-200"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  const fallback = getCategoryFallbackImage(product.name);
+                  if (target.src !== fallback) {
+                    target.src = fallback;
+                  }
+                }}
+              />
               <div className="flex-1 min-w-0">
                 <p className="font-bold text-xs text-gray-900 truncate">
                   {product.name}

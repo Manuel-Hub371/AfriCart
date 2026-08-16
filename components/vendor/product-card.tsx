@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ProductStatusBadge } from "./product-status-badge";
@@ -38,10 +38,15 @@ interface ProductCardProps {
 
 export function ProductCard({ product, isSelected, onSelect, onAction }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [imgSrc, setImgSrc] = useState(
-    extractCoverImage(product.image, product.name, product.category) ||
-    getCategoryFallbackImage(product.name, product.category)
-  );
+  const getPrimaryImage = (): string => {
+    const extracted = extractCoverImage((product as any).images || product.image, product.name, product.category);
+    return extracted || getCategoryFallbackImage(product.name, product.category);
+  };
+  const [imgSrc, setImgSrc] = useState<string>(getPrimaryImage());
+
+  useEffect(() => {
+    setImgSrc(getPrimaryImage());
+  }, [product]);
 
   return (
     <Card
@@ -81,18 +86,17 @@ export function ProductCard({ product, isSelected, onSelect, onAction }: Product
 
       {/* Product Image */}
       <div className="relative aspect-square bg-gray-100 overflow-hidden">
-        {imgSrc ? (
-          <img
-            src={imgSrc}
-            alt={product.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            onError={() => setImgSrc("")}
-          />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300 bg-gray-50">
-            <Package className="w-12 h-12 stroke-[1.5]" />
-          </div>
-        )}
+        <img
+          src={imgSrc}
+          alt={product.name}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          onError={() => {
+            const fallback = getCategoryFallbackImage(product.name, product.category);
+            if (imgSrc !== fallback) {
+              setImgSrc(fallback);
+            }
+          }}
+        />
         {/* Status Badge Overlay */}
         <div className="absolute bottom-3 left-3 z-10 flex items-center gap-1.5 flex-wrap">
           <ProductStatusBadge status={product.status} />

@@ -7,6 +7,7 @@ import { EmptyCart } from "@/components/cart/empty-cart";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, ArrowLeft, Trash2, Plus, Minus, Store, Package } from "lucide-react";
 import Link from "next/link";
+import { extractCoverImage, getCategoryFallbackImage } from "@/lib/image-utils";
 
 export default function CartPage() {
   const [cartData, setCartData] = useState<any>(null);
@@ -139,17 +140,25 @@ export default function CartPage() {
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-2.5 sm:space-y-4">
               {cartData.items.map((item: any) => {
-                const imgUrl = item.product.image || "";
+                const coverImage = extractCoverImage(item.product.images || item.product.image, item.product.name, item.product.categoryName);
+                const imgUrl = coverImage || getCategoryFallbackImage(item.product.name, item.product.categoryName);
                 const isDiscounted = item.product.isDiscounted && item.product.originalPrice > item.product.price;
 
                 return (
                   <div key={item.id} className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-2.5 sm:p-5 flex gap-3 sm:gap-5 items-center shadow-2xs">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center">
-                      {imgUrl ? (
-                        <img src={imgUrl} alt={item.product.name} className="w-full h-full object-cover" />
-                      ) : (
-                        <Package className="w-6 h-6 sm:w-8 sm:h-8 text-gray-300" />
-                      )}
+                      <img
+                        src={imgUrl}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.currentTarget;
+                          const fallback = getCategoryFallbackImage(item.product.name, item.product.categoryName);
+                          if (target.src !== fallback) {
+                            target.src = fallback;
+                          }
+                        }}
+                      />
                     </div>
 
                     <div className="flex-1 min-w-0 space-y-1">

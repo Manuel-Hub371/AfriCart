@@ -6,6 +6,7 @@ import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Trash2, ShoppingCart, Star } from "lucide-react";
 import Link from "next/link";
+import { extractCoverImage, getCategoryFallbackImage } from "@/lib/image-utils";
 
 export default function WishlistPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -86,7 +87,9 @@ export default function WishlistPage() {
           ) : items.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-6">
               {items.map((item) => {
-                const imgUrl = item.product.image || "";
+                const coverImage = extractCoverImage(item.product.images || item.product.image, item.product.name, item.product.categoryName);
+                const imgUrl = coverImage || getCategoryFallbackImage(item.product.name, item.product.categoryName);
+
                 return (
                   <div
                     key={item.id}
@@ -94,17 +97,18 @@ export default function WishlistPage() {
                   >
                     <div>
                       <Link href={`/product/${item.product.id}`}>
-                        {imgUrl ? (
-                          <img
-                            src={imgUrl}
-                            alt={item.product.name}
-                            className="h-32 sm:h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          />
-                        ) : (
-                          <div className="h-32 sm:h-48 bg-gradient-to-br from-emerald-100 to-green-200 flex items-center justify-center font-bold text-emerald-800 text-2xl cursor-pointer">
-                            {item.product.name[0]}
-                          </div>
-                        )}
+                        <img
+                          src={imgUrl}
+                          alt={item.product.name}
+                          className="h-32 sm:h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.currentTarget;
+                            const fallback = getCategoryFallbackImage(item.product.name, item.product.categoryName);
+                            if (target.src !== fallback) {
+                              target.src = fallback;
+                            }
+                          }}
+                        />
                       </Link>
                       <div className="p-2 sm:p-4 space-y-1">
                         <Link href={`/product/${item.product.id}`}>

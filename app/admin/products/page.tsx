@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Package, ExternalLink, Loader2 } from "lucide-react";
+import { extractCoverImage, getCategoryFallbackImage } from "@/lib/image-utils";
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -61,15 +62,26 @@ export default function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 font-medium">
-                {products.map((p) => (
-                  <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-3">
-                        {p.image ? (
-                          <img src={p.image} alt={p.name} className="w-9 h-9 object-cover rounded-lg border border-slate-800" />
-                        ) : (
-                          <div className="w-9 h-9 bg-slate-800 rounded-lg flex items-center justify-center text-slate-500 font-bold">P</div>
-                        )}
+                {products.map((p) => {
+                  const coverImage = extractCoverImage(p.images || p.image, p.name, p.category);
+                  const imgSrc = coverImage || getCategoryFallbackImage(p.name, p.category);
+
+                  return (
+                    <tr key={p.id} className="hover:bg-slate-800/40 transition-colors">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={imgSrc}
+                            alt={p.name}
+                            className="w-9 h-9 object-cover rounded-lg border border-slate-800"
+                            onError={(e) => {
+                              const target = e.currentTarget;
+                              const fallback = getCategoryFallbackImage(p.name, p.category);
+                              if (target.src !== fallback) {
+                                target.src = fallback;
+                              }
+                            }}
+                          />
                         <div>
                           <p className="font-bold text-slate-100">{p.name}</p>
                           <p className="text-[10px] text-slate-500 font-mono">ID: {p.id.slice(0, 8)}</p>
@@ -82,8 +94,9 @@ export default function AdminProductsPage() {
                     <td className="py-4 px-6 font-mono text-slate-300">{p.stock} units</td>
                     <td className="py-4 px-6 font-bold text-emerald-400">{p.status}</td>
                   </tr>
-                ))}
-              </tbody>
+                );
+              })}
+            </tbody>
             </table>
           </div>
         ) : (

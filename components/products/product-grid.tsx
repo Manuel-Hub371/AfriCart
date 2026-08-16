@@ -40,7 +40,7 @@ export function ProductGrid({ products = [], totalProducts = 0, showCount = true
             campaignBadge={product.campaignBadge}
             campaignColor={product.campaignColor}
             campaignName={product.campaignName}
-            image={product.images?.[0] || ""}
+            image={product.images || product.image}
             inStock={product.stock > 0}
             imagesCount={Array.isArray(product.images) ? product.images.length : 1}
             isBestSeller={product.isBestSeller ?? false}
