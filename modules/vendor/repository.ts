@@ -866,14 +866,27 @@ export class VendorRepository {
     });
 
     if (Array.isArray(data.productIds) && data.productIds.length > 0) {
-      await db.campaignProduct.createMany({
-        data: data.productIds.map((pid: string) => ({
-          campaignId: campaign.id,
-          productId: pid,
-          assignedBy: actorUserId || null,
-        })),
-        skipDuplicates: true,
+      // Server-side vendor product ownership validation: vendor can only link products owned by their store
+      const ownedProducts = await db.product.findMany({
+        where: {
+          id: { in: data.productIds },
+          storeId,
+          deletedAt: null,
+        },
+        select: { id: true },
       });
+      const validProductIds = ownedProducts.map((p) => p.id);
+
+      if (validProductIds.length > 0) {
+        await db.campaignProduct.createMany({
+          data: validProductIds.map((pid: string) => ({
+            campaignId: campaign.id,
+            productId: pid,
+            assignedBy: actorUserId || null,
+          })),
+          skipDuplicates: true,
+        });
+      }
     }
 
     // Invalidate pricing cache & record audit log
@@ -940,14 +953,27 @@ export class VendorRepository {
     if (Array.isArray(data.productIds)) {
       await db.campaignProduct.deleteMany({ where: { campaignId: id } });
       if (data.productIds.length > 0) {
-        await db.campaignProduct.createMany({
-          data: data.productIds.map((pid: string) => ({
-            campaignId: id,
-            productId: pid,
-            assignedBy: actorUserId || null,
-          })),
-          skipDuplicates: true,
+        // Server-side vendor product ownership validation
+        const ownedProducts = await db.product.findMany({
+          where: {
+            id: { in: data.productIds },
+            storeId,
+            deletedAt: null,
+          },
+          select: { id: true },
         });
+        const validProductIds = ownedProducts.map((p) => p.id);
+
+        if (validProductIds.length > 0) {
+          await db.campaignProduct.createMany({
+            data: validProductIds.map((pid: string) => ({
+              campaignId: id,
+              productId: pid,
+              assignedBy: actorUserId || null,
+            })),
+            skipDuplicates: true,
+          });
+        }
       }
     }
 

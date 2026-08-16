@@ -49,6 +49,7 @@ export default function DealsPage() {
   // Deals Data State
   const [products, setProducts] = useState<any[]>([]);
   const [featuredCampaign, setFeaturedCampaign] = useState<any | null>(null);
+  const [activeCampaigns, setActiveCampaigns] = useState<any[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
   const [page, setPage] = useState<number>(1);
@@ -58,6 +59,7 @@ export default function DealsPage() {
   // Filter & Search States
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string>("");
   const [minDiscount, setMinDiscount] = useState<string>("");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
@@ -100,6 +102,7 @@ export default function DealsPage() {
 
       if (searchQuery.trim()) params.set("query", searchQuery.trim());
       if (selectedCategory) params.set("category", selectedCategory);
+      if (selectedCampaignId) params.set("campaignId", selectedCampaignId);
       if (minDiscount) params.set("minDiscount", minDiscount);
       if (minPrice) params.set("minPrice", minPrice);
       if (maxPrice) params.set("maxPrice", maxPrice);
@@ -114,6 +117,7 @@ export default function DealsPage() {
       setTotal(data.total || 0);
       setTotalPages(data.totalPages || 1);
       setFeaturedCampaign(data.featuredCampaign || null);
+      setActiveCampaigns(data.activeCampaigns || []);
 
       if (data.featuredCampaign?.endDate) {
         setSpotlightTime(computeTimeLeft(data.featuredCampaign.endDate));
@@ -124,7 +128,7 @@ export default function DealsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [page, sortBy, searchQuery, selectedCategory, minDiscount, minPrice, maxPrice]);
+  }, [page, sortBy, searchQuery, selectedCategory, selectedCampaignId, minDiscount, minPrice, maxPrice]);
 
   useEffect(() => {
     fetchDeals();
@@ -146,6 +150,7 @@ export default function DealsPage() {
   const handleResetFilters = () => {
     setSearchQuery("");
     setSelectedCategory("");
+    setSelectedCampaignId("");
     setMinDiscount("");
     setMinPrice("");
     setMaxPrice("");
@@ -222,45 +227,51 @@ export default function DealsPage() {
         {/* Main Content Area */}
         <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 py-3 sm:py-8 space-y-3 sm:space-y-6">
           
-          {/* Touch Category Pills Bar (Mobile/Tablet Only) */}
-          <div className="overflow-x-auto no-scrollbar flex items-center gap-1.5 py-1 lg:hidden">
-            <button
-              onClick={() => {
-                setSelectedCategory("");
-                setPage(1);
-              }}
-              className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-                selectedCategory === ""
-                  ? "bg-emerald-600 text-white shadow-2xs"
-                  : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-              }`}
-            >
-              🔥 All Deals
-            </button>
-            {categories.map((c) => {
-              const isSelected = selectedCategory === c;
-              return (
-                <button
-                  key={c}
-                  onClick={() => {
-                    setSelectedCategory(c);
-                    setPage(1);
-                  }}
-                  className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-                    isSelected
-                      ? "bg-emerald-600 text-white shadow-2xs"
-                      : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
-                  }`}
-                >
-                  {c}
-                </button>
-              );
-            })}
-          </div>
+          {/* Dynamic Active Campaigns Touch Bar (Mobile/Tablet Only) */}
+          {activeCampaigns.length > 0 && (
+            <div className="overflow-x-auto no-scrollbar flex items-center gap-1.5 py-1 lg:hidden">
+              <button
+                onClick={() => {
+                  setSelectedCampaignId("");
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
+                  selectedCampaignId === ""
+                    ? "bg-emerald-600 text-white shadow-2xs"
+                    : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                }`}
+              >
+                🔥 All Deals ({total})
+              </button>
 
-          {/* Toolbar: Search, Filters & Sorting */}
+              {activeCampaigns.map((ac) => {
+                const isSelected = selectedCampaignId === ac.id;
+                return (
+                  <button
+                    key={ac.id}
+                    onClick={() => {
+                      setSelectedCampaignId(isSelected ? "" : ac.id);
+                      setPage(1);
+                    }}
+                    className={`px-3 py-1.5 rounded-full text-[11px] font-bold whitespace-nowrap transition-all flex items-center gap-1 ${
+                      isSelected
+                        ? "bg-emerald-600 text-white shadow-2xs"
+                        : "bg-white text-gray-700 hover:bg-gray-100 border border-gray-200"
+                    }`}
+                  >
+                    <span>{ac.badge || ac.name}</span>
+                    {ac.store?.name && (
+                      <span className="text-[9px] font-medium opacity-75">({ac.store.name})</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Toolbar: Search, Campaign Filter, Category & Sorting */}
           <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-2.5 sm:p-5 shadow-2xs space-y-2.5">
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-3">
               {/* Search within Deals */}
               <div className="relative col-span-2 sm:col-span-1">
                 <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
@@ -274,6 +285,25 @@ export default function DealsPage() {
                   }}
                   className="pl-8 h-8 sm:h-10 rounded-xl text-xs bg-gray-50/50 border-gray-200"
                 />
+              </div>
+
+              {/* Active Campaign Filter Dropdown */}
+              <div>
+                <select
+                  value={selectedCampaignId}
+                  onChange={(e) => {
+                    setSelectedCampaignId(e.target.value);
+                    setPage(1);
+                  }}
+                  className="w-full h-8 sm:h-10 px-2 sm:px-3 rounded-xl border border-gray-200 text-xs focus:border-emerald-600 focus:outline-none bg-white font-medium text-gray-700 cursor-pointer"
+                >
+                  <option value="">🔥 All Active Campaigns</option>
+                  {activeCampaigns.map((ac) => (
+                    <option key={ac.id} value={ac.id}>
+                      {ac.name} — {ac.store?.name || "Vendor"}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Category Filter */}
@@ -384,7 +414,7 @@ export default function DealsPage() {
                   className="w-14 sm:w-20 h-7 text-[10px] sm:text-xs rounded-lg px-1.5"
                 />
 
-                {(searchQuery || selectedCategory || minDiscount || minPrice || maxPrice || sortBy !== "discount_desc") && (
+                {(searchQuery || selectedCategory || selectedCampaignId || minDiscount || minPrice || maxPrice || sortBy !== "discount_desc") && (
                   <Button
                     onClick={handleResetFilters}
                     variant="ghost"
