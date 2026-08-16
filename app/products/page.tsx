@@ -305,8 +305,8 @@ function ProductsContent() {
           onClearAll={handleClearAll}
         />
 
-        {/* Toolbar & Sort Controls */}
-        <div className="flex items-center justify-between gap-2 mb-4 bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-gray-200 shadow-2xs">
+        {/* Toolbar & Sort Controls (Sticky Header Bar) */}
+        <div className="sticky top-14 md:top-16 z-30 flex items-center justify-between gap-2 mb-4 bg-white/95 backdrop-blur-md px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl border border-gray-200 shadow-2xs transition-all">
           <div className="flex items-center gap-2">
             {/* Mobile Filter Toggle Button */}
             <Button
@@ -355,7 +355,7 @@ function ProductsContent() {
         {/* Desktop & Mobile Grid Section */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Desktop Sticky Filter Sidebar (1/4 column) */}
-          <div className="hidden lg:block lg:col-span-1 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
+          <div className="hidden lg:block lg:col-span-1 sticky top-32 self-start max-h-[calc(100vh-9rem)] overflow-y-auto pr-1">
             <FilterSidebar
               categories={categories}
               selectedCategories={selectedCategories}
