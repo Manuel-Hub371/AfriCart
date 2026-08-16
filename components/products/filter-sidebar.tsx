@@ -15,6 +15,7 @@ interface FilterSidebarProps {
   maxPrice?: number;
   onPriceChange: (min?: number, max?: number) => void;
   onClearAll: () => void;
+  className?: string;
 }
 
 export function FilterSidebar({
@@ -27,6 +28,7 @@ export function FilterSidebar({
   maxPrice,
   onPriceChange,
   onClearAll,
+  className = "",
 }: FilterSidebarProps) {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     category: true,
@@ -63,7 +65,7 @@ export function FilterSidebar({
   ];
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-2xs space-y-4 sm:space-y-6">
+    <div className={`bg-white rounded-2xl border border-gray-200 p-4 sm:p-5 shadow-2xs space-y-4 sm:space-y-6 ${className}`}>
       {/* Header */}
       <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
@@ -96,7 +98,7 @@ export function FilterSidebar({
         </button>
 
         {openSections.category && (
-          <div className="space-y-1.5 mt-2.5 max-h-64 sm:max-h-72 overflow-y-auto pr-1">
+          <div className="space-y-1.5 mt-2.5">
             {categories.map((cat) => {
               const catSlug = cat.slug || cat.id || cat.name.toLowerCase();
               const isChecked = selectedCategories.includes(catSlug);

@@ -354,8 +354,8 @@ function ProductsContent() {
 
         {/* Desktop & Mobile Grid Section */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Desktop Filter Sidebar (1/4 column) */}
-          <div className="hidden lg:block lg:col-span-1">
+          {/* Desktop Sticky Filter Sidebar (1/4 column) */}
+          <div className="hidden lg:block lg:col-span-1 sticky top-20 self-start max-h-[calc(100vh-6rem)] overflow-y-auto pr-1">
             <FilterSidebar
               categories={categories}
               selectedCategories={selectedCategories}
