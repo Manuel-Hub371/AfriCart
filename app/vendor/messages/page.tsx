@@ -16,11 +16,11 @@ export default function VendorMessagesPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch vendor conversations
+  // Fetch vendor conversations with live polling
   useEffect(() => {
-    async function loadConversations() {
+    async function loadConversations(isInitial = false) {
       try {
-        setIsLoading(true);
+        if (isInitial) setIsLoading(true);
         const res = await fetch("/api/messaging/conversations?role=vendor");
         if (res.ok) {
           const data = await res.json();
@@ -33,7 +33,10 @@ export default function VendorMessagesPage() {
             unreadCount: c.unreadCount || 0,
             type: "general",
           }));
-          setConversations(mapped);
+          setConversations((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(mapped)) return mapped;
+            return prev;
+          });
           if (mapped.length > 0 && !activeConversationId) {
             setActiveConversationId(mapped[0].id);
           }
@@ -41,17 +44,19 @@ export default function VendorMessagesPage() {
       } catch (err) {
         console.error("Failed to load vendor conversations:", err);
       } finally {
-        setIsLoading(false);
+        if (isInitial) setIsLoading(false);
       }
     }
-    loadConversations();
+    loadConversations(true);
+    const interval = setInterval(() => loadConversations(false), 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Fetch messages for active conversation
+  // Fetch messages for active conversation with 3s live polling
   useEffect(() => {
     if (!activeConversationId) return;
 
-    async function loadMessages() {
+    async function loadMessages(silent = false) {
       try {
         const res = await fetch(`/api/messaging/conversations/${activeConversationId}/messages`);
         if (res.ok) {
@@ -64,13 +69,18 @@ export default function VendorMessagesPage() {
             timestamp: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: m.isRead ? "read" : "delivered",
           }));
-          setMessages(mapped);
+          setMessages((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(mapped)) return mapped;
+            return prev;
+          });
         }
       } catch (err) {
-        console.error("Failed to load messages:", err);
+        if (!silent) console.error("Failed to load messages:", err);
       }
     }
-    loadMessages();
+    loadMessages(false);
+    const interval = setInterval(() => loadMessages(true), 3000);
+    return () => clearInterval(interval);
   }, [activeConversationId]);
 
   const activeConversation = conversations.find(

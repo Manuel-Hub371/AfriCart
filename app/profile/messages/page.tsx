@@ -60,15 +60,18 @@ export default function CustomerMessagesPage() {
     scrollToBottom();
   }, [messages]);
 
-  // Fetch customer conversations
+  // Fetch customer conversations with live polling
   useEffect(() => {
-    async function loadConversations() {
+    async function loadConversations(isInitial = false) {
       try {
-        setIsLoading(true);
+        if (isInitial) setIsLoading(true);
         const res = await fetch("/api/messaging/conversations?role=customer");
         if (res.ok) {
           const data = await res.json();
-          setConversations(data || []);
+          setConversations((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(data)) return data || [];
+            return prev;
+          });
           if (data && data.length > 0 && !activeConversationId) {
             setActiveConversationId(data[0].id);
           }
@@ -76,28 +79,35 @@ export default function CustomerMessagesPage() {
       } catch (err) {
         console.error("Failed to load conversations:", err);
       } finally {
-        setIsLoading(false);
+        if (isInitial) setIsLoading(false);
       }
     }
-    loadConversations();
+    loadConversations(true);
+    const interval = setInterval(() => loadConversations(false), 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  // Fetch messages for active conversation
+  // Fetch messages for active conversation with 3s live polling
   useEffect(() => {
     if (!activeConversationId) return;
 
-    async function loadMessages() {
+    async function loadMessages(silent = false) {
       try {
         const res = await fetch(`/api/messaging/conversations/${activeConversationId}/messages`);
         if (res.ok) {
           const data = await res.json();
-          setMessages(data || []);
+          setMessages((prev) => {
+            if (JSON.stringify(prev) !== JSON.stringify(data)) return data || [];
+            return prev;
+          });
         }
       } catch (err) {
-        console.error("Failed to load messages:", err);
+        if (!silent) console.error("Failed to load messages:", err);
       }
     }
-    loadMessages();
+    loadMessages(false);
+    const interval = setInterval(() => loadMessages(true), 3000);
+    return () => clearInterval(interval);
   }, [activeConversationId]);
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);

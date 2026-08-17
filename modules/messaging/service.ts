@@ -1,6 +1,7 @@
 import { messagingRepository } from "./repository";
 import { shoppingRepository } from "@/modules/shopping/repository";
 import { vendorRepository } from "@/modules/vendor/repository";
+import { notificationRepository } from "@/modules/notifications/repository";
 import { ConversationDTO, CreateConversationInput, MessageDTO, SendMessageInput } from "./dto";
 import { domainEvents, EVENT_TOPICS } from "@/lib/events";
 
@@ -138,6 +139,35 @@ export class MessagingService {
     const senderType = isCustomer ? "CUSTOMER" : "VENDOR";
 
     const message = await messagingRepository.createMessage(conversationId, userId, senderType, input);
+
+    // Create system notification for message recipient
+    try {
+      const recipientUserId = isCustomer
+        ? conversation.store.vendorProfile.userId
+        : conversation.customerProfile.user.id;
+
+      const customerUser = conversation.customerProfile.user;
+      const senderDisplayName = isCustomer
+        ? [customerUser.firstName, customerUser.lastName].filter(Boolean).join(" ") || "Customer"
+        : conversation.store.name;
+
+      const previewText = input.text?.trim()
+        || (input.attachments && input.attachments.length > 0 ? `[${input.attachments[0].type.toUpperCase()}] ${input.attachments[0].name}` : "Attachment");
+
+      const link = isCustomer
+        ? `/vendor/messages`
+        : `/profile/messages?conversationId=${conversation.id}`;
+
+      await notificationRepository.createNotification({
+        userId: recipientUserId,
+        title: isCustomer ? `New Message from ${senderDisplayName}` : `New Message from ${senderDisplayName}`,
+        message: `"${previewText.length > 80 ? previewText.slice(0, 80) + '...' : previewText}"`,
+        type: "INFO",
+        link,
+      });
+    } catch (notifErr) {
+      console.error("Failed to create message notification:", notifErr);
+    }
 
     domainEvents.emit(EVENT_TOPICS.MESSAGE_SENT, {
       messageId: message.id,
