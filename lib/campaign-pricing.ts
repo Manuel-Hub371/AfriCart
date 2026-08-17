@@ -77,29 +77,30 @@ export function isCampaignLive(c: any): boolean {
   if (!c || c.deletedAt) return false;
   if (c.isActive === false) return false;
 
-  const now = Date.now();
-  const start = new Date(c.startDate).getTime();
-
-  let endDateObj = c.endDate ? new Date(c.endDate) : null;
-  if (!endDateObj || isNaN(endDateObj.getTime())) return false;
-
-  const endDateStr = typeof c.endDate === "string" ? c.endDate : c.endDate?.toISOString?.() || "";
-  if (endDateStr.endsWith("T00:00:00.000Z") || (!endDateStr.includes("T") && endDateStr.length === 10)) {
-    endDateObj = new Date(`${endDateStr.slice(0, 10)}T23:59:59.999Z`);
-  }
-
-  const end = endDateObj.getTime();
-
-  // Status check: DRAFT, PAUSED, CANCELLED are explicitly inactive.
   if (c.status && ["DRAFT", "PAUSED", "CANCELLED"].includes(c.status)) {
     return false;
   }
-  // EXPIRED: only inactive if current time is past the end of the day
-  if (c.status === "EXPIRED" && now > end) {
+
+  const now = Date.now();
+
+  if (typeof c._startTime !== "number") {
+    c._startTime = new Date(c.startDate).getTime();
+  }
+  if (typeof c._endTime !== "number") {
+    let endDateObj = c.endDate instanceof Date ? c.endDate : new Date(c.endDate);
+    if (!endDateObj || isNaN(endDateObj.getTime())) return false;
+    const endDateStr = typeof c.endDate === "string" ? c.endDate : (c.endDate?.toISOString ? c.endDate.toISOString() : "");
+    if (endDateStr.endsWith("T00:00:00.000Z") || (!endDateStr.includes("T") && endDateStr.length === 10)) {
+      endDateObj = new Date(`${endDateStr.slice(0, 10)}T23:59:59.999Z`);
+    }
+    c._endTime = endDateObj.getTime();
+  }
+
+  if (c.status === "EXPIRED" && now > c._endTime) {
     return false;
   }
 
-  return start <= now && now <= end;
+  return c._startTime <= now && now <= c._endTime;
 }
 
 /**
@@ -167,21 +168,23 @@ export function isCampaignEligibleForProduct(c: any, product: {
   if (scope === "PRODUCT") {
     if (!product.id) return false;
 
-    // Check 1: campaign -> campaignProducts join array
-    if (Array.isArray(c.campaignProducts) && c.campaignProducts.length > 0) {
-      const isLinked = c.campaignProducts.some((cp: any) => {
-        const linkedId = typeof cp === "string" ? cp : cp.productId || cp.product?.id || cp.id;
-        return linkedId === product.id;
-      });
-      if (isLinked) return true;
+    // Fast O(1) Set lookup
+    if (!c._productIdSet && Array.isArray(c.campaignProducts)) {
+      c._productIdSet = new Set(
+        c.campaignProducts.map((cp: any) =>
+          typeof cp === "string" ? cp : cp.productId || cp.product?.id || cp.id
+        ).filter(Boolean)
+      );
     }
 
-    // Check 2: campaign -> productIds string array
-    if (Array.isArray(c.productIds) && c.productIds.length > 0) {
-      if (c.productIds.includes(product.id)) return true;
+    if (c._productIdSet && c._productIdSet.has(product.id)) {
+      return true;
     }
 
-    // Check 3: product -> campaignProducts join array
+    if (Array.isArray(c.productIds) && c.productIds.includes(product.id)) {
+      return true;
+    }
+
     if (Array.isArray(product.campaignProducts) && product.campaignProducts.length > 0) {
       const isLinked = product.campaignProducts.some((cp: any) => {
         const linkedCampId = typeof cp === "string" ? cp : cp.campaignId || cp.campaign?.id || cp.id;
