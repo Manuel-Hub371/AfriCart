@@ -932,7 +932,12 @@ export class VendorRepository {
       }).catch(() => {});
     }
 
-    return campaign;
+    const fullCampaign = await db.marketingCampaign.findUnique({
+      where: { id: campaign.id },
+      include: { campaignProducts: true },
+    });
+
+    return fullCampaign || campaign;
   }
 
   async updateCampaign(id: string, storeId: string, data: any, actorUserId?: string) {

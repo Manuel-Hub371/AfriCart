@@ -162,16 +162,34 @@ export function isCampaignEligibleForProduct(c: any, product: {
     return categories.some((cat) => cat.toLowerCase() === product.categoryName?.toLowerCase());
   }
 
-  // 2. Scope === "PRODUCT": Must be explicitly linked to the product if campaignProducts list is present
+  // 2. Scope === "PRODUCT": Must be explicitly linked to the product via campaignProducts or product.campaignProducts
   if (scope === "PRODUCT") {
-    if (Array.isArray(c.campaignProducts) && c.campaignProducts.length > 0 && product.id) {
-      const isLinked = c.campaignProducts.some((cp: any) => {
+    if (!product.id) return false;
+
+    let isLinked = false;
+
+    // Check 1: campaign -> campaignProducts join array
+    if (Array.isArray(c.campaignProducts) && c.campaignProducts.length > 0) {
+      isLinked = c.campaignProducts.some((cp: any) => {
         const linkedId = typeof cp === "string" ? cp : cp.productId || cp.product?.id || cp.id;
         return linkedId === product.id;
       });
-      if (!isLinked) return false;
     }
-    return true;
+
+    // Check 2: campaign -> productIds string array
+    if (!isLinked && Array.isArray(c.productIds) && c.productIds.length > 0) {
+      isLinked = c.productIds.includes(product.id);
+    }
+
+    // Check 3: product -> campaignProducts join array
+    if (!isLinked && Array.isArray((product as any).campaignProducts) && (product as any).campaignProducts.length > 0) {
+      isLinked = (product as any).campaignProducts.some((cp: any) => {
+        const linkedCampId = typeof cp === "string" ? cp : cp.campaignId || cp.campaign?.id || cp.id;
+        return linkedCampId === c.id;
+      });
+    }
+
+    return isLinked;
   }
 
   return true;
