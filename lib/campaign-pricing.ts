@@ -75,17 +75,29 @@ function noPricing(basePrice: number): CampaignPricingResult {
  */
 export function isCampaignLive(c: any): boolean {
   if (!c || c.deletedAt) return false;
-  
-  // Status check: must not be DRAFT, PAUSED, CANCELLED, or EXPIRED
-  if (c.status && ["DRAFT", "PAUSED", "CANCELLED", "EXPIRED"].includes(c.status)) {
-    return false;
-  }
-
   if (c.isActive === false) return false;
 
   const now = Date.now();
   const start = new Date(c.startDate).getTime();
-  const end = new Date(c.endDate).getTime();
+
+  let endDateObj = c.endDate ? new Date(c.endDate) : null;
+  if (!endDateObj || isNaN(endDateObj.getTime())) return false;
+
+  const endDateStr = typeof c.endDate === "string" ? c.endDate : c.endDate?.toISOString?.() || "";
+  if (endDateStr.endsWith("T00:00:00.000Z") || (!endDateStr.includes("T") && endDateStr.length === 10)) {
+    endDateObj = new Date(`${endDateStr.slice(0, 10)}T23:59:59.999Z`);
+  }
+
+  const end = endDateObj.getTime();
+
+  // Status check: DRAFT, PAUSED, CANCELLED are explicitly inactive.
+  if (c.status && ["DRAFT", "PAUSED", "CANCELLED"].includes(c.status)) {
+    return false;
+  }
+  // EXPIRED: only inactive if current time is past the end of the day
+  if (c.status === "EXPIRED" && now > end) {
+    return false;
+  }
 
   return start <= now && now <= end;
 }

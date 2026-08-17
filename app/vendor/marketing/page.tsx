@@ -75,6 +75,7 @@ export default function VendorMarketingDashboardPage() {
   });
 
   const [campaigns, setCampaigns] = useState<DashboardCampaign[]>([]);
+  const [storeProducts, setStoreProducts] = useState<any[]>([]);
 
   // Modals state
   const [campaignModalOpen, setCampaignModalOpen] = useState(false);
@@ -95,13 +96,18 @@ export default function VendorMarketingDashboardPage() {
     targetScope: "PRODUCT",
     visibility: "PUBLIC",
     isActive: true,
+    productIds: [] as string[],
   });
 
   const fetchOverview = async () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await fetch("/api/vendor/marketing/overview");
+      const [res, prodRes] = await Promise.all([
+        fetch("/api/vendor/marketing/overview"),
+        fetch("/api/vendor/products"),
+      ]);
+
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error || "Failed to load marketing overview");
@@ -109,6 +115,11 @@ export default function VendorMarketingDashboardPage() {
       const data = await res.json();
       if (data.stats) setStats(data.stats);
       setCampaigns(data.campaigns || []);
+
+      if (prodRes && prodRes.ok) {
+        const pData = await prodRes.json();
+        setStoreProducts(pData.products || pData || []);
+      }
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -136,12 +147,26 @@ export default function VendorMarketingDashboardPage() {
       targetScope: "PRODUCT",
       visibility: "PUBLIC",
       isActive: true,
+      productIds: storeProducts.map((p) => p.id), // Default to selecting all existing store products
     });
     setCampaignModalOpen(true);
   };
 
-  const handleOpenEditCampaign = (c: DashboardCampaign) => {
+  const handleOpenEditCampaign = async (c: DashboardCampaign) => {
     setEditingCampaign(c);
+    let linkedProductIds: string[] = [];
+
+    try {
+      const res = await fetch(`/api/vendor/campaigns/${c.id}`);
+      if (res.ok) {
+        const details = await res.json();
+        const cps = details.campaign?.campaignProducts || [];
+        linkedProductIds = cps.map((cp: any) => cp.productId);
+      }
+    } catch {
+      // best effort
+    }
+
     setCampaignForm({
       name: c.name,
       type: c.type,
@@ -156,8 +181,17 @@ export default function VendorMarketingDashboardPage() {
       targetScope: c.targetScope || "PRODUCT",
       visibility: "PUBLIC",
       isActive: c.isActive,
+      productIds: linkedProductIds,
     });
     setCampaignModalOpen(true);
+  };
+
+  const toggleProductSelect = (pid: string) => {
+    if (campaignForm.productIds.includes(pid)) {
+      setCampaignForm({ ...campaignForm, productIds: campaignForm.productIds.filter((id) => id !== pid) });
+    } else {
+      setCampaignForm({ ...campaignForm, productIds: [...campaignForm.productIds, pid] });
+    }
   };
 
   const handleSaveCampaign = async (e: React.FormEvent) => {
@@ -504,6 +538,50 @@ export default function VendorMarketingDashboardPage() {
                   </select>
                 </div>
               </div>
+
+              {campaignForm.targetScope === "PRODUCT" && storeProducts.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs font-bold uppercase text-gray-700">
+                      Assign Store Products ({campaignForm.productIds.length} Selected)
+                    </label>
+                    <div className="flex items-center gap-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setCampaignForm({ ...campaignForm, productIds: storeProducts.map((p) => p.id) })}
+                        className="text-emerald-700 font-bold hover:underline"
+                      >
+                        Select All
+                      </button>
+                      <span className="text-gray-300">|</span>
+                      <button
+                        type="button"
+                        onClick={() => setCampaignForm({ ...campaignForm, productIds: [] })}
+                        className="text-red-600 font-bold hover:underline"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="max-h-36 overflow-y-auto border rounded-xl p-2 space-y-1 bg-gray-50">
+                    {storeProducts.map((p) => {
+                      const isSel = campaignForm.productIds.includes(p.id);
+                      return (
+                        <div
+                          key={p.id}
+                          onClick={() => toggleProductSelect(p.id)}
+                          className={`p-2 rounded-lg text-xs font-medium cursor-pointer flex items-center justify-between ${
+                            isSel ? "bg-emerald-100 text-emerald-800 font-bold" : "hover:bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          <span className="truncate max-w-[80%]">{p.name} (GH₵{p.price})</span>
+                          <span>{isSel ? "✓" : "+"}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

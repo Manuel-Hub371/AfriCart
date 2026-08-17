@@ -828,13 +828,31 @@ export class VendorRepository {
   async createCampaign(storeId: string, data: any, actorUserId?: string) {
     const slug = data.slug || `${data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now().toString(36)}`;
     const now = new Date();
-    const startDate = data.startDate ? new Date(data.startDate) : now;
-    const endDate = new Date(data.endDate);
+
+    const normalizeStartDate = (input: any): Date => {
+      if (!input) return now;
+      if (input instanceof Date) return input;
+      const str = String(input).trim();
+      if (!str) return now;
+      return str.includes("T") ? new Date(str) : new Date(`${str}T00:00:00.000Z`);
+    };
+
+    const normalizeEndDate = (input: any): Date => {
+      if (!input) return new Date(now.getTime() + 7 * 86400000);
+      if (input instanceof Date) return input;
+      const str = String(input).trim();
+      if (!str) return new Date(now.getTime() + 7 * 86400000);
+      return str.includes("T") ? new Date(str) : new Date(`${str}T23:59:59.999Z`);
+    };
+
+    const startDate = normalizeStartDate(data.startDate);
+    const endDate = normalizeEndDate(data.endDate);
 
     let status = data.status || "ACTIVE";
     if (data.isActive === false) status = "DRAFT";
     else if (startDate > now) status = "SCHEDULED";
     else if (endDate < now) status = "EXPIRED";
+    else status = "ACTIVE";
 
     const campaign = await db.marketingCampaign.create({
       data: {
@@ -865,11 +883,21 @@ export class VendorRepository {
       },
     });
 
+    let targetProductIds: string[] = [];
     if (Array.isArray(data.productIds) && data.productIds.length > 0) {
-      // Server-side vendor product ownership validation: vendor can only link products owned by their store
+      targetProductIds = data.productIds;
+    } else if (data.targetScope === "STORE" || !data.targetScope || data.targetScope === "PRODUCT") {
+      const storeProds = await db.product.findMany({
+        where: { storeId, deletedAt: null, status: "ACTIVE" },
+        select: { id: true },
+      });
+      targetProductIds = storeProds.map((p) => p.id);
+    }
+
+    if (targetProductIds.length > 0) {
       const ownedProducts = await db.product.findMany({
         where: {
-          id: { in: data.productIds },
+          id: { in: targetProductIds },
           storeId,
           deletedAt: null,
         },
@@ -912,8 +940,25 @@ export class VendorRepository {
     if (!existing) return null;
 
     const now = new Date();
-    const startDate = data.startDate ? new Date(data.startDate) : existing.startDate;
-    const endDate = data.endDate ? new Date(data.endDate) : existing.endDate;
+
+    const normalizeStartDate = (input: any, fallback: Date): Date => {
+      if (!input) return fallback;
+      if (input instanceof Date) return input;
+      const str = String(input).trim();
+      if (!str) return fallback;
+      return str.includes("T") ? new Date(str) : new Date(`${str}T00:00:00.000Z`);
+    };
+
+    const normalizeEndDate = (input: any, fallback: Date): Date => {
+      if (!input) return fallback;
+      if (input instanceof Date) return input;
+      const str = String(input).trim();
+      if (!str) return fallback;
+      return str.includes("T") ? new Date(str) : new Date(`${str}T23:59:59.999Z`);
+    };
+
+    const startDate = data.startDate ? normalizeStartDate(data.startDate, existing.startDate) : existing.startDate;
+    const endDate = data.endDate ? normalizeEndDate(data.endDate, existing.endDate) : existing.endDate;
     const isActive = data.isActive !== undefined ? Boolean(data.isActive) : existing.isActive;
 
     let status = data.status || existing.status;
@@ -931,8 +976,8 @@ export class VendorRepository {
         ...(data.banner !== undefined && { banner: data.banner }),
         ...(data.badge !== undefined && { badge: data.badge }),
         ...(data.color !== undefined && { color: data.color }),
-        ...(data.startDate && { startDate: new Date(data.startDate) }),
-        ...(data.endDate && { endDate: new Date(data.endDate) }),
+        ...(data.startDate && { startDate }),
+        ...(data.endDate && { endDate }),
         ...(data.isActive !== undefined && { isActive }),
         status,
         ...(data.visibility && { visibility: data.visibility }),
@@ -950,13 +995,27 @@ export class VendorRepository {
       },
     });
 
+    let targetProductIds: string[] | null = null;
     if (Array.isArray(data.productIds)) {
-      await db.campaignProduct.deleteMany({ where: { campaignId: id } });
       if (data.productIds.length > 0) {
-        // Server-side vendor product ownership validation
+        targetProductIds = data.productIds;
+      } else if (data.targetScope === "STORE") {
+        const storeProds = await db.product.findMany({
+          where: { storeId, deletedAt: null, status: "ACTIVE" },
+          select: { id: true },
+        });
+        targetProductIds = storeProds.map((p) => p.id);
+      } else {
+        targetProductIds = [];
+      }
+    }
+
+    if (targetProductIds !== null) {
+      await db.campaignProduct.deleteMany({ where: { campaignId: id } });
+      if (targetProductIds.length > 0) {
         const ownedProducts = await db.product.findMany({
           where: {
-            id: { in: data.productIds },
+            id: { in: targetProductIds },
             storeId,
             deletedAt: null,
           },

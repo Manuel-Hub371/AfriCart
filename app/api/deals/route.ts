@@ -22,14 +22,16 @@ export async function GET(req: NextRequest) {
 
     const now = new Date();
 
+    const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+
     // 1. Fetch ALL valid, live marketing campaigns across ALL vendors in the marketplace
-    const activeCampaigns = await db.marketingCampaign.findMany({
+    const candidateCampaigns = await db.marketingCampaign.findMany({
       where: {
         deletedAt: null,
         isActive: true,
-        status: "ACTIVE",
+        status: { in: ["ACTIVE", "SCHEDULED", "EXPIRED"] },
         startDate: { lte: now },
-        endDate: { gte: now },
+        endDate: { gte: startOfYesterday },
         ...(campaignIdParam ? { id: campaignIdParam } : {}),
       },
       include: {
@@ -41,6 +43,11 @@ export async function GET(req: NextRequest) {
         },
       },
       orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
+    });
+
+    const activeCampaigns = candidateCampaigns.filter((c) => {
+      const { isCampaignLive } = require("@/lib/campaign-pricing");
+      return isCampaignLive(c);
     });
 
     if (activeCampaigns.length === 0) {
