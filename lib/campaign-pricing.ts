@@ -138,6 +138,12 @@ export function isCampaignEligibleForProduct(c: any, product: {
 
   const scope = c.targetScope || "PRODUCT";
 
+  // 1. Strict Vendor Isolation: Vendor-owned campaigns (storeId present) ONLY apply to products owned by that store.
+  // Exception: MARKETPLACE scope campaigns created at global level without storeId restriction.
+  if (scope !== "MARKETPLACE" && c.storeId && product.storeId && c.storeId !== product.storeId) {
+    return false;
+  }
+
   if (scope === "MARKETPLACE") return true;
 
   if (scope === "STORE") {
@@ -156,7 +162,18 @@ export function isCampaignEligibleForProduct(c: any, product: {
     return categories.some((cat) => cat.toLowerCase() === product.categoryName?.toLowerCase());
   }
 
-  // Scope === "PRODUCT" (default: checked via CampaignProduct relationship or product ID list)
+  // 2. Scope === "PRODUCT": Must be explicitly linked to the product if campaignProducts list is present
+  if (scope === "PRODUCT") {
+    if (Array.isArray(c.campaignProducts) && c.campaignProducts.length > 0 && product.id) {
+      const isLinked = c.campaignProducts.some((cp: any) => {
+        const linkedId = typeof cp === "string" ? cp : cp.productId || cp.product?.id || cp.id;
+        return linkedId === product.id;
+      });
+      if (!isLinked) return false;
+    }
+    return true;
+  }
+
   return true;
 }
 
