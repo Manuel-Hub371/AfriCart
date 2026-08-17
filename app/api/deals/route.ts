@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
         store: {
           select: { id: true, name: true, logo: true, slug: true },
         },
+        campaignProducts: true,
         _count: {
           select: { campaignProducts: true },
         },
@@ -189,6 +190,7 @@ export async function GET(req: NextRequest) {
           categoryName: p.categoryName,
           brand: p.brand,
           storeId: p.storeId,
+          campaignProducts: (p as any).campaignProducts,
         };
 
         const pricing = resolveCampaignPricing(p.price, campaigns, productMeta);

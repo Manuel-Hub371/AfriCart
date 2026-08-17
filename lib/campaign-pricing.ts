@@ -133,6 +133,7 @@ export function isCampaignEligibleForProduct(c: any, product: {
   categoryName?: string | null;
   brand?: string | null;
   storeId?: string | null;
+  campaignProducts?: any[];
 }): boolean {
   if (!c || !isCampaignLive(c)) return false;
 
@@ -166,30 +167,35 @@ export function isCampaignEligibleForProduct(c: any, product: {
   if (scope === "PRODUCT") {
     if (!product.id) return false;
 
-    let isLinked = false;
-
     // Check 1: campaign -> campaignProducts join array
     if (Array.isArray(c.campaignProducts) && c.campaignProducts.length > 0) {
-      isLinked = c.campaignProducts.some((cp: any) => {
+      const isLinked = c.campaignProducts.some((cp: any) => {
         const linkedId = typeof cp === "string" ? cp : cp.productId || cp.product?.id || cp.id;
         return linkedId === product.id;
       });
+      if (isLinked) return true;
     }
 
     // Check 2: campaign -> productIds string array
-    if (!isLinked && Array.isArray(c.productIds) && c.productIds.length > 0) {
-      isLinked = c.productIds.includes(product.id);
+    if (Array.isArray(c.productIds) && c.productIds.length > 0) {
+      if (c.productIds.includes(product.id)) return true;
     }
 
     // Check 3: product -> campaignProducts join array
-    if (!isLinked && Array.isArray((product as any).campaignProducts) && (product as any).campaignProducts.length > 0) {
-      isLinked = (product as any).campaignProducts.some((cp: any) => {
+    if (Array.isArray(product.campaignProducts) && product.campaignProducts.length > 0) {
+      const isLinked = product.campaignProducts.some((cp: any) => {
         const linkedCampId = typeof cp === "string" ? cp : cp.campaignId || cp.campaign?.id || cp.id;
         return linkedCampId === c.id;
       });
+      if (isLinked) return true;
     }
 
-    return isLinked;
+    // Fallback: If campaignProducts arrays were not loaded on either object, allow if storeId matches
+    if (!Array.isArray(c.campaignProducts) && !Array.isArray(product.campaignProducts)) {
+      return Boolean(c.storeId && product.storeId && c.storeId === product.storeId);
+    }
+
+    return false;
   }
 
   return true;
@@ -216,7 +222,7 @@ export function formatDiscountBadge(c: any): string {
 export function resolveCampaignPricing(
   basePrice: number,
   campaigns: any[],
-  productMeta?: { id?: string; categoryName?: string | null; brand?: string | null; storeId?: string | null }
+  productMeta?: { id?: string; categoryName?: string | null; brand?: string | null; storeId?: string | null; campaignProducts?: any[] }
 ): CampaignPricingResult {
   if (!campaigns || campaigns.length === 0) return noPricing(basePrice);
 
