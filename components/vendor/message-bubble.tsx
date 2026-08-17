@@ -7,7 +7,7 @@ export type MessageStatus = "sent" | "delivered" | "read";
 export type MessageSender = "vendor" | "customer";
 
 export interface MessageAttachment {
-  type: "image" | "file";
+  type: "image" | "video" | "file";
   url: string;
   name: string;
   size?: string;
@@ -58,57 +58,65 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             {/* Attachments */}
             {message.attachments && message.attachments.length > 0 && (
               <div className="mt-2 space-y-2">
-                {message.attachments.map((attachment, index) => (
-                  <div key={index}>
-                    {attachment.type === "image" ? (
-                      <div className="rounded-xl overflow-hidden shadow-md">
-                        <Image
+                {message.attachments.map((attachment, index) => {
+                  const isImage = attachment.type === "image" || (attachment.url && (attachment.url.startsWith("data:image/") || attachment.url.match(/\.(jpeg|jpg|png|webp|gif|svg)$/i)));
+                  const isVideo = attachment.type === "video" || (attachment.url && (attachment.url.startsWith("data:video/") || attachment.url.match(/\.(mp4|webm|ogg|mov)$/i)));
+
+                  if (isImage) {
+                    return (
+                      <div key={index} className="rounded-xl overflow-hidden shadow-md max-w-sm">
+                        <img
                           src={attachment.url}
                           alt={attachment.name}
-                          width={300}
-                          height={200}
-                          className="object-cover"
+                          className="w-full h-auto max-h-80 object-cover rounded-xl"
                         />
                       </div>
-                    ) : (
+                    );
+                  }
+
+                  if (isVideo) {
+                    return (
+                      <div key={index} className="rounded-xl overflow-hidden shadow-md max-w-sm">
+                        <video
+                          src={attachment.url}
+                          controls
+                          className="w-full h-auto max-h-80 rounded-xl"
+                        />
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <a
+                      key={index}
+                      href={attachment.url}
+                      download={attachment.name}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`flex items-center gap-3 p-3 rounded-xl shadow-sm transition-opacity hover:opacity-90 ${
+                        isVendor ? "bg-emerald-500 text-white" : "bg-gray-50 text-gray-900 border border-gray-200"
+                      }`}
+                    >
                       <div
-                        className={`flex items-center gap-3 p-3 rounded-xl shadow-sm ${
-                          isVendor ? "bg-emerald-500" : "bg-gray-50"
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          isVendor ? "bg-emerald-400" : "bg-gray-200"
                         }`}
                       >
-                        <div
-                          className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            isVendor ? "bg-emerald-400" : "bg-gray-200"
-                          }`}
-                        >
-                          <FileText
-                            className={`h-5 w-5 ${
-                              isVendor ? "text-white" : "text-gray-600"
-                            }`}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p
-                            className={`text-sm font-medium truncate ${
-                              isVendor ? "text-white" : "text-gray-900"
-                            }`}
-                          >
-                            {attachment.name}
-                          </p>
-                          {attachment.size && (
-                            <p
-                              className={`text-xs ${
-                                isVendor ? "text-emerald-100" : "text-gray-500"
-                              }`}
-                            >
-                              {attachment.size}
-                            </p>
-                          )}
-                        </div>
+                        <FileText className={`h-5 w-5 ${isVendor ? "text-white" : "text-gray-600"}`} />
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-xs font-bold truncate ${isVendor ? "text-white" : "text-gray-900"}`}>
+                          {attachment.name}
+                        </p>
+                        {attachment.size && (
+                          <p className={`text-[10px] ${isVendor ? "text-emerald-100" : "text-gray-500"}`}>
+                            {attachment.size}
+                          </p>
+                        )}
+                      </div>
+                    </a>
+                  );
+                })}
               </div>
             )}
           </div>

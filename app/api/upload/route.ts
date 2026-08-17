@@ -3,7 +3,7 @@ import { writeFile, mkdir } from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
 
-const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
 const ALLOWED_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -11,7 +11,17 @@ const ALLOWED_TYPES = [
   "image/webp",
   "image/gif",
   "image/svg+xml",
+  "video/mp4",
+  "video/webm",
+  "video/ogg",
+  "video/quicktime",
+  "audio/mpeg",
+  "audio/wav",
+  "audio/ogg",
   "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "text/plain",
 ];
 
 export async function POST(request: NextRequest) {

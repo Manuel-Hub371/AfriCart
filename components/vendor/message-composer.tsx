@@ -86,7 +86,7 @@ export function MessageComposer({ onSendMessage }: MessageComposerProps) {
                 onChange={handleFileSelect}
                 className="hidden"
                 multiple
-                accept="image/*,.pdf,.doc,.docx"
+                accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
               />
               <button
                 type="button"

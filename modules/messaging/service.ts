@@ -113,6 +113,7 @@ export class MessagingService {
       senderId: m.senderId,
       senderType: m.senderType as "CUSTOMER" | "VENDOR",
       text: m.text,
+      attachments: Array.isArray(m.attachments) ? (m.attachments as any) : null,
       isRead: m.isRead,
       createdAt: m.createdAt,
     }));
@@ -151,6 +152,7 @@ export class MessagingService {
       senderId: message.senderId,
       senderType,
       text: message.text,
+      attachments: Array.isArray(message.attachments) ? (message.attachments as any) : null,
       isRead: message.isRead,
       createdAt: message.createdAt,
     };

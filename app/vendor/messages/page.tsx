@@ -60,6 +60,7 @@ export default function VendorMessagesPage() {
             id: m.id,
             sender: m.senderType === "VENDOR" ? "vendor" : "customer",
             text: m.text,
+            attachments: Array.isArray(m.attachments) ? m.attachments : undefined,
             timestamp: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: m.isRead ? "read" : "delivered",
           }));
@@ -76,14 +77,43 @@ export default function VendorMessagesPage() {
     (conv) => conv.id === activeConversationId
   );
 
-  const handleSendMessage = async (text: string) => {
-    if (!activeConversationId || !text.trim()) return;
+  const handleSendMessage = async (text: string, files?: File[]) => {
+    if (!activeConversationId || (!text.trim() && (!files || files.length === 0))) return;
 
     try {
+      let uploadedAttachments: any[] = [];
+      if (files && files.length > 0) {
+        for (const file of files) {
+          const formData = new FormData();
+          formData.append("file", file);
+          const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (uploadRes.ok) {
+            const uploadData = await uploadRes.json();
+            const fileType = file.type.startsWith("image/")
+              ? "image"
+              : file.type.startsWith("video/")
+              ? "video"
+              : "file";
+            uploadedAttachments.push({
+              type: fileType,
+              url: uploadData.url,
+              name: file.name,
+              size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            });
+          }
+        }
+      }
+
       const res = await fetch(`/api/messaging/conversations/${activeConversationId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({
+          text: text.trim(),
+          attachments: uploadedAttachments.length > 0 ? uploadedAttachments : undefined,
+        }),
       });
 
       if (res.ok) {
@@ -92,16 +122,19 @@ export default function VendorMessagesPage() {
           id: newMsg.id,
           sender: "vendor",
           text: newMsg.text,
+          attachments: Array.isArray(newMsg.attachments) ? newMsg.attachments : undefined,
           timestamp: new Date(newMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           status: "delivered",
         };
         setMessages((prev) => [...prev, mappedMsg]);
 
+        const previewText = text.trim() || (uploadedAttachments.length > 0 ? `[${uploadedAttachments[0].type.toUpperCase()}]` : "Attachment");
+
         // Update last message in conversation list
         setConversations((prev) =>
           prev.map((c) =>
             c.id === activeConversationId
-              ? { ...c, lastMessage: text, timestamp: "Just now" }
+              ? { ...c, lastMessage: previewText, timestamp: "Just now" }
               : c
           )
         );

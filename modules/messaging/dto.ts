@@ -1,11 +1,19 @@
 // --- DTO INTERFACES ---
 
+export interface AttachmentDTO {
+  type: "image" | "video" | "file";
+  url: string;
+  name: string;
+  size?: string;
+}
+
 export interface MessageDTO {
   id: string;
   conversationId: string;
   senderId: string;
   senderType: "CUSTOMER" | "VENDOR";
   text: string;
+  attachments?: AttachmentDTO[] | null;
   isRead: boolean;
   createdAt: Date;
 }
@@ -25,7 +33,8 @@ export interface ConversationDTO {
 }
 
 export interface SendMessageInput {
-  text: string;
+  text?: string;
+  attachments?: AttachmentDTO[];
 }
 
 export interface CreateConversationInput {
@@ -40,15 +49,30 @@ export function validateSendMessageInput(body: any): SendMessageInput {
     throw new Error("Payload must be an object");
   }
 
-  if (typeof body.text !== "string" || body.text.trim().length === 0) {
-    throw new Error("Message text cannot be empty");
+  const hasText = typeof body.text === "string" && body.text.trim().length > 0;
+  const hasAttachments = Array.isArray(body.attachments) && body.attachments.length > 0;
+
+  if (!hasText && !hasAttachments) {
+    throw new Error("Message must contain text or at least one attachment");
   }
 
-  if (body.text.length > 2000) {
+  if (body.text && body.text.length > 2000) {
     throw new Error("Message text cannot exceed 2000 characters");
   }
 
-  return { text: body.text.trim() };
+  const validatedAttachments: AttachmentDTO[] = hasAttachments
+    ? body.attachments.map((att: any) => ({
+        type: att.type === "video" ? "video" : att.type === "image" ? "image" : "file",
+        url: String(att.url || ""),
+        name: String(att.name || "Attachment"),
+        size: att.size ? String(att.size) : undefined,
+      }))
+    : [];
+
+  return {
+    text: body.text ? body.text.trim() : "",
+    attachments: validatedAttachments.length > 0 ? validatedAttachments : undefined,
+  };
 }
 
 export function validateCreateConversationInput(body: any): CreateConversationInput {

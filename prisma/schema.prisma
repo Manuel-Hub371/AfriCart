@@ -574,6 +574,7 @@ model Message {
   senderId       String
   senderType     String       // "CUSTOMER" | "VENDOR"
   text           String
+  attachments    Json?
   isRead         Boolean      @default(false)
   createdAt      DateTime     @default(now())
 }

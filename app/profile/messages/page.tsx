@@ -5,7 +5,7 @@ import DashboardSidebar from "@/components/profile/dashboard-sidebar";
 import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Store, Loader2, MessageSquare } from "lucide-react";
+import { Send, Store, Loader2, MessageSquare, Paperclip, FileText, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 
 interface CustomerConversation {
@@ -18,12 +18,20 @@ interface CustomerConversation {
   createdAt: string;
 }
 
+interface MessageAttachment {
+  type: "image" | "video" | "file";
+  url: string;
+  name: string;
+  size?: string;
+}
+
 interface Message {
   id: string;
   conversationId: string;
   senderId: string;
   senderType: "CUSTOMER" | "VENDOR";
   text: string;
+  attachments?: MessageAttachment[];
   isRead: boolean;
   createdAt: string;
 }
@@ -37,9 +45,11 @@ export default function CustomerMessagesPage() {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(initialConvId);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [attachments, setAttachments] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll messages
   const scrollToBottom = () => {
@@ -92,28 +102,67 @@ export default function CustomerMessagesPage() {
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
 
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setAttachments((prev) => [...prev, ...Array.from(e.target.files!)]);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!activeConversationId || !newMessage.trim() || isSending) return;
+    if (!activeConversationId || (!newMessage.trim() && attachments.length === 0) || isSending) return;
 
     try {
       setIsSending(true);
+
+      let uploadedAttachments: any[] = [];
+      if (attachments.length > 0) {
+        for (const file of attachments) {
+          const formData = new FormData();
+          formData.append("file", file);
+          const uploadRes = await fetch("/api/upload", {
+            method: "POST",
+            body: formData,
+          });
+          if (uploadRes.ok) {
+            const uploadData = await uploadRes.json();
+            const fileType = file.type.startsWith("image/")
+              ? "image"
+              : file.type.startsWith("video/")
+              ? "video"
+              : "file";
+            uploadedAttachments.push({
+              type: fileType,
+              url: uploadData.url,
+              name: file.name,
+              size: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
+            });
+          }
+        }
+      }
+
       const res = await fetch(`/api/messaging/conversations/${activeConversationId}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: newMessage.trim() }),
+        body: JSON.stringify({
+          text: newMessage.trim(),
+          attachments: uploadedAttachments.length > 0 ? uploadedAttachments : undefined,
+        }),
       });
 
       if (res.ok) {
         const sentMsg = await res.json();
         setMessages((prev) => [...prev, sentMsg]);
         setNewMessage("");
+        setAttachments([]);
+
+        const previewText = sentMsg.text || (uploadedAttachments.length > 0 ? `[${uploadedAttachments[0].type.toUpperCase()}]` : "Attachment");
 
         // Update last message in conversation list
         setConversations((prev) =>
           prev.map((c) =>
             c.id === activeConversationId
-              ? { ...c, lastMessageText: sentMsg.text, lastMessageAt: sentMsg.createdAt }
+              ? { ...c, lastMessageText: previewText, lastMessageAt: sentMsg.createdAt }
               : c
           )
         );
@@ -233,7 +282,60 @@ export default function CustomerMessagesPage() {
                                   : "bg-white text-gray-900 border border-gray-200 rounded-bl-none"
                               }`}
                             >
-                              {msg.text}
+                              {msg.text && <p className="leading-relaxed whitespace-pre-wrap break-words">{msg.text}</p>}
+
+                              {/* Media Attachments */}
+                              {msg.attachments && msg.attachments.length > 0 && (
+                                <div className="mt-2 space-y-2">
+                                  {msg.attachments.map((attachment, index) => {
+                                    const isImage = attachment.type === "image" || (attachment.url && (attachment.url.startsWith("data:image/") || attachment.url.match(/\.(jpeg|jpg|png|webp|gif|svg)$/i)));
+                                    const isVideo = attachment.type === "video" || (attachment.url && (attachment.url.startsWith("data:video/") || attachment.url.match(/\.(mp4|webm|ogg|mov)$/i)));
+
+                                    if (isImage) {
+                                      return (
+                                        <div key={index} className="rounded-xl overflow-hidden shadow-md max-w-sm">
+                                          <img
+                                            src={attachment.url}
+                                            alt={attachment.name}
+                                            className="w-full h-auto max-h-72 object-cover rounded-xl"
+                                          />
+                                        </div>
+                                      );
+                                    }
+
+                                    if (isVideo) {
+                                      return (
+                                        <div key={index} className="rounded-xl overflow-hidden shadow-md max-w-sm">
+                                          <video
+                                            src={attachment.url}
+                                            controls
+                                            className="w-full h-auto max-h-72 rounded-xl"
+                                          />
+                                        </div>
+                                      );
+                                    }
+
+                                    return (
+                                      <a
+                                        key={index}
+                                        href={attachment.url}
+                                        download={attachment.name}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={`flex items-center gap-2.5 p-2.5 rounded-xl shadow-xs transition-opacity hover:opacity-90 ${
+                                          isCustomer ? "bg-emerald-700 text-white" : "bg-gray-100 text-gray-900"
+                                        }`}
+                                      >
+                                        <FileText className="h-4 w-4 flex-shrink-0" />
+                                        <div className="flex-1 min-w-0">
+                                          <p className="text-xs font-bold truncate">{attachment.name}</p>
+                                          {attachment.size && <p className="text-[10px] opacity-80">{attachment.size}</p>}
+                                        </div>
+                                      </a>
+                                    );
+                                  })}
+                                </div>
+                              )}
                             </div>
                             <span className="text-[9px] text-gray-400 mt-0.5 px-1">
                               {new Date(msg.createdAt).toLocaleTimeString([], {
@@ -248,16 +350,54 @@ export default function CustomerMessagesPage() {
                     <div ref={messagesEndRef} />
                   </div>
 
+                  {/* Attachment Preview Bar */}
+                  {attachments.length > 0 && (
+                    <div className="px-3 py-2 bg-emerald-50 border-t border-emerald-100 flex gap-2 flex-wrap">
+                      {attachments.map((file, index) => (
+                        <div
+                          key={index}
+                          className="px-2.5 py-1 bg-white border border-emerald-300 text-emerald-800 text-xs rounded-lg flex items-center gap-1.5 shadow-2xs font-bold"
+                        >
+                          <Paperclip className="h-3 w-3 text-emerald-600" />
+                          <span className="truncate max-w-[120px]">{file.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => setAttachments(attachments.filter((_, i) => i !== index))}
+                            className="text-gray-400 hover:text-red-600 font-bold ml-1"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
                   {/* Chat Input */}
-                  <form onSubmit={handleSendMessage} className="p-2.5 sm:p-4 bg-white border-t border-gray-200 flex gap-2">
+                  <form onSubmit={handleSendMessage} className="p-2.5 sm:p-4 bg-white border-t border-gray-200 flex items-center gap-2">
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileSelect}
+                      className="hidden"
+                      multiple
+                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.txt"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-colors"
+                      title="Attach Image, Video, or File"
+                    >
+                      <Paperclip className="h-4 w-4 sm:h-5 sm:w-5" />
+                    </button>
                     <Input
                       type="text"
-                      placeholder="Type a message to the store..."
+                      placeholder="Type a message or attach images/videos..."
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       className="flex-1 h-8 sm:h-10 text-xs rounded-xl"
                     />
-                    <Button type="submit" disabled={isSending || !newMessage.trim()} className="gradient-primary text-white gap-1 font-bold text-xs h-8 sm:h-10 px-3 rounded-xl">
+                    <Button type="submit" disabled={isSending || (!newMessage.trim() && attachments.length === 0)} className="gradient-primary text-white gap-1 font-bold text-xs h-8 sm:h-10 px-3 rounded-xl">
                       {isSending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
                       <span className="hidden sm:inline">Send</span>
                     </Button>

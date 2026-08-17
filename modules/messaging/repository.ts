@@ -125,20 +125,25 @@ export class MessagingRepository {
     senderType: "CUSTOMER" | "VENDOR",
     input: SendMessageInput
   ) {
+    const textContent = input.text || "";
+    const firstAttachment = input.attachments && input.attachments.length > 0 ? input.attachments[0] : null;
+    const previewText = textContent || (firstAttachment ? `[${firstAttachment.type.toUpperCase()}] ${firstAttachment.name}` : "Attachment");
+
     return db.$transaction(async (tx) => {
       const message = await tx.message.create({
         data: {
           conversationId,
           senderId,
           senderType,
-          text: input.text,
+          text: textContent,
+          attachments: input.attachments ? (input.attachments as any) : undefined,
         },
       });
 
       await tx.conversation.update({
         where: { id: conversationId },
         data: {
-          lastMessageText: input.text,
+          lastMessageText: previewText,
           lastMessageAt: message.createdAt,
         },
       });
