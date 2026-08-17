@@ -1,5 +1,4 @@
 import { LucideIcon } from "lucide-react";
-import { Card } from "@/components/ui/card";
 
 interface StatCardProps {
   icon: LucideIcon;
@@ -14,19 +13,19 @@ export default function StatCard({
   label,
   value,
   iconColor = "text-emerald-600",
-  iconBg = "bg-emerald-100",
+  iconBg = "bg-emerald-50",
 }: StatCardProps) {
   return (
-    <Card className="p-2.5 sm:p-4 rounded-xl border border-gray-200 bg-white shadow-2xs transition-all hover:shadow-xs">
-      <div className="flex items-center gap-2.5 sm:gap-4">
-        <div className={`p-2 sm:p-3 rounded-lg sm:rounded-xl shrink-0 ${iconBg}`}>
-          <Icon className={`h-4 w-4 sm:h-6 sm:w-6 ${iconColor}`} />
+    <div className="p-3 sm:p-4 rounded-xl border border-gray-200/80 bg-white shadow-2xs transition-all hover:border-gray-300">
+      <div className="flex items-center gap-3">
+        <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl shrink-0 flex items-center justify-center border border-gray-100 ${iconBg}`}>
+          <Icon className={`h-4 w-4 sm:h-5 sm:w-5 ${iconColor}`} />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[9px] sm:text-xs text-gray-500 font-bold uppercase tracking-wider truncate">{label}</p>
-          <p className="text-sm sm:text-2xl font-black text-gray-900 truncate">{value}</p>
+          <p className="text-[10px] sm:text-xs text-gray-500 font-semibold tracking-tight truncate">{label}</p>
+          <p className="text-sm sm:text-xl font-extrabold text-gray-900 truncate mt-0.5">{value}</p>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }

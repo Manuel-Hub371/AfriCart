@@ -38,47 +38,47 @@ export default function OrderCard({ order }: OrderCardProps) {
   const targetId = order.fullId || order.orderId;
 
   return (
-    <Card className="p-3 sm:p-5 bg-white rounded-xl sm:rounded-2xl border border-gray-200 shadow-2xs space-y-2.5">
-      <div className="flex items-start justify-between gap-2 border-b border-gray-100 pb-2">
+    <div className="p-3 sm:p-4 bg-white rounded-xl border border-gray-200/80 shadow-2xs space-y-2.5 hover:border-gray-300 transition-all">
+      <div className="flex items-center justify-between gap-2 border-b border-gray-100 pb-2">
         <div>
-          <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <h3 className="font-extrabold text-gray-900 text-xs sm:text-sm">
               Order #{order.orderId}
             </h3>
-            <Badge className={`${statusInfo.color} text-[9px] sm:text-xs px-2 py-0.2 font-extrabold rounded-full`}>
+            <Badge className={`${statusInfo.color} text-[10px] px-2 py-0.5 font-bold rounded-md`}>
               {order.status}
             </Badge>
           </div>
-          <p className="text-[10px] sm:text-xs text-gray-400 font-medium">{order.date}</p>
+          <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">{order.date}</p>
         </div>
 
         <div className="text-right">
-          <span className="text-[10px] text-gray-400 font-semibold uppercase block">Total</span>
-          <span className="text-xs sm:text-lg font-black text-emerald-700">
+          <span className="text-[10px] text-gray-400 font-medium block">Total Amount</span>
+          <span className="text-xs sm:text-base font-extrabold text-emerald-700">
             GH₵{order.total.toFixed(2)}
           </span>
         </div>
       </div>
 
       <div className="flex items-center gap-1.5 text-[10px] sm:text-xs text-gray-500">
-        <span className="font-semibold">Vendor:</span>
+        <span className="font-medium">Vendor:</span>
         <span className="font-bold text-gray-800">{order.vendor.name}</span>
         {order.vendor.verified && (
           <BadgeCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
         )}
       </div>
 
-      <div className="space-y-2 pt-0.5">
+      <div className="space-y-1.5 pt-0.5">
         {order.products.map((product, index) => {
           const coverImage = extractCoverImage((product as any).images || product.image, product.name);
           const imgSrc = coverImage || getCategoryFallbackImage(product.name);
 
           return (
-            <div key={index} className="flex items-center gap-2.5 bg-gray-50/60 p-1.5 rounded-lg border border-gray-100">
+            <div key={index} className="flex items-center gap-2.5 bg-gray-50/80 p-1.5 rounded-lg border border-gray-100">
               <img
                 src={imgSrc}
                 alt={product.name}
-                className="w-12 h-12 sm:w-14 sm:h-14 object-cover rounded-md flex-shrink-0 border border-gray-200"
+                className="w-10 h-10 object-cover rounded-md flex-shrink-0 border border-gray-200"
                 onError={(e) => {
                   const target = e.currentTarget;
                   const fallback = getCategoryFallbackImage(product.name);
@@ -100,12 +100,12 @@ export default function OrderCard({ order }: OrderCardProps) {
 
       <div className="pt-1">
         <Link href={`/profile/orders/${targetId}`} className="block">
-          <Button variant="outline" size="sm" className="w-full gap-1.5 font-bold text-xs h-8 sm:h-9 rounded-xl border-gray-200 hover:bg-gray-50">
+          <Button variant="outline" size="sm" className="w-full gap-1.5 font-bold text-xs h-8 rounded-lg border-gray-200 hover:bg-gray-50">
             <Eye className="h-3.5 w-3.5 text-emerald-600" />
             <span>View Order Details</span>
           </Button>
         </Link>
       </div>
-    </Card>
+    </div>
   );
 }
