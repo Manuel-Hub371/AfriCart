@@ -12,6 +12,7 @@ import {
   Shield,
   CheckCheck,
   Bell,
+  Trash2,
 } from "lucide-react";
 
 export default function NotificationsPage() {
@@ -61,6 +62,18 @@ export default function NotificationsPage() {
       }
     } catch (err) {
       console.error("Failed to mark notification read:", err);
+    }
+  };
+
+  const deleteNotification = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const res = await fetch(`/api/notifications/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete notification:", err);
     }
   };
 
@@ -142,7 +155,7 @@ export default function NotificationsPage() {
                   <div
                     key={item.id}
                     onClick={() => !item.isRead && markAsRead(item.id)}
-                    className={`p-3.5 sm:p-4 flex items-start gap-3.5 transition-colors cursor-pointer ${
+                    className={`group p-3.5 sm:p-4 flex items-start gap-3.5 transition-colors cursor-pointer ${
                       !item.isRead ? "bg-emerald-50/40 hover:bg-emerald-50/70 border-l-4 border-emerald-600" : "hover:bg-gray-50 bg-white"
                     }`}
                   >
@@ -162,9 +175,20 @@ export default function NotificationsPage() {
                       <p className="text-xs text-gray-600 leading-relaxed font-medium">{item.message}</p>
                     </div>
 
-                    {!item.isRead && (
-                      <div className="w-2 h-2 bg-emerald-600 rounded-full flex-shrink-0 mt-1.5" />
-                    )}
+                    <div className="flex items-center gap-1 flex-shrink-0 mt-0.5">
+                      {!item.isRead && (
+                        <div className="w-2 h-2 bg-emerald-600 rounded-full flex-shrink-0 mr-1" />
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => deleteNotification(item.id, e)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity h-7 w-7 p-0 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        title="Delete notification"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
                   </div>
                 );
               })}
