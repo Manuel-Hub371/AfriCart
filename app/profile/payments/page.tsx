@@ -51,11 +51,11 @@ export default function PaymentsPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-4">
+        <main className="flex-1 p-3 sm:p-5 lg:p-6 max-w-7xl mx-auto w-full space-y-3.5">
           {/* Header Banner */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-xl border border-gray-200/80 shadow-2xs">
             <div>
-              <h1 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+              <h1 className="text-base sm:text-xl font-extrabold text-gray-900 tracking-tight">
                 Payment Methods
               </h1>
               <p className="text-xs text-gray-500 font-medium mt-0.5">
