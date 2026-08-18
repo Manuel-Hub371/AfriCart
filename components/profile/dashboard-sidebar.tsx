@@ -86,27 +86,29 @@ export default function DashboardSidebar({
           </button>
         )}
 
-        {/* Profile Section */}
-        <div className="p-6 border-b">
+        {/* Profile Section Header */}
+        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
           <div className="flex items-center gap-3">
-            <Avatar className="h-12 w-12 overflow-hidden">
+            <Avatar className="h-10 w-10 overflow-hidden border border-gray-200 shrink-0">
               {user?.avatar ? (
                 <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover rounded-full" />
               ) : (
-                <div className="w-full h-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white text-lg font-bold">
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                <div className="w-full h-full bg-emerald-600 flex items-center justify-center text-white text-sm font-bold">
+                  {user?.firstName?.[0] || "U"}{user?.lastName?.[0] || ""}
                 </div>
               )}
             </Avatar>
-            <div>
-              <h3 className="font-semibold text-gray-900">{user?.firstName} {user?.lastName}</h3>
-              <p className="text-sm text-gray-600">{user?.email}</p>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-bold text-gray-900 text-xs sm:text-sm truncate">
+                {user?.firstName ? `${user.firstName} ${user.lastName || ""}` : "Customer Account"}
+              </h3>
+              <p className="text-[11px] text-gray-400 font-medium truncate">{user?.email || "customer@africart.com"}</p>
             </div>
           </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4">
+        {/* Navigation List */}
+        <nav className="flex-1 overflow-y-auto p-3">
           <ul className="space-y-1">
             {userMenuItems.map((item) => {
               const isActive = pathname === item.href;
@@ -115,13 +117,13 @@ export default function DashboardSidebar({
                   <Link
                     href={item.href}
                     onClick={onClose}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs font-bold transition-all ${
                       isActive
-                        ? "bg-emerald-50 text-emerald-600 font-medium"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-emerald-50 text-emerald-700 border-l-4 border-emerald-600 shadow-2xs"
+                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/70"
                     }`}
                   >
-                    <item.icon className="h-5 w-5" />
+                    <item.icon className={`h-4 w-4 shrink-0 ${isActive ? "text-emerald-600" : "text-gray-400"}`} />
                     <span>{item.label}</span>
                   </Link>
                 </li>
@@ -130,15 +132,15 @@ export default function DashboardSidebar({
           </ul>
         </nav>
 
-        {/* Logout */}
-        <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+        {/* Sign Out Footer */}
+        <div className="p-3 border-t border-gray-100 bg-gray-50/50">
           <button 
             onClick={handleLogout}
             disabled={isLoggingOut}
-            className="flex items-center gap-3 px-4 py-3 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 font-extrabold text-sm w-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-2xs"
+            className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-red-600 bg-red-50 hover:bg-red-100 border border-red-100 font-bold text-xs w-full transition-colors disabled:opacity-50"
           >
-            <LogOut className="h-5 w-5 shrink-0" />
-            <span>{isLoggingOut ? "Logging out..." : "Sign Out Account"}</span>
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span>{isLoggingOut ? "Signing out..." : "Sign Out"}</span>
           </button>
         </div>
       </aside>

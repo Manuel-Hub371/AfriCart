@@ -107,7 +107,7 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-xl border border-gray-200/80 shadow-2xs">
             <div>
               <h1 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight">
-                Welcome back{user?.firstName ? `, ${user.firstName}` : ""} 👋
+                Welcome back{user?.firstName ? `, ${user.firstName}` : ""}
               </h1>
               <p className="text-xs text-gray-500 font-medium mt-0.5">
                 Overview of your recent orders, saved wishlist items, and account activity
