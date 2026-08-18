@@ -35,24 +35,24 @@ export function MessageComposer({ onSendMessage }: MessageComposerProps) {
   };
 
   return (
-    <div className="bg-white p-4 shadow-lg">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        {/* Attachments preview */}
+    <div className="bg-white p-3 sm:p-4 border-t border-gray-200/80">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2.5">
+        {/* Attachments Preview Bar */}
         {attachments.length > 0 && (
-          <div className="flex gap-2 flex-wrap pb-2 border-b border-gray-100">
+          <div className="flex gap-2 flex-wrap p-2 bg-emerald-50/60 border border-emerald-100 rounded-xl">
             {attachments.map((file, index) => (
               <div
                 key={index}
-                className="px-3 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm rounded-lg flex items-center gap-2 shadow-sm"
+                className="px-2.5 py-1 bg-white border border-emerald-200 text-emerald-800 text-xs rounded-lg flex items-center gap-1.5 shadow-2xs font-bold"
               >
-                <Paperclip className="h-3.5 w-3.5" />
-                <span className="truncate max-w-[150px] font-medium">{file.name}</span>
+                <Paperclip className="h-3 w-3 text-emerald-600" />
+                <span className="truncate max-w-[130px]">{file.name}</span>
                 <button
                   type="button"
                   onClick={() =>
                     setAttachments(attachments.filter((_, i) => i !== index))
                   }
-                  className="text-emerald-600 hover:text-emerald-800 font-bold"
+                  className="text-gray-400 hover:text-red-600 font-bold ml-1"
                 >
                   ×
                 </button>
@@ -61,25 +61,20 @@ export function MessageComposer({ onSendMessage }: MessageComposerProps) {
           </div>
         )}
 
-        {/* Input area */}
-        <div className="flex items-end gap-3">
-          {/* Text input */}
-          <div className="flex-1 bg-gray-50 rounded-xl border-2 border-gray-200 focus-within:border-emerald-500 focus-within:bg-white transition-all">
-            <textarea
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Type your message..."
-              rows={1}
-              className="w-full px-4 py-3 bg-transparent resize-none focus:outline-none text-sm text-gray-900 placeholder:text-gray-500 max-h-32"
-              style={{
-                minHeight: "44px",
-                maxHeight: "128px",
-              }}
-            />
+        {/* Floating Message Box Container */}
+        <div className="bg-gray-50/70 border border-gray-200/90 focus-within:border-emerald-500 focus-within:bg-white focus-within:ring-2 focus-within:ring-emerald-500/20 rounded-2xl p-2 transition-all shadow-2xs">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Type your reply message..."
+            rows={2}
+            className="w-full px-2.5 py-1.5 bg-transparent resize-none focus:outline-none text-xs text-gray-900 placeholder:text-gray-400 max-h-32 font-medium"
+          />
 
-            {/* Action buttons */}
-            <div className="flex items-center gap-1 px-3 pb-3">
+          {/* Action Bar Header */}
+          <div className="flex items-center justify-between pt-1 border-t border-gray-100/80">
+            <div className="flex items-center gap-1">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -91,64 +86,52 @@ export function MessageComposer({ onSendMessage }: MessageComposerProps) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="p-2 hover:bg-emerald-50 rounded-lg transition-colors group"
-                title="Attach file"
+                className="p-1.5 hover:bg-emerald-50 text-gray-500 hover:text-emerald-600 rounded-lg transition-colors flex items-center gap-1 text-[11px] font-bold"
+                title="Attach Media / Files"
               >
-                <Paperclip className="h-4 w-4 text-gray-600 group-hover:text-emerald-600 transition-colors" />
-              </button>
-              <button
-                type="button"
-                className="p-2 hover:bg-emerald-50 rounded-lg transition-colors group"
-                title="Add emoji"
-              >
-                <Smile className="h-4 w-4 text-gray-600 group-hover:text-emerald-600 transition-colors" />
-              </button>
-              <button
-                type="button"
-                className="p-2 hover:bg-emerald-50 rounded-lg transition-colors group"
-                title="Add image"
-              >
-                <ImageIcon className="h-4 w-4 text-gray-600 group-hover:text-emerald-600 transition-colors" />
+                <Paperclip className="h-4 w-4" />
+                <span className="hidden sm:inline">Attach</span>
               </button>
             </div>
-          </div>
 
-          {/* Send button */}
-          <button
-            type="submit"
-            disabled={!message.trim() && attachments.length === 0}
-            className="h-12 w-12 bg-gradient-to-br from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:from-gray-300 disabled:to-gray-300 disabled:cursor-not-allowed text-white rounded-xl flex items-center justify-center transition-all shadow-md hover:shadow-lg disabled:shadow-none flex-shrink-0"
-          >
-            <Send className="h-5 w-5" />
-          </button>
+            {/* Send Button */}
+            <button
+              type="submit"
+              disabled={!message.trim() && attachments.length === 0}
+              className="h-8 px-4 bg-emerald-600 hover:bg-emerald-700 disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed text-white font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all shadow-2xs flex-shrink-0"
+            >
+              <span>Send Message</span>
+              <Send className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Quick replies */}
-        <div className="flex gap-2 flex-wrap pt-1">
+        {/* Quick Template Chips (No Emojis) */}
+        <div className="flex gap-1.5 flex-wrap pt-0.5">
           <button
             type="button"
             onClick={() =>
-              setMessage("Hello, thank you for contacting us. How can I help you today?")
+              setMessage("Hello, thank you for contacting our store! How may we assist you today?")
             }
-            className="px-3 py-1.5 text-xs bg-white border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 text-gray-700 rounded-lg transition-all font-medium"
+            className="px-2.5 py-1 text-[11px] bg-white border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 rounded-lg transition-all font-semibold"
           >
-            👋 Greeting
+            Store Greeting
           </button>
           <button
             type="button"
-            onClick={() => setMessage("Your order has been shipped and is on its way!")}
-            className="px-3 py-1.5 text-xs bg-white border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 text-gray-700 rounded-lg transition-all font-medium"
+            onClick={() => setMessage("Your package has been dispatched and is currently in transit.")}
+            className="px-2.5 py-1 text-[11px] bg-white border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 rounded-lg transition-all font-semibold"
           >
-            📦 Order Shipped
+            Package Shipped
           </button>
           <button
             type="button"
             onClick={() =>
-              setMessage("I apologize for the inconvenience. Let me look into this for you.")
+              setMessage("We apologize for the inconvenience. Let us check this immediately for you.")
             }
-            className="px-3 py-1.5 text-xs bg-white border-2 border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 text-gray-700 rounded-lg transition-all font-medium"
+            className="px-2.5 py-1 text-[11px] bg-white border border-gray-200 hover:border-emerald-500 hover:bg-emerald-50 hover:text-emerald-700 text-gray-600 rounded-lg transition-all font-semibold"
           >
-            🙏 Apology
+            Support Apology
           </button>
         </div>
       </form>
