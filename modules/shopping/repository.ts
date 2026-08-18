@@ -11,6 +11,10 @@ export class ShoppingRepository {
     });
 
     if (!profile) {
+      const user = await db.user.findUnique({ where: { id: userId } });
+      if (!user) {
+        throw { code: "USER_NOT_FOUND", message: "User account not found", status: 404 };
+      }
       profile = await db.customerProfile.create({
         data: { userId },
       });

@@ -49,7 +49,28 @@ export class OrderRepository {
    * 7. Increment campaign stats (salesCount, revenueGenerated, usedCount) outside the tx
    */
   async createOrderFromCart(customerProfileId: string, input: CreateOrderInput) {
-    // 1. Get active cart items WITH their campaigns
+    // 1. Check for duplicate order submission within the last 5 seconds
+    const recentDuplicate = await db.order.findFirst({
+      where: {
+        customerProfileId,
+        createdAt: { gte: new Date(Date.now() - 5000) },
+        deletedAt: null,
+      },
+      include: {
+        orderItems: {
+          include: {
+            product: true,
+            store: true,
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    if (recentDuplicate) {
+      return recentDuplicate;
+    }
+
+    // 2. Get active cart items WITH their campaigns
     const cartItems = await db.cartItem.findMany({
       where: { customerProfileId },
       include: {
@@ -68,15 +89,16 @@ export class OrderRepository {
       throw { code: "EMPTY_CART", message: "Cart is empty", status: 400 };
     }
 
-    // 2. Resolve campaign pricing for every item
-    const pricedItems = cartItems.map((item) => {
-      const campaigns = extractCampaigns((item.product as any).campaignProducts || []);
-      const pricing = resolveCampaignPricing(item.product.price, campaigns);
-      return { item, pricing };
-    });
+    // 3. Check product availability & variant stock
+    for (const item of cartItems) {
+      if (!item.product || item.product.deletedAt !== null || ["ARCHIVED", "HIDDEN"].includes(item.product.status)) {
+        throw {
+          code: "PRODUCT_UNAVAILABLE",
+          message: `Product "${item.product?.name || "Item"}" is no longer available in the marketplace. Please update your cart.`,
+          status: 400,
+        };
+      }
 
-    // 3. Check stock availability
-    for (const { item } of pricedItems) {
       if (item.product.stock < item.quantity) {
         throw {
           code: "INSUFFICIENT_STOCK",
@@ -84,9 +106,29 @@ export class OrderRepository {
           status: 400,
         };
       }
+
+      if ((item as any).variantId) {
+        const variant = await db.productVariant.findUnique({
+          where: { id: (item as any).variantId },
+        });
+        if (!variant || variant.stock < item.quantity) {
+          throw {
+            code: "INSUFFICIENT_VARIANT_STOCK",
+            message: `Selected variant for "${item.product.name}" is out of stock or no longer available.`,
+            status: 400,
+          };
+        }
+      }
     }
 
-    // 4. Calculate total using campaign-adjusted prices
+    // 4. Resolve campaign pricing for every item
+    const pricedItems = cartItems.map((item) => {
+      const campaigns = extractCampaigns((item.product as any).campaignProducts || []);
+      const pricing = resolveCampaignPricing(item.product.price, campaigns);
+      return { item, pricing };
+    });
+
+    // 5. Calculate total using campaign-adjusted prices
     const totalAmount = pricedItems.reduce(
       (sum, { item, pricing }) => sum + pricing.effectivePrice * item.quantity,
       0
