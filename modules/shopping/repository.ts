@@ -159,14 +159,21 @@ export class ShoppingRepository {
   }
 
   async createAddress(customerProfileId: string, input: AddressInput) {
-    if (input.isDefault) {
-      await this.resetDefaultAddress(customerProfileId, input.type);
+    const addressType = input.type || "shipping";
+    const existingCount = await db.address.count({
+      where: { customerProfileId, deletedAt: null, type: addressType },
+    });
+
+    const shouldBeDefault = Boolean(input.isDefault) || existingCount === 0;
+
+    if (shouldBeDefault) {
+      await this.resetDefaultAddress(customerProfileId, addressType);
     }
 
     return db.address.create({
       data: {
         customerProfileId,
-        type: input.type,
+        type: addressType,
         firstName: input.firstName,
         lastName: input.lastName,
         phone: input.phone,
@@ -175,17 +182,22 @@ export class ShoppingRepository {
         region: input.region,
         country: input.country,
         postalCode: input.postalCode || null,
-        isDefault: Boolean(input.isDefault),
+        isDefault: shouldBeDefault,
       },
     });
   }
 
   async updateAddress(id: string, customerProfileId: string, input: Partial<AddressInput>) {
-    if (input.isDefault && input.type) {
-      await this.resetDefaultAddress(customerProfileId, input.type);
+    const existing = await this.findAddressById(id, customerProfileId);
+    if (!existing) return null;
+
+    const addressType = input.type || existing.type;
+
+    if (input.isDefault) {
+      await this.resetDefaultAddress(customerProfileId, addressType);
     }
 
-    return db.address.updateMany({
+    await db.address.updateMany({
       where: { id, customerProfileId, deletedAt: null },
       data: {
         ...(input.type && { type: input.type }),
@@ -200,13 +212,47 @@ export class ShoppingRepository {
         ...(input.isDefault !== undefined && { isDefault: input.isDefault }),
       },
     });
+
+    return this.findAddresses(customerProfileId);
+  }
+
+  async setDefaultAddress(id: string, customerProfileId: string) {
+    const existing = await this.findAddressById(id, customerProfileId);
+    if (!existing) return null;
+
+    await this.resetDefaultAddress(customerProfileId, existing.type);
+    await db.address.update({
+      where: { id },
+      data: { isDefault: true },
+    });
+
+    return this.findAddresses(customerProfileId);
   }
 
   async softDeleteAddress(id: string, customerProfileId: string) {
-    return db.address.updateMany({
-      where: { id, customerProfileId },
-      data: { deletedAt: new Date() },
+    const existing = await db.address.findFirst({
+      where: { id, customerProfileId, deletedAt: null },
     });
+
+    if (!existing) return;
+
+    await db.address.update({
+      where: { id },
+      data: { deletedAt: new Date(), isDefault: false },
+    });
+
+    if (existing.isDefault) {
+      const nextAddress = await db.address.findFirst({
+        where: { customerProfileId, deletedAt: null, type: existing.type },
+        orderBy: { createdAt: "desc" },
+      });
+      if (nextAddress) {
+        await db.address.update({
+          where: { id: nextAddress.id },
+          data: { isDefault: true },
+        });
+      }
+    }
   }
 }
 

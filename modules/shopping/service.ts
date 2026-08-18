@@ -156,6 +156,12 @@ export class ShoppingService {
     return this.getAddresses(userId);
   }
 
+  async setDefaultAddress(userId: string, addressId: string): Promise<AddressDTO[]> {
+    const profile = await this.repo.ensureCustomerProfile(userId);
+    await this.repo.setDefaultAddress(addressId, profile.id);
+    return this.getAddresses(userId);
+  }
+
   async deleteAddress(userId: string, addressId: string): Promise<AddressDTO[]> {
     const profile = await this.repo.ensureCustomerProfile(userId);
     await this.repo.softDeleteAddress(addressId, profile.id);
