@@ -178,8 +178,10 @@ model PaymentMethod {
   id                String          @id @default(uuid())
   customerProfileId String
   customerProfile   CustomerProfile @relation(fields: [customerProfileId], references: [id], onDelete: Cascade)
-  provider          String          // "stripe", "paypal", "momo"
-  type              String          // "card", "mobile_money"
+  provider          String          // "MTN", "Telecel", "AT", "momo"
+  type              String          // "mobile_money", "card"
+  accountName       String?
+  accountNumber     String?
   last4             String?
   expiryDate        String?
   isDefault         Boolean         @default(false)

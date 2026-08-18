@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { AddToCartInput, AddressInput } from "./dto";
+import { AddToCartInput, AddressInput, PaymentMethodInput } from "./dto";
 
 export class ShoppingRepository {
   /**
@@ -249,6 +249,118 @@ export class ShoppingRepository {
       if (nextAddress) {
         await db.address.update({
           where: { id: nextAddress.id },
+          data: { isDefault: true },
+        });
+      }
+    }
+  }
+
+  // --- PAYMENT METHOD PERSISTENCE ---
+
+  async findPaymentMethods(customerProfileId: string) {
+    return db.paymentMethod.findMany({
+      where: { customerProfileId, deletedAt: null },
+      orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+    });
+  }
+
+  async findPaymentMethodById(id: string, customerProfileId: string) {
+    return db.paymentMethod.findFirst({
+      where: { id, customerProfileId, deletedAt: null },
+    });
+  }
+
+  async resetDefaultPaymentMethod(customerProfileId: string) {
+    return db.paymentMethod.updateMany({
+      where: { customerProfileId, isDefault: true },
+      data: { isDefault: false },
+    });
+  }
+
+  async createPaymentMethod(customerProfileId: string, input: PaymentMethodInput) {
+    const existingCount = await db.paymentMethod.count({
+      where: { customerProfileId, deletedAt: null },
+    });
+
+    const shouldBeDefault = Boolean(input.isDefault) || existingCount === 0;
+
+    if (shouldBeDefault) {
+      await this.resetDefaultPaymentMethod(customerProfileId);
+    }
+
+    const last4 = input.accountNumber.length >= 4 ? input.accountNumber.slice(-4) : input.accountNumber;
+
+    return db.paymentMethod.create({
+      data: {
+        customerProfileId,
+        provider: input.provider,
+        type: input.type || "mobile_money",
+        accountName: input.accountName,
+        accountNumber: input.accountNumber,
+        last4,
+        isDefault: shouldBeDefault,
+      },
+    });
+  }
+
+  async updatePaymentMethod(id: string, customerProfileId: string, input: Partial<PaymentMethodInput>) {
+    const existing = await this.findPaymentMethodById(id, customerProfileId);
+    if (!existing) return null;
+
+    if (input.isDefault) {
+      await this.resetDefaultPaymentMethod(customerProfileId);
+    }
+
+    const last4 = input.accountNumber
+      ? input.accountNumber.slice(-4)
+      : existing.last4;
+
+    await db.paymentMethod.updateMany({
+      where: { id, customerProfileId, deletedAt: null },
+      data: {
+        ...(input.provider && { provider: input.provider }),
+        ...(input.accountName && { accountName: input.accountName }),
+        ...(input.accountNumber && { accountNumber: input.accountNumber, last4 }),
+        ...(input.isDefault !== undefined && { isDefault: input.isDefault }),
+      },
+    });
+
+    return this.findPaymentMethods(customerProfileId);
+  }
+
+  async setDefaultPaymentMethod(id: string, customerProfileId: string) {
+    const existing = await this.findPaymentMethodById(id, customerProfileId);
+    if (!existing) return null;
+
+    await this.resetDefaultPaymentMethod(customerProfileId);
+    await db.paymentMethod.update({
+      where: { id },
+      data: { isDefault: true },
+    });
+
+    return this.findPaymentMethods(customerProfileId);
+  }
+
+  async softDeletePaymentMethod(id: string, customerProfileId: string) {
+    const existing = await db.paymentMethod.findFirst({
+      where: { id, customerProfileId, deletedAt: null },
+    });
+
+    if (!existing) return;
+
+    await db.paymentMethod.update({
+      where: { id },
+      data: { deletedAt: new Date(), isDefault: false },
+    });
+
+    if (existing.isDefault) {
+      const nextPm = await db.paymentMethod.findFirst({
+        where: { customerProfileId, deletedAt: null },
+        orderBy: { createdAt: "desc" },
+      });
+      if (nextPm) {
+        await db.paymentMethod.update({
+          where: { id: nextPm.id },
           data: { isDefault: true },
         });
       }

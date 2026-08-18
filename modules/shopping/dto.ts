@@ -143,3 +143,45 @@ export const AddressSchema = {
     };
   },
 };
+
+// Payment Method DTOs
+export interface PaymentMethodInput {
+  type: "mobile_money" | "card";
+  provider: string; // "MTN Mobile Money" | "Telecel Cash" | "AT Money"
+  accountName: string;
+  accountNumber: string;
+  isDefault?: boolean;
+}
+
+export interface PaymentMethodDTO {
+  id: string;
+  type: string;
+  provider: string;
+  accountName: string | null;
+  accountNumber: string | null;
+  last4: string | null;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+export const PaymentMethodSchema = {
+  safeParse: (data: any) => {
+    if (!data.provider?.trim() || !data.accountName?.trim() || !data.accountNumber?.trim()) {
+      return { success: false as const, error: "Provider, Account Name, and Mobile Money Number are required" };
+    }
+    const cleanNumber = data.accountNumber.trim().replace(/\s+/g, "");
+    if (cleanNumber.length < 9) {
+      return { success: false as const, error: "Please enter a valid Mobile Money phone number" };
+    }
+    return {
+      success: true as const,
+      data: {
+        type: "mobile_money",
+        provider: data.provider.trim(),
+        accountName: data.accountName.trim(),
+        accountNumber: cleanNumber,
+        isDefault: Boolean(data.isDefault),
+      } as PaymentMethodInput,
+    };
+  },
+};

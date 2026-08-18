@@ -4,10 +4,12 @@ import {
   AddToCartInput,
   UpdateCartItemInput,
   AddressInput,
+  PaymentMethodInput,
   CartResponseDTO,
   CartItemDTO,
   WishlistItemDTO,
   AddressDTO,
+  PaymentMethodDTO,
 } from "./dto";
 
 export class ShoppingService {
@@ -166,6 +168,48 @@ export class ShoppingService {
     const profile = await this.repo.ensureCustomerProfile(userId);
     await this.repo.softDeleteAddress(addressId, profile.id);
     return this.getAddresses(userId);
+  }
+
+  // --- PAYMENT METHOD SERVICE ---
+
+  async getPaymentMethods(userId: string): Promise<PaymentMethodDTO[]> {
+    const profile = await this.repo.ensureCustomerProfile(userId);
+    const rawPms = await this.repo.findPaymentMethods(profile.id);
+
+    return rawPms.map((pm) => ({
+      id: pm.id,
+      type: pm.type,
+      provider: pm.provider,
+      accountName: pm.accountName,
+      accountNumber: pm.accountNumber,
+      last4: pm.last4,
+      isDefault: pm.isDefault,
+      createdAt: pm.createdAt.toISOString(),
+    }));
+  }
+
+  async createPaymentMethod(userId: string, input: PaymentMethodInput): Promise<PaymentMethodDTO[]> {
+    const profile = await this.repo.ensureCustomerProfile(userId);
+    await this.repo.createPaymentMethod(profile.id, input);
+    return this.getPaymentMethods(userId);
+  }
+
+  async updatePaymentMethod(userId: string, paymentMethodId: string, input: Partial<PaymentMethodInput>): Promise<PaymentMethodDTO[]> {
+    const profile = await this.repo.ensureCustomerProfile(userId);
+    await this.repo.updatePaymentMethod(paymentMethodId, profile.id, input);
+    return this.getPaymentMethods(userId);
+  }
+
+  async setDefaultPaymentMethod(userId: string, paymentMethodId: string): Promise<PaymentMethodDTO[]> {
+    const profile = await this.repo.ensureCustomerProfile(userId);
+    await this.repo.setDefaultPaymentMethod(paymentMethodId, profile.id);
+    return this.getPaymentMethods(userId);
+  }
+
+  async deletePaymentMethod(userId: string, paymentMethodId: string): Promise<PaymentMethodDTO[]> {
+    const profile = await this.repo.ensureCustomerProfile(userId);
+    await this.repo.softDeletePaymentMethod(paymentMethodId, profile.id);
+    return this.getPaymentMethods(userId);
   }
 }
 
