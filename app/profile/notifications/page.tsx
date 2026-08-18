@@ -87,90 +87,89 @@ export default function NotificationsPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6">
-          <div className="max-w-4xl mx-auto space-y-3 sm:space-y-6">
-            {/* Page Header */}
-            <div className="flex items-center justify-between gap-2">
-              <div>
-                <h1 className="text-xl sm:text-3xl font-black text-gray-900 flex items-center gap-2 tracking-tight">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-4">
+          {/* Header Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
+            <div>
+              <div className="flex items-center gap-2">
+                <h1 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight">
                   Notifications
-                  {unreadCount > 0 && (
-                    <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-extrabold text-[10px] px-2 py-0.2 rounded-full">
-                      {unreadCount} new
-                    </Badge>
-                  )}
                 </h1>
-                <p className="text-xs text-gray-500 font-medium mt-0.5">
-                  Stay updated with your order activities and store updates
-                </p>
+                {unreadCount > 0 && (
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold text-[10px] px-2 py-0.5 rounded-md">
+                    {unreadCount} new
+                  </Badge>
+                )}
               </div>
-
-              {unreadCount > 0 && (
-                <Button
-                  onClick={markAllAsRead}
-                  variant="outline"
-                  size="sm"
-                  className="gap-1 text-xs font-bold h-8 px-2.5 rounded-xl border-gray-200"
-                >
-                  <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
-                  <span className="hidden sm:inline">Mark all as read</span>
-                  <span className="sm:hidden">Read All</span>
-                </Button>
-              )}
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
+                Updates regarding your orders, seller messages, and platform activity
+              </p>
             </div>
 
-            {/* Notifications List */}
-            {isLoading ? (
-              <div className="bg-white rounded-xl shadow-2xs border border-gray-200 p-6 text-center text-xs text-gray-400 font-medium">
-                Loading notifications...
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-2xs border border-dashed border-gray-200 p-8 text-center">
-                <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Bell className="h-6 w-6" />
-                </div>
-                <h3 className="text-base font-extrabold text-gray-900">No Notifications</h3>
-                <p className="text-xs text-gray-500 mt-0.5">
-                  When you have new order updates or messages, they will appear here.
-                </p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xs border border-gray-200 divide-y divide-gray-100 overflow-hidden">
-                {notifications.map((item) => {
-                  const { icon: Icon, iconColor, iconBg } = getIcon(item.type);
-                  return (
-                    <div
-                      key={item.id}
-                      onClick={() => !item.isRead && markAsRead(item.id)}
-                      className={`p-3 sm:p-5 flex items-start gap-3 transition-colors cursor-pointer ${
-                        !item.isRead ? "bg-emerald-50/40 hover:bg-emerald-50/60" : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className={`p-2 rounded-lg sm:rounded-xl ${iconBg} ${iconColor} flex-shrink-0`}>
-                        <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className={`text-xs sm:text-sm ${!item.isRead ? "text-gray-900 font-extrabold" : "text-gray-700 font-semibold"}`}>
-                            {item.title}
-                          </h3>
-                          <span className="text-[10px] text-gray-400 whitespace-nowrap font-medium">
-                            {new Date(item.createdAt).toLocaleDateString([], { month: "short", day: "numeric" })}
-                          </span>
-                        </div>
-                        <p className="text-xs text-gray-600 mt-0.5 leading-snug">{item.message}</p>
-                      </div>
-
-                      {!item.isRead && (
-                        <div className="w-2 h-2 bg-emerald-600 rounded-full flex-shrink-0 mt-1.5" />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+            {unreadCount > 0 && (
+              <Button
+                onClick={markAllAsRead}
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-xs font-bold h-8 px-3 rounded-lg border-gray-200 hover:bg-gray-50"
+              >
+                <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
+                <span>Mark All Read</span>
+              </Button>
             )}
           </div>
+
+          {/* Notifications List Stream */}
+          {isLoading ? (
+            <div className="bg-white rounded-xl border border-gray-200/80 p-8 text-center text-xs text-gray-400 font-medium">
+              Loading notifications...
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="bg-white rounded-xl border border-dashed border-gray-200 p-10 text-center">
+              <div className="w-10 h-10 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-2">
+                <Bell className="h-5 w-5" />
+              </div>
+              <h3 className="text-sm font-extrabold text-gray-900 mb-0.5">You&apos;re all caught up!</h3>
+              <p className="text-xs text-gray-400 font-medium">
+                New order updates and message notifications will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-xl border border-gray-200/80 divide-y divide-gray-100 overflow-hidden shadow-2xs">
+              {notifications.map((item) => {
+                const { icon: Icon, iconColor, iconBg } = getIcon(item.type);
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => !item.isRead && markAsRead(item.id)}
+                    className={`p-3.5 sm:p-4 flex items-start gap-3.5 transition-colors cursor-pointer ${
+                      !item.isRead ? "bg-emerald-50/40 hover:bg-emerald-50/70 border-l-4 border-emerald-600" : "hover:bg-gray-50 bg-white"
+                    }`}
+                  >
+                    <div className={`w-8 h-8 rounded-lg ${iconBg} ${iconColor} flex items-center justify-center flex-shrink-0 mt-0.5 border border-gray-100`}>
+                      <Icon className="h-4 w-4" />
+                    </div>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-0.5">
+                        <h3 className={`text-xs sm:text-sm ${!item.isRead ? "text-gray-900 font-extrabold" : "text-gray-700 font-semibold"}`}>
+                          {item.title}
+                        </h3>
+                        <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap">
+                          {new Date(item.createdAt).toLocaleDateString([], { month: "short", day: "numeric" })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-600 leading-relaxed font-medium">{item.message}</p>
+                    </div>
+
+                    {!item.isRead && (
+                      <div className="w-2 h-2 bg-emerald-600 rounded-full flex-shrink-0 mt-1.5" />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </main>
       </div>
     </div>

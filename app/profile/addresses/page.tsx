@@ -110,103 +110,109 @@ export default function AddressesPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6">
-          <div>
-            <div className="flex items-center justify-between gap-2">
-              <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">My Addresses</h1>
-              {!showForm && (
-                <Button onClick={() => setShowForm(true)} className="gap-1 gradient-primary text-white font-bold text-xs h-8 sm:h-9 px-2.5 rounded-xl shadow-2xs">
-                  <Plus className="h-4 w-4" />
-                  <span>Add New</span>
-                </Button>
-              )}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-4">
+          {/* Header Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+                My Addresses
+              </h1>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
+                Manage your saved shipping and billing delivery destinations ({addresses.length})
+              </p>
             </div>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">
-              Manage your shipping and billing delivery addresses
-            </p>
+            {!showForm && (
+              <Button onClick={() => setShowForm(true)} className="gap-1.5 gradient-primary text-white font-bold text-xs h-8 px-3 rounded-lg shadow-2xs">
+                <Plus className="h-4 w-4" />
+                <span>Add Address</span>
+              </Button>
+            )}
           </div>
 
           {showForm && (
-            <div className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3.5 sm:p-6 shadow-2xs space-y-3">
-              <h2 className="text-sm sm:text-lg font-black text-gray-900 border-b border-gray-100 pb-2">Add New Address</h2>
+            <div className="bg-white rounded-xl border border-gray-200/80 p-4 sm:p-5 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
+                <h2 className="text-sm font-extrabold text-gray-900">Add Delivery Address</h2>
+                <button onClick={() => setShowForm(false)} className="text-xs font-semibold text-gray-400 hover:text-gray-600">Cancel</button>
+              </div>
 
               {error && (
-                <div className="p-2.5 bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-medium">
+                <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-xs font-medium">
                   {error}
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-3">
-                <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">First Name *</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">First Name *</label>
                     <Input
                       required
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Last Name *</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Last Name *</label>
                     <Input
                       required
                       value={formData.lastName}
                       onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                   <div className="col-span-2 sm:col-span-1">
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Phone Number *</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Phone Number *</label>
                     <Input
                       required
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Country *</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Country *</label>
                     <Input
                       required
                       value={formData.country}
                       onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Region / State *</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Region / State *</label>
                     <Input
                       required
                       value={formData.region}
                       onChange={(e) => setFormData({ ...formData, region: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">City *</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">City *</label>
                     <Input
                       required
                       value={formData.city}
                       onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Street Address *</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Street Address *</label>
                     <Input
                       required
                       value={formData.streetAddress}
                       onChange={(e) => setFormData({ ...formData, streetAddress: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-[10px] sm:text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Postal Code</label>
+                    <label className="block text-[11px] font-bold text-gray-700 uppercase tracking-wider mb-1">Postal Code</label>
                     <Input
                       value={formData.postalCode}
                       onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                      className="h-8 sm:h-10 text-xs rounded-xl"
+                      className="h-8 text-xs rounded-lg bg-gray-50 border-gray-200 focus-within:border-emerald-500"
                     />
                   </div>
                 </div>
@@ -225,10 +231,10 @@ export default function AddressesPage() {
                 </div>
 
                 <div className="flex justify-end gap-2 pt-3 border-t border-gray-100">
-                  <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(false)} className="h-8 text-xs font-bold px-3 rounded-xl">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setShowForm(false)} className="h-8 text-xs font-bold px-3 rounded-lg border-gray-200">
                     Cancel
                   </Button>
-                  <Button type="submit" size="sm" disabled={isSubmitting} className="h-8 text-xs font-bold px-4 rounded-xl gradient-primary text-white">
+                  <Button type="submit" size="sm" disabled={isSubmitting} className="h-8 text-xs font-bold px-4 rounded-lg gradient-primary text-white">
                     {isSubmitting ? "Saving..." : "Save Address"}
                   </Button>
                 </div>
@@ -237,29 +243,31 @@ export default function AddressesPage() {
           )}
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[1, 2].map((i) => (
-                <div key={i} className="h-36 bg-white rounded-xl border p-4 animate-pulse"></div>
+                <div key={i} className="h-32 bg-white rounded-xl border border-gray-200/80 animate-pulse"></div>
               ))}
             </div>
           ) : addresses.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {addresses.map((address) => (
                 <div
                   key={address.id}
-                  className={`bg-white rounded-xl sm:rounded-2xl border p-3.5 sm:p-6 relative transition-all ${
-                    address.isDefault ? "border-emerald-500 shadow-xs ring-2 ring-emerald-500/20" : "border-gray-200 hover:border-gray-300"
+                  className={`bg-white rounded-xl border p-4 relative transition-all ${
+                    address.isDefault ? "border-emerald-500/80 shadow-2xs" : "border-gray-200/80 hover:border-gray-300"
                   }`}
                 >
                   {address.isDefault && (
-                    <span className="absolute top-3 right-3 flex items-center gap-1 text-[9px] sm:text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">
+                    <span className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
                       <CheckCircle2 className="h-3 w-3" /> Default
                     </span>
                   )}
 
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <MapPin className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <h3 className="font-extrabold text-gray-900 text-xs sm:text-base">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                      <MapPin className="h-3.5 w-3.5" />
+                    </div>
+                    <h3 className="font-bold text-gray-900 text-xs sm:text-sm">
                       {address.firstName} {address.lastName}
                     </h3>
                   </div>
@@ -269,7 +277,7 @@ export default function AddressesPage() {
                     {address.postalCode && ` (${address.postalCode})`}
                   </p>
 
-                  <div className="text-[10px] sm:text-xs text-gray-500 mb-3 font-semibold">Phone: {address.phone}</div>
+                  <div className="text-[11px] text-gray-400 mb-3 font-semibold">Phone: {address.phone}</div>
 
                   <div className="flex justify-end pt-2 border-t border-gray-100">
                     <Button
@@ -285,11 +293,11 @@ export default function AddressesPage() {
               ))}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center">
-              <MapPin className="h-10 w-10 text-gray-300 mx-auto mb-2" />
-              <h3 className="text-base font-extrabold text-gray-900 mb-1">No Saved Addresses</h3>
-              <p className="text-xs text-gray-500 mb-4">Add a delivery address to speed up your checkout process.</p>
-              <Button onClick={() => setShowForm(true)} className="gradient-primary text-white font-bold text-xs h-8 px-4 rounded-xl shadow-2xs">
+            <div className="bg-white rounded-xl border border-dashed border-gray-200 p-8 text-center">
+              <MapPin className="h-8 w-8 text-gray-300 mx-auto mb-2" />
+              <h3 className="text-sm font-extrabold text-gray-900 mb-1">No Saved Addresses</h3>
+              <p className="text-xs text-gray-400 mb-4 max-w-xs mx-auto font-medium">Add a delivery address to speed up your checkout process.</p>
+              <Button onClick={() => setShowForm(true)} className="gradient-primary text-white font-bold text-xs h-8 px-4 rounded-lg">
                 Add Your First Address
               </Button>
             </div>

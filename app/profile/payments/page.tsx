@@ -51,61 +51,62 @@ export default function PaymentsPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6">
-          <div>
-            <div className="flex items-center justify-between gap-2">
-              <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-4">
+          {/* Header Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight">
                 Payment Methods
               </h1>
-              <Button className="gap-1 font-bold text-xs h-8 sm:h-9 px-2.5 rounded-xl gradient-primary text-white shadow-2xs">
-                <Plus className="h-4 w-4" />
-                <span>Add Method</span>
-              </Button>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
+                Manage your saved debit cards and mobile money payment profiles
+              </p>
             </div>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">
-              Manage your saved cards and mobile money payment options
-            </p>
+            <Button className="gap-1.5 font-bold text-xs h-8 px-3 rounded-lg gradient-primary text-white shadow-2xs">
+              <Plus className="h-4 w-4" />
+              <span>Add Method</span>
+            </Button>
           </div>
 
-          <div className="max-w-3xl space-y-2.5 sm:space-y-4">
+          <div className="space-y-3">
             {methods.map((method) => (
-              <div key={method.id} className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3 sm:p-5 shadow-2xs">
+              <div key={method.id} className="bg-white rounded-xl border border-gray-200/80 p-4 shadow-2xs hover:border-gray-300 transition-all">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`p-2.5 rounded-xl shrink-0 ${
+                    className={`w-9 h-9 rounded-lg shrink-0 flex items-center justify-center border ${
                       method.type === "card"
-                        ? "bg-blue-50 text-blue-600"
-                        : "bg-emerald-50 text-emerald-600"
+                        ? "bg-blue-50 text-blue-600 border-blue-100"
+                        : "bg-emerald-50 text-emerald-600 border-emerald-100"
                     }`}
                   >
                     {method.type === "card" ? (
-                      <CreditCard className="h-4 w-4 sm:h-6 sm:w-6" />
+                      <CreditCard className="h-4 w-4" />
                     ) : (
-                      <Smartphone className="h-4 w-4 sm:h-6 sm:w-6" />
+                      <Smartphone className="h-4 w-4" />
                     )}
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <h3 className="font-extrabold text-gray-900 text-xs sm:text-base">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-bold text-gray-900 text-xs sm:text-sm">
                         {method.name}
                         {method.type === "card" && ` •••• ${method.last4}`}
                       </h3>
                       {method.isDefault && (
                         <Badge
                           variant="secondary"
-                          className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold text-[9px] px-2 py-0.2 rounded-full"
+                          className="bg-emerald-50 text-emerald-700 border-emerald-200 font-bold text-[10px] px-2 py-0.5 rounded-md"
                         >
                           Default
                         </Badge>
                       )}
                     </div>
                     {method.type === "card" ? (
-                      <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">
+                      <p className="text-[11px] text-gray-400 font-medium mt-0.5">
                         Expires {method.expiry}
                       </p>
                     ) : (
-                      <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-0.5">
+                      <p className="text-[11px] text-gray-400 font-medium mt-0.5">
                         {method.phone}
                       </p>
                     )}

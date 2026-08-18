@@ -85,22 +85,32 @@ export default function ReviewsPage() {
       <div className="flex-1 flex flex-col min-w-0">
         <DashboardHeader onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 p-3 sm:p-6 lg:p-8 space-y-3 sm:space-y-6">
-          <div>
-            <h1 className="text-xl sm:text-3xl font-black text-gray-900 tracking-tight">My Reviews</h1>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">
-              Review your purchases and manage your feedback ({reviews.length})
-            </p>
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto w-full space-y-4">
+          {/* Header Banner */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-gray-200/80 shadow-2xs">
+            <div>
+              <h1 className="text-lg sm:text-2xl font-extrabold text-gray-900 tracking-tight">
+                My Reviews
+              </h1>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
+                Feedback and ratings submitted on your purchases ({reviews.length})
+              </p>
+            </div>
+            <Link href="/profile/orders">
+              <Button variant="outline" size="sm" className="h-8 px-3 text-xs font-bold rounded-lg border-gray-200 hover:bg-gray-50">
+                <span>View My Orders</span>
+              </Button>
+            </Link>
           </div>
 
           <div>
             {isLoading ? (
-              <div className="py-8 text-center text-gray-400 text-xs font-semibold">
+              <div className="py-12 text-center text-gray-400 text-xs font-semibold">
                 Loading your reviews...
               </div>
             ) : reviews.length === 0 ? (
-              <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-8 text-center text-gray-500 text-xs font-medium">
-                You haven&apos;t submitted any reviews yet.
+              <div className="bg-white rounded-xl border border-dashed border-gray-200 p-8 text-center text-gray-400 text-xs font-medium">
+                You haven&apos;t submitted any product reviews yet.
               </div>
             ) : (
               <div className="space-y-3">
@@ -112,16 +122,16 @@ export default function ReviewsPage() {
                   });
 
                   return (
-                    <div key={review.id} className="bg-white rounded-xl sm:rounded-2xl border border-gray-200 p-3 sm:p-5 shadow-2xs">
+                    <div key={review.id} className="bg-white rounded-xl border border-gray-200/80 p-4 shadow-2xs hover:border-gray-300 transition-all">
                       <div className="flex gap-3">
                         {review.productImage ? (
                           <img
                             src={review.productImage}
                             alt={review.productName || "Product"}
-                            className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-gray-100 shrink-0"
+                            className="w-12 h-12 object-cover rounded-lg border border-gray-100 shrink-0"
                           />
                         ) : (
-                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-emerald-50 text-emerald-800 rounded-lg flex items-center justify-center font-bold text-sm shrink-0">
+                          <div className="w-12 h-12 bg-emerald-50 text-emerald-800 rounded-lg flex items-center justify-center font-bold text-xs shrink-0">
                             {review.productName?.[0] || "P"}
                           </div>
                         )}
@@ -129,16 +139,16 @@ export default function ReviewsPage() {
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <Link href={`/product/${review.productId}`}>
-                                <h3 className="font-extrabold text-gray-900 text-xs sm:text-base hover:text-emerald-600 truncate">
+                                <h3 className="font-bold text-gray-900 text-xs sm:text-sm hover:text-emerald-600 truncate">
                                   {review.productName || "Purchased Product"}
                                 </h3>
                               </Link>
-                              <div className="flex items-center gap-1 mt-0.5">
+                              <div className="flex items-center gap-1.5 mt-0.5">
                                 <div className="flex gap-0.5">
                                   {[1, 2, 3, 4, 5].map((star) => (
                                     <Star
                                       key={star}
-                                      className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                                      className={`h-3 w-3 ${
                                         star <= review.rating
                                           ? "fill-amber-400 text-amber-400"
                                           : "text-gray-200"
@@ -146,7 +156,7 @@ export default function ReviewsPage() {
                                     />
                                   ))}
                                 </div>
-                                <span className="text-[10px] text-gray-400 font-medium ml-1">
+                                <span className="text-[10px] text-gray-400 font-medium">
                                   {formattedDate}
                                 </span>
                               </div>
@@ -163,7 +173,7 @@ export default function ReviewsPage() {
                             </Button>
                           </div>
                           {review.comment && (
-                            <p className="text-xs text-gray-700 mt-2 bg-gray-50 p-2 rounded-lg border border-gray-100 font-medium leading-snug">
+                            <p className="text-xs text-gray-700 mt-2 bg-gray-50/80 p-2.5 rounded-lg border border-gray-100 font-medium leading-relaxed">
                               &ldquo;{review.comment}&rdquo;
                             </p>
                           )}
