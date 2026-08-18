@@ -147,6 +147,8 @@ model Address {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   deletedAt         DateTime?
+
+  @@index([customerProfileId, deletedAt, isDefault])
 }
 
 model WishlistItem {
@@ -158,6 +160,7 @@ model WishlistItem {
   createdAt         DateTime        @default(now())
 
   @@unique([customerProfileId, productId])
+  @@index([customerProfileId])
 }
 
 model CartItem {
@@ -172,6 +175,7 @@ model CartItem {
   updatedAt         DateTime        @updatedAt
 
   @@unique([customerProfileId, productId])
+  @@index([customerProfileId])
 }
 
 model PaymentMethod {
@@ -188,6 +192,8 @@ model PaymentMethod {
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
   deletedAt         DateTime?
+
+  @@index([customerProfileId, deletedAt, isDefault])
 }
 
 model VendorProfile {
@@ -491,6 +497,9 @@ model Review {
   isVerifiedPurchase Boolean        @default(true)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
+
+  @@index([productId, rating])
+  @@index([customerProfileId])
 }
 
 model Order {
@@ -506,6 +515,9 @@ model Order {
   updatedAt         DateTime        @updatedAt
   deletedAt         DateTime?
   orderItems        OrderItem[]
+
+  @@index([customerProfileId, createdAt])
+  @@index([status, createdAt])
 }
 
 model OrderItem {
@@ -526,6 +538,10 @@ model OrderItem {
   variant             ProductVariant? @relation(fields: [variantId], references: [id], onDelete: SetNull)
   status              String          @default("PROCESSING") // "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED" | "REFUNDED"
   isInventoryRestored Boolean         @default(false)
+
+  @@index([orderId])
+  @@index([storeId, status])
+  @@index([productId])
 }
 
 model LoginHistory {
@@ -567,6 +583,8 @@ model Conversation {
   messages          Message[]
 
   @@unique([customerProfileId, storeId])
+  @@index([customerProfileId, lastMessageAt])
+  @@index([storeId, lastMessageAt])
 }
 
 model Message {
@@ -579,6 +597,8 @@ model Message {
   attachments    Json?
   isRead         Boolean      @default(false)
   createdAt      DateTime     @default(now())
+
+  @@index([conversationId, createdAt])
 }
 
 model Notification {
@@ -591,6 +611,8 @@ model Notification {
   isRead    Boolean  @default(false)
   link      String?
   createdAt DateTime @default(now())
+
+  @@index([userId, isRead, createdAt])
 }
 
 model SupportTicket {
