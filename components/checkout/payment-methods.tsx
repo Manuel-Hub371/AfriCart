@@ -1,192 +1,227 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Smartphone, Building, Wallet } from "lucide-react";
+import { Smartphone, Check, Plus, Loader2, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface PaymentMethodsProps {
-  selectedPayment: string;
-  onPaymentChange: (method: string) => void;
+  savedPaymentMethods: any[];
+  selectedPaymentMethod: any | null;
+  onSelectPaymentMethod: (pm: any) => void;
+  onAddNewPaymentMethod: (data: { provider: string; phone: string; accountName: string; isDefault?: boolean }) => Promise<void>;
 }
 
 export default function PaymentMethods({
-  selectedPayment,
-  onPaymentChange,
+  savedPaymentMethods,
+  selectedPaymentMethod,
+  onSelectPaymentMethod,
+  onAddNewPaymentMethod,
 }: PaymentMethodsProps) {
-  const [saveCard, setSaveCard] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(savedPaymentMethods.length === 0);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const paymentMethods = [
-    {
-      id: "card",
-      name: "Credit/Debit Card",
-      icon: CreditCard,
-      description: "Pay with Visa, Mastercard, or Verve",
-    },
-    {
-      id: "mobile",
-      name: "Mobile Money",
-      icon: Smartphone,
-      description: "MTN, Vodafone, AirtelTigo",
-    },
-    {
-      id: "bank",
-      name: "Bank Transfer",
-      icon: Building,
-      description: "Direct bank payment",
-    },
-    {
-      id: "wallet",
-      name: "Digital Wallet",
-      icon: Wallet,
-      description: "PayPal, Stripe, others",
-    },
-  ];
+  const [newProvider, setNewProvider] = useState("MTN");
+  const [newPhone, setNewPhone] = useState("");
+  const [newAccountName, setNewAccountName] = useState("");
+
+  const handleCreateNew = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPhone.trim() || !newAccountName.trim()) {
+      setError("Please enter phone number and account name");
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+    try {
+      await onAddNewPaymentMethod({
+        provider: newProvider,
+        phone: newPhone,
+        accountName: newAccountName,
+        isDefault: true,
+      });
+      setShowAddForm(false);
+      setNewPhone("");
+      setNewAccountName("");
+    } catch (err: any) {
+      setError(err.message || "Failed to save payment method");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const getProviderBadge = (provider: string) => {
+    const p = (provider || "").toLowerCase();
+    if (p.includes("mtn")) return { name: "MTN MoMo", bg: "bg-amber-100 text-amber-900 border-amber-300" };
+    if (p.includes("telecel") || p.includes("voda")) return { name: "Telecel Cash", bg: "bg-red-100 text-red-900 border-red-300" };
+    return { name: "AT Money", bg: "bg-blue-100 text-blue-900 border-blue-300" };
+  };
 
   return (
     <div className="space-y-6">
-      {/* Payment Method Selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {paymentMethods.map((method) => (
-          <div
-            key={method.id}
-            onClick={() => onPaymentChange(method.id)}
-            className={`border rounded-lg p-4 cursor-pointer transition-all ${
-              selectedPayment === method.id
-                ? "border-emerald-600 bg-emerald-50 ring-2 ring-emerald-600"
-                : "border-gray-200 hover:border-emerald-300"
-            }`}
-          >
-            <div className="flex items-start gap-3">
-              {/* Radio Button */}
-              <div className="mt-1">
-                <div
-                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                    selectedPayment === method.id
-                      ? "border-emerald-600 bg-emerald-600"
-                      : "border-gray-300 bg-white"
-                  }`}
-                >
-                  {selectedPayment === method.id && (
-                    <div className="w-2 h-2 bg-white rounded-full" />
-                  )}
-                </div>
-              </div>
-
-              {/* Icon & Info */}
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <method.icon className="h-5 w-5 text-gray-700" />
-                  <h4 className="font-semibold text-gray-900">{method.name}</h4>
-                </div>
-                <p className="text-sm text-gray-600">{method.description}</p>
-              </div>
-            </div>
+      {/* Mobile Money Only Header Banner */}
+      <div className="flex items-center justify-between p-3.5 bg-emerald-50/80 border border-emerald-200/80 rounded-xl">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold shadow-2xs shrink-0">
+            <Smartphone className="h-5 w-5" />
           </div>
-        ))}
+          <div>
+            <h3 className="text-sm font-extrabold text-gray-900 flex items-center gap-2">
+              Mobile Money Payment
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-300">
+                Official AfriCart Channel
+              </span>
+            </h3>
+            <p className="text-xs text-gray-600">Fast, instant authorization via MTN MoMo, Telecel Cash & AT Money</p>
+          </div>
+        </div>
       </div>
 
-      {/* Payment Form - Card */}
-      {selectedPayment === "card" && (
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Card Number
+      {/* Saved Payment Methods List from Customer Dashboard */}
+      {savedPaymentMethods.length > 0 && !showAddForm && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+              Select Saved Payment Method ({savedPaymentMethods.length})
             </label>
-            <Input placeholder="1234 5678 9012 3456" />
+            <button
+              type="button"
+              onClick={() => setShowAddForm(true)}
+              className="text-xs font-extrabold text-emerald-700 hover:text-emerald-800 flex items-center gap-1"
+            >
+              <Plus className="h-3.5 w-3.5" /> Add New MoMo Account
+            </button>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Expiry Date
-              </label>
-              <Input placeholder="MM/YY" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                CVV
-              </label>
-              <Input placeholder="123" type="password" />
-            </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {savedPaymentMethods.map((pm) => {
+              const badge = getProviderBadge(pm.provider || pm.details?.provider);
+              const isSelected = selectedPaymentMethod?.id === pm.id;
+              const phoneDisplay = pm.phone || pm.accountNumber || pm.details?.phone || "024 XXX XXXX";
+              const holderDisplay = pm.accountName || pm.details?.accountName || "Account Holder";
+
+              return (
+                <div
+                  key={pm.id}
+                  onClick={() => onSelectPaymentMethod(pm)}
+                  className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    isSelected
+                      ? "bg-emerald-50/90 border-emerald-600 ring-2 ring-emerald-600/30 shadow-xs"
+                      : "bg-white border-gray-200 hover:border-emerald-300"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${isSelected ? "bg-emerald-600 border-emerald-600 text-white" : "border-gray-300 bg-white"}`}>
+                        {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                      </div>
+                      <span className={`text-[11px] font-extrabold px-2 py-0.5 rounded-md border ${badge.bg}`}>
+                        {badge.name}
+                      </span>
+                    </div>
+                    {pm.isDefault && (
+                      <span className="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                        Default
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="mt-2.5">
+                    <p className="text-xs font-bold text-gray-900">{holderDisplay}</p>
+                    <p className="text-xs text-gray-600 font-medium tracking-wide mt-0.5">{phoneDisplay}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Card Holder Name
-            </label>
-            <Input placeholder="e.g. Manuel Darko" />
-          </div>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={saveCard}
-              onChange={(e) => setSaveCard(e.target.checked)}
-              className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
-            />
-            <span className="text-sm text-gray-700">
-              Save this card for future purchases
-            </span>
-          </label>
         </div>
       )}
 
-      {/* Payment Form - Mobile Money */}
-      {selectedPayment === "mobile" && (
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mobile Money Provider
-            </label>
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option>MTN Mobile Money</option>
-              <option>Vodafone Cash</option>
-              <option>AirtelTigo Money</option>
-            </select>
+      {/* Add New Payment Method Inline Form */}
+      {(showAddForm || savedPaymentMethods.length === 0) && (
+        <form onSubmit={handleCreateNew} className="p-4 bg-gray-50/80 rounded-2xl border border-gray-200 space-y-4">
+          <div className="flex items-center justify-between border-b border-gray-200/80 pb-2.5">
+            <h4 className="text-xs font-extrabold text-gray-900 uppercase tracking-wider">
+              Add Mobile Money Payment Method
+            </h4>
+            {savedPaymentMethods.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                className="text-xs font-bold text-gray-500 hover:text-gray-700"
+              >
+                Use Saved Method
+              </button>
+            )}
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Mobile Number
-            </label>
-            <Input placeholder="+233 XX XXX XXXX" />
-          </div>
-          <p className="text-sm text-gray-600">
-            You will receive a prompt on your phone to authorize the payment
-          </p>
-        </div>
-      )}
 
-      {/* Payment Form - Bank Transfer */}
-      {selectedPayment === "bank" && (
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-700">
-            After placing your order, you will receive bank details to complete
-            the transfer. Your order will be processed once payment is confirmed.
-          </p>
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
-            <p className="text-sm text-amber-800">
-              <span className="font-semibold">Note:</span> Bank transfers may take
-              1-3 business days to process
+          {error && (
+            <div className="p-2.5 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs font-medium">
+              {error}
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                Network Provider *
+              </label>
+              <select
+                value={newProvider}
+                onChange={(e) => setNewProvider(e.target.value)}
+                className="w-full h-9 px-2.5 text-xs bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
+              >
+                <option value="MTN">MTN Mobile Money</option>
+                <option value="Telecel">Telecel Cash (Vodafone)</option>
+                <option value="AT">AT Money (AirtelTigo)</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                Mobile Number *
+              </label>
+              <Input
+                required
+                type="tel"
+                value={newPhone}
+                onChange={(e) => setNewPhone(e.target.value)}
+                placeholder="024 XXX XXXX"
+                className="h-9 text-xs rounded-xl bg-white border-gray-200"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">
+                Account Holder Name *
+              </label>
+              <Input
+                required
+                value={newAccountName}
+                onChange={(e) => setNewAccountName(e.target.value)}
+                placeholder="Name as registered on SIM card"
+                className="h-9 text-xs rounded-xl bg-white border-gray-200"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <p className="text-[11px] text-gray-500 font-medium flex items-center gap-1">
+              <ShieldCheck className="h-3.5 w-3.5 text-emerald-600 shrink-0" />
+              Saves automatically to your Customer Dashboard profile
             </p>
+            <Button
+              type="submit"
+              disabled={isSaving}
+              className="h-8 px-4 text-xs font-bold gap-1 rounded-xl gradient-primary text-white"
+            >
+              {isSaving ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+              <span>{isSaving ? "Saving..." : "Save & Use for Order"}</span>
+            </Button>
           </div>
-        </div>
-      )}
-
-      {/* Payment Form - Digital Wallet */}
-      {selectedPayment === "wallet" && (
-        <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select Wallet Provider
-            </label>
-            <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-              <option>PayPal</option>
-              <option>Stripe</option>
-              <option>Apple Pay</option>
-              <option>Google Pay</option>
-            </select>
-          </div>
-          <p className="text-sm text-gray-600">
-            You will be redirected to complete the payment securely
-          </p>
-        </div>
+        </form>
       )}
     </div>
   );

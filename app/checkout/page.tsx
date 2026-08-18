@@ -21,21 +21,23 @@ export default function CheckoutPage() {
   const [selectedAddress, setSelectedAddress] = useState<any | null>(null);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [cartItems, setCartItems] = useState<any[]>([]);
-  const [selectedPayment, setSelectedPayment] = useState("card");
+  const [savedPaymentMethods, setSavedPaymentMethods] = useState<any[]>([]);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<any | null>(null);
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch real addresses and cart items on mount
+  // Fetch real addresses, cart items, and saved dashboard payment methods on mount
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [addrRes, cartRes] = await Promise.all([
+      const [addrRes, cartRes, payRes] = await Promise.all([
         fetch("/api/addresses"),
         fetch("/api/cart"),
+        fetch("/api/payments"),
       ]);
 
       if (addrRes.ok) {
@@ -50,6 +52,14 @@ export default function CheckoutPage() {
         const cartData = await cartRes.json();
         setCartItems(cartData.items || []);
       }
+
+      if (payRes.ok) {
+        const payData = await payRes.json();
+        const pms = Array.isArray(payData) ? payData : payData.paymentMethods || [];
+        setSavedPaymentMethods(pms);
+        const defaultPm = pms.find((p: any) => p.isDefault) || pms[0] || null;
+        setSelectedPaymentMethod(defaultPm);
+      }
     } catch (e: any) {
       setError(e.message);
     } finally {
@@ -60,6 +70,31 @@ export default function CheckoutPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  const handleAddNewPaymentMethod = async (data: { provider: string; phone: string; accountName: string; isDefault?: boolean }) => {
+    const res = await fetch("/api/payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "MOBILE_MONEY",
+        provider: data.provider,
+        accountName: data.accountName,
+        phone: data.phone,
+        isDefault: data.isDefault ?? true,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.message || "Failed to save payment method");
+    }
+
+    const updated = await res.json();
+    const pms = Array.isArray(updated) ? updated : updated.paymentMethods || [];
+    setSavedPaymentMethods(pms);
+    const newest = pms.length > 0 ? pms[pms.length - 1] : null;
+    setSelectedPaymentMethod(newest);
+  };
 
   // Selected shipping options per vendor state
   const [selectedShippingPerVendor, setSelectedShippingPerVendor] = useState<Record<string, string>>({});
@@ -200,7 +235,9 @@ export default function CheckoutPage() {
             country: selectedAddress.country,
             postalCode: selectedAddress.postalCode,
           },
-          paymentMethod: selectedPayment,
+          paymentMethod: selectedPaymentMethod?.provider || "MOBILE_MONEY",
+          paymentMethodId: selectedPaymentMethod?.id,
+          paymentPhone: selectedPaymentMethod?.phone || selectedPaymentMethod?.accountNumber,
         }),
       });
 
@@ -388,8 +425,10 @@ export default function CheckoutPage() {
               <div className="bg-white rounded-lg shadow-sm border p-6">
                 <h2 className="text-xl font-semibold mb-6">Payment Method</h2>
                 <PaymentMethods
-                  selectedPayment={selectedPayment}
-                  onPaymentChange={setSelectedPayment}
+                  savedPaymentMethods={savedPaymentMethods}
+                  selectedPaymentMethod={selectedPaymentMethod}
+                  onSelectPaymentMethod={setSelectedPaymentMethod}
+                  onAddNewPaymentMethod={handleAddNewPaymentMethod}
                 />
               </div>
 
