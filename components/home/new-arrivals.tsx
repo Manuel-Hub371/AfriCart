@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import { ProductCard } from "@/components/products/product-card";
 
-export function NewArrivals() {
-  const [products, setProducts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function NewArrivals({ initialProducts }: { initialProducts?: any[] }) {
+  const [products, setProducts] = useState<any[]>(initialProducts || []);
+  const [isLoading, setIsLoading] = useState(!initialProducts || initialProducts.length === 0);
 
   useEffect(() => {
+    if (initialProducts && initialProducts.length > 0) return;
     async function loadNewArrivals() {
       try {
         setIsLoading(true);
@@ -23,7 +24,7 @@ export function NewArrivals() {
       }
     }
     loadNewArrivals();
-  }, []);
+  }, [initialProducts]);
 
   return (
     <section className="py-8 sm:py-12 md:py-16 bg-gray-50 border-t">

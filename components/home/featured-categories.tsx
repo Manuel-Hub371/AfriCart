@@ -173,11 +173,12 @@ function getCategoryIcon(slug: string = "", name: string = "") {
   };
 }
 
-export function FeaturedCategories() {
-  const [categories, setCategories] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function FeaturedCategories({ initialCategories }: { initialCategories?: any[] }) {
+  const [categories, setCategories] = useState<any[]>(initialCategories || []);
+  const [isLoading, setIsLoading] = useState(!initialCategories || initialCategories.length === 0);
 
   useEffect(() => {
+    if (initialCategories && initialCategories.length > 0) return;
     async function loadCategories() {
       try {
         setIsLoading(true);
@@ -193,7 +194,7 @@ export function FeaturedCategories() {
       }
     }
     loadCategories();
-  }, []);
+  }, [initialCategories]);
 
   return (
     <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-b from-white to-green-50/30">

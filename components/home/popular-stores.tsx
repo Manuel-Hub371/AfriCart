@@ -6,11 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Star, Package, CheckCircle, MapPin, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-export function PopularStores() {
-  const [stores, setStores] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function PopularStores({ initialStores }: { initialStores?: any[] }) {
+  const [stores, setStores] = useState<any[]>(initialStores || []);
+  const [isLoading, setIsLoading] = useState(!initialStores || initialStores.length === 0);
 
   useEffect(() => {
+    if (initialStores && initialStores.length > 0) return;
     async function loadStores() {
       try {
         setIsLoading(true);
@@ -26,7 +27,7 @@ export function PopularStores() {
       }
     }
     loadStores();
-  }, []);
+  }, [initialStores]);
 
   return (
     <section className="py-8 sm:py-12 md:py-16 bg-white">
