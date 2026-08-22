@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=2048\" NODE_ENV=production next build",
+    "build": "cross-env NODE_OPTIONS=\"--max-old-space-size=384\" NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push --accept-data-loss",
