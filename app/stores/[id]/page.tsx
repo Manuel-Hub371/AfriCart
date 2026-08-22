@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, use, useMemo } from "react";
+import { useEffect, useState, use, useMemo, Suspense } from "react";
 import { Navbar } from "@/components/navigation/navbar";
 import { Footer } from "@/components/footer/footer";
 import { ProductCard } from "@/components/products/product-card";
@@ -40,7 +40,7 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
-export default function StoreDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+function StoreDetailsContent({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
   const storeId = resolvedParams.id;
   const router = useRouter();
@@ -1018,5 +1018,13 @@ export default function StoreDetailsPage({ params }: { params: Promise<{ id: str
 
       <Footer />
     </div>
+  );
+}
+
+export default function StoreDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500 font-bold">Loading Store Details...</div>}>
+      <StoreDetailsContent params={params} />
+    </Suspense>
   );
 }

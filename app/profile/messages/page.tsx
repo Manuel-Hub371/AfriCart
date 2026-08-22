@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import DashboardSidebar from "@/components/profile/dashboard-sidebar";
 import DashboardHeader from "@/components/profile/dashboard-header";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ interface Message {
   createdAt: string;
 }
 
-export default function CustomerMessagesPage() {
+function MessagesContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const searchParams = useSearchParams();
   const initialConvId = searchParams.get("conversationId");
@@ -438,5 +438,13 @@ export default function CustomerMessagesPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-gray-500 font-bold">Loading Messages...</div>}>
+      <MessagesContent />
+    </Suspense>
   );
 }
