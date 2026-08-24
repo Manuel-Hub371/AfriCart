@@ -315,7 +315,7 @@ export default function VendorNotificationsPage() {
                     <BellRing className="h-6 w-6" />
                   </div>
                   <h3 className="font-extrabold text-gray-900 text-sm sm:text-base">
-                    You're all caught up!
+                    You&apos;re all caught up!
                   </h3>
                   <p className="text-xs text-gray-400 mt-1 max-w-xs mx-auto">
                     {searchQuery

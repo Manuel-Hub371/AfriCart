@@ -178,7 +178,7 @@ export default function DealsPage() {
                 </div>
 
                 <h1 className="text-xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-tight">
-                  Today's <span className="text-gradient">Hot Deals</span> & Discounts
+                  Today&apos;s <span className="text-gradient">Hot Deals</span> &amp; Discounts
                 </h1>
 
                 <p className="text-gray-300 text-xs sm:text-base leading-relaxed max-w-xl mx-auto md:mx-0">
