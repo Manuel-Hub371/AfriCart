@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "cross-env NODE_ENV=production next build",
-    "start": "cross-env NODE_ENV=production next start -H 0.0.0.0",
+    "start": "cross-env NODE_ENV=production next start -H 0.0.0.0 -p $PORT",
     "lint": "next lint",
     "db:push": "prisma db push --accept-data-loss",
     "db:seed": "npx tsx prisma/seed.ts",
