@@ -3,7 +3,7 @@ services:
     name: africart
     env: node
     buildCommand: npm install && npx prisma generate && npx prisma db push --accept-data-loss && npm run build
-    startCommand: export NODE_ENV=production && next start -H 0.0.0.0 -p $PORT
+    startCommand: npm start
     healthCheckPath: /
     envVars:
       - key: DATABASE_URL
@@ -15,8 +15,6 @@ services:
       - key: NEXT_PUBLIC_APP_URL
         value: https://africart-ywef.onrender.com
       - key: NODE_ENV
-        value: production
-      - key: NEXT_PUBLIC_NODE_ENV
         value: production
 
 databases:
