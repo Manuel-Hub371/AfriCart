@@ -19,12 +19,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Allow large files for the upload route
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
     },
     webpackBuildWorker: false,
+    workerThreads: false,
+    cpus: 1,
   },
 };
 
