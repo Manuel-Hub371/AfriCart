@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { resolveCampaignPricing, extractCampaigns } from "@/lib/campaign-pricing";
+import { resolveCampaignPricing, extractCampaigns, isCampaignLive } from "@/lib/campaign-pricing";
 import { isBestSellerProduct } from "@/modules/catalog/best-seller-calculator";
 import { normalizeImages } from "@/lib/image-utils";
 
@@ -46,10 +46,7 @@ export async function GET(req: NextRequest) {
       orderBy: [{ priority: "desc" }, { createdAt: "desc" }],
     });
 
-    const activeCampaigns = candidateCampaigns.filter((c) => {
-      const { isCampaignLive } = require("@/lib/campaign-pricing");
-      return isCampaignLive(c);
-    });
+    const activeCampaigns = candidateCampaigns.filter((c) => isCampaignLive(c));
 
     if (activeCampaigns.length === 0) {
       return NextResponse.json({
