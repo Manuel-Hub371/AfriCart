@@ -376,7 +376,7 @@ export default function VendorApplicationDetailPage({
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="font-bold text-slate-200 text-sm">Government ID Document</h4>
-                <p className="text-[11px] text-slate-500">National ID, Passport, or Driver's License</p>
+                <p className="text-[11px] text-slate-500">National ID, Passport, or Driver&apos;s License</p>
               </div>
               {application.idDocumentUrl ? (
                 <span className="text-[10px] font-extrabold bg-emerald-950 text-emerald-400 border border-emerald-800 px-2.5 py-0.5 rounded-full">

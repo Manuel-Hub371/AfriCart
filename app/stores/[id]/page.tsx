@@ -840,7 +840,7 @@ function StoreDetailsContent({ params }: { params: Promise<{ id: string }> }) {
                   <Tag className="h-16 w-16 text-gray-300 mx-auto" />
                   <h3 className="text-2xl font-extrabold text-gray-900">No Active Deals Right Now</h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    This store doesn't have any active deals or promotional offers right now. Check back later for new offers, or browse all available products from <strong>{store.name}</strong>.
+                    This store doesn&apos;t have any active deals or promotional offers right now. Check back later for new offers, or browse all available products from <strong>{store.name}</strong>.
                   </p>
                   <Button
                     onClick={() => setActiveTab("products")}
