@@ -3,7 +3,7 @@ services:
     name: africart
     env: node
     buildCommand: npm install && npx prisma generate && npx prisma db push --accept-data-loss && npm run build
-    startCommand: NODE_ENV=production next start -H 0.0.0.0 -p $PORT
+    startCommand: export NODE_ENV=production && next start -H 0.0.0.0 -p $PORT
     healthCheckPath: /
     envVars:
       - key: DATABASE_URL
