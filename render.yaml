@@ -1,10 +1,31 @@
+# AfriCart — Deploy configuration (split architecture)
+#
+# This repository now contains two independently deployable Next.js applications:
+#
+#   backend/  -> AfriCart API (API-only, Postgres + Cloudinary + email)
+#                Deployed on Render as the service below.
+#   frontend/ -> AfriCart storefront UI (no server code, no DB access)
+#                Deployed on Vercel or Netlify (configure there, see comment below).
+#
+# Frontend hosting (Vercel/Netlify) required env vars:
+#   NEXT_PUBLIC_API_URL  = https://<this-api-service>.onrender.com  (public API base)
+#   NEXT_PUBLIC_APP_URL  = https://<frontend-domain>                (public frontend origin)
+#
+# IMPORTANT one-time prerequisite before the first deploy that uses migrate deploy:
+# the existing production DB was created via `prisma db push` and already has the
+# full schema. Run the following against the Render database ONCE (it only records
+# the baseline migration as applied; it makes NO schema/data changes):
+#   npx prisma migrate resolve --applied 0_init
+# Then deploy. `migrate deploy` applies only NEW changes going forward (non-destructive).
+
 services:
   - type: web
-    name: africart
+    name: africart-api
+    rootDir: backend
     env: node
-    buildCommand: npm install && npx prisma generate && npx prisma db push --accept-data-loss && npm run build
+    buildCommand: npm install && npx prisma generate && npx prisma migrate deploy && npm run build
     startCommand: npm run start
-    healthCheckPath: /
+    healthCheckPath: /api/health
     envVars:
       - key: DATABASE_URL
         fromDatabase:
@@ -12,10 +33,48 @@ services:
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
-      - key: NEXT_PUBLIC_APP_URL
-        value: https://africart-hw50.onrender.com
       - key: NODE_ENV
         value: production
+      - key: NEXT_PUBLIC_APP_URL
+        value: https://www.africart.com
+      # Comma-separated frontend origins allowed for CORS (append the real frontend
+      # origin, e.g. https://africart.vercel.app).
+      - key: ALLOWED_ORIGINS
+        value: https://www.africart.com
+      # Frontend and API are different sites => cross-site cookies.
+      # COOKIE_SAME_SITE=none forces Secure, which requires HTTPS (provided by Render).
+      - key: COOKIE_SAME_SITE
+        value: none
+      - key: LOG_LEVEL
+        value: info
+      # Credentials below are set in the Render dashboard (sync: false prevents this
+      # file from overriding them / forcing values into the diff).
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+
+  # Daily maintenance: prune expired/used verification & reset tokens.
+  # Idempotent — safe to re-run. Free on Render's free plan.
+  - type: cron
+    name: africart-maintenance
+    rootDir: backend
+    env: node
+    schedule: "0 3 * * *"
+    startCommand: npm run job:maintenance
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: africart-db
+          property: connectionString
 
 databases:
   - name: africart-db

@@ -1,0 +1,138 @@
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+// Session verification is delegated to the backend API (GET /api/auth/me).
+// This keeps JWT_SECRET out of the frontend build: the middleware never
+// verifies tokens itself. The user's cookies are forwarded to the backend,
+// which resolves the session and applies cookie rotation. The backend base URL
+// is resolved from API_INTERNAL_URL (server-side) or NEXT_PUBLIC_API_URL.
+
+interface SessionUser {
+  id?: string;
+  userId?: string;
+  role?: string | null;
+  roles?: string[] | null;
+}
+
+function getApiBase(): string {
+  const url =
+    process.env.API_INTERNAL_URL?.trim() ||
+    process.env.NEXT_PUBLIC_API_URL?.trim() ||
+    "";
+  return /^https?:\/\//i.test(url) ? url.replace(/\/+$/, "") : "";
+}
+
+async function getSessionUser(request: NextRequest): Promise<SessionUser | null> {
+  const base = getApiBase();
+  const cookie = request.headers.get("cookie");
+  if (!base || !cookie) return null;
+
+  try {
+    const res = await fetch(`${base}/api/auth/me`, {
+      headers: { cookie },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const user = data?.user;
+    return user ? { ...user } : null;
+  } catch {
+    return null;
+  }
+}
+
+function getSafeRedirectUrl(redirectParam: string | null): string {
+  if (!redirectParam) return "/profile";
+  // Only permit valid relative paths starting with "/" and not containing "//" or protocol schemes
+  if (redirectParam.startsWith("/") && !redirectParam.startsWith("//") && !redirectParam.includes("://")) {
+    return redirectParam;
+  }
+  return "/profile";
+}
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const session = await getSessionUser(request);
+
+  const isAuthRoute =
+    pathname.startsWith("/auth/login") ||
+    pathname.startsWith("/auth/register") ||
+    pathname.startsWith("/auth/welcome") ||
+    pathname.startsWith("/auth/vendor-registration");
+
+  const isCustomerRoute =
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/cart") ||
+    pathname.startsWith("/checkout");
+
+  const isVendorRoute =
+    pathname.startsWith("/vendor");
+
+  const isAdminRoute =
+    pathname.startsWith("/admin");
+
+  const userId = session?.userId || session?.id;
+  const roles = Array.isArray(session?.roles)
+    ? session!.roles!.map((r: string) => String(r).toUpperCase())
+    : [];
+  const singleRole = String(session?.role || "").toUpperCase();
+
+  // 1. Guard customer, vendor, and admin routes
+  if (isCustomerRoute || isVendorRoute || isAdminRoute) {
+    if (!session || !userId) {
+      const loginUrl = new URL("/auth/login", request.url);
+      const safeRedirect = getSafeRedirectUrl(pathname);
+      loginUrl.searchParams.set("redirect", safeRedirect);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // 2. Guard Admin routes specifically (Requires ADMIN role)
+    if (isAdminRoute) {
+      const isAdmin = roles.includes("ADMIN") || singleRole === "ADMIN";
+      if (!isAdmin) {
+        return NextResponse.redirect(new URL("/profile", request.url));
+      }
+    }
+
+    // 3. Guard Vendor routes specifically
+    if (isVendorRoute) {
+      const isVendorOrAdmin =
+        roles.includes("VENDOR") ||
+        roles.includes("ADMIN") ||
+        singleRole === "VENDOR" ||
+        singleRole === "ADMIN";
+
+      if (roles.length > 0 && !isVendorOrAdmin && singleRole === "CUSTOMER") {
+        return NextResponse.redirect(new URL("/profile", request.url));
+      }
+    }
+  }
+
+  // 4. Redirect authenticated users away from authentication pages
+  if (isAuthRoute && session && userId) {
+    if (roles.includes("ADMIN") || singleRole === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    } else if (roles.includes("VENDOR") || singleRole === "VENDOR") {
+      return NextResponse.redirect(new URL("/vendor", request.url));
+    } else {
+      return NextResponse.redirect(new URL("/profile", request.url));
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: [
+    "/profile/:path*",
+    "/vendor/:path*",
+    "/admin/:path*",
+    "/cart",
+    "/checkout",
+    "/auth/login",
+    "/auth/register",
+    "/auth/welcome",
+    "/auth/vendor-registration",
+  ],
+};
