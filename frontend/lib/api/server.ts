@@ -38,20 +38,35 @@ export interface ServerFetchOptions extends Omit<RequestInit, "cache"> {
 /**
  * Fetch from the backend API on the server.
  * Supports Next.js fetch caching/revalidation for ISR pages.
+ * Bounded by a default timeout (API_FETCH_TIMEOUT_MS, default 15s) so a
+ * slow/unreachable backend can never hang a `next build` prerender — callers
+ * catch the abort and degrade gracefully (e.g. empty homepage sections).
  */
 export async function serverApiFetch(
   path: string,
   options: ServerFetchOptions = {},
 ): Promise<Response> {
-  const { cache, revalidate, tags, ...init } = options;
+  const { cache, revalidate, tags, signal: callerSignal, ...init } = options;
   const url = `${API_BASE}${path.startsWith("/") ? path : `/${path}`}`;
 
-  return fetch(url, {
-    ...init,
-    ...(cache ? { cache } : revalidate !== undefined
-      ? { next: { revalidate: revalidate === false ? 0 : revalidate, tags } }
-      : {}),
-  });
+  // Abort long-pending requests. Respect the caller's signal if provided.
+  const timeoutMs = Number(process.env.API_FETCH_TIMEOUT_MS) || 15000;
+  const controller = callerSignal ? null : new AbortController();
+  const timer = controller
+    ? setTimeout(() => controller.abort(), timeoutMs)
+    : undefined;
+
+  try {
+    return await fetch(url, {
+      ...init,
+      ...(controller ? { signal: controller.signal } : {}),
+      ...(cache ? { cache } : revalidate !== undefined
+        ? { next: { revalidate: revalidate === false ? 0 : revalidate, tags } }
+        : {}),
+    });
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
 }
 
 /** Throwing variant that parses JSON and throws on non-2xx. */
