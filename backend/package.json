@@ -8,6 +8,7 @@
     "start": "next start -H 0.0.0.0 -p $PORT",
     "lint": "next lint",
     "db:migrate": "prisma migrate deploy",
+    "db:resolve-failed-init": "prisma migrate resolve --rolled-back 0_init",
     "db:seed": "npx tsx prisma/seed.ts",
     "db:migrate:media": "npx tsx scripts/migrate-media-cloudinary.ts",
     "job:maintenance": "npx tsx scripts/maintenance.ts",
