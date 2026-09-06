@@ -12,6 +12,7 @@
     "db:seed": "npx tsx prisma/seed.ts",
     "db:migrate:media": "npx tsx scripts/migrate-media-cloudinary.ts",
     "job:maintenance": "npx tsx scripts/maintenance.ts",
+    "db:clear-dummy": "npx tsx scripts/clear-dummy-catalog.ts",
     "postinstall": "prisma generate"
   },
   "prisma": {
