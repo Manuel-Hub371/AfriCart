@@ -8,7 +8,26 @@ import {
   User 
 } from "./types";
 import { storage } from "./storage";
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, parseApiResponse, describeBadApiResponse } from "@/lib/api/client";
+
+// Parse a backend response and surface a friendly, actionable error instead of
+// the cryptic "Unexpected token '<', ... is not valid JSON" message that occurs
+// when the browser receives an HTML page (missing backend / wrong API URL).
+async function parseAuthResponse<T = any>(
+  path: string,
+  res: Response,
+  fallbackError: string
+): Promise<T> {
+  const data = await parseApiResponse<any>(res);
+  if (!res.ok) {
+    const message = data?.message || data?.error || fallbackError;
+    throw new Error(message);
+  }
+  if (data === null) {
+    throw new Error(describeBadApiResponse(path, res));
+  }
+  return data;
+}
 
 export const authService = {
   /**
@@ -26,10 +45,7 @@ export const authService = {
       })
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Login failed. Please check your credentials.");
-    }
+    const data = await parseAuthResponse("/api/auth/login", response, "Login failed. Please check your credentials.");
 
     return {
       user: data.user,
@@ -50,10 +66,7 @@ export const authService = {
       body: JSON.stringify(data)
     });
 
-    const resData = await response.json();
-    if (!response.ok) {
-      throw new Error(resData.message || "Registration failed.");
-    }
+    const resData = await parseAuthResponse("/api/auth/register", response, "Registration failed.");
 
     return {
       user: resData.user,
@@ -74,10 +87,7 @@ export const authService = {
       body: JSON.stringify(data)
     });
 
-    const resData = await response.json();
-    if (!response.ok) {
-      throw new Error(resData.message || "Vendor registration failed.");
-    }
+    const resData = await parseAuthResponse("/api/auth/register-vendor", response, "Vendor registration failed.");
 
     return {
       user: resData.user,
@@ -109,10 +119,7 @@ export const authService = {
       cache: "no-store"
     });
 
-    const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || "Unauthorized session.");
-    }
+    const data = await parseAuthResponse("/api/auth/me", response, "Unauthorized session.");
 
     return data.user;
   },
@@ -178,10 +185,7 @@ export const authService = {
       body: JSON.stringify(data)
     });
 
-    const resData = await response.json();
-    if (!response.ok) {
-      throw new Error(resData.message || "Failed to upgrade account to vendor.");
-    }
+    const resData = await parseAuthResponse("/api/auth/upgrade", response, "Failed to upgrade account to vendor.");
 
     return resData.user;
   }

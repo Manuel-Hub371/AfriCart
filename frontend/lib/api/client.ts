@@ -1,10 +1,10 @@
 // Centralized API client.
 //
 // Resolves the backend base URL at runtime:
-//   - NEXT_PUBLIC_API_URL set  -> cross-origin (frontend/API split). Sends credentials
-//     (HttpOnly cookies) with each request so auth works across origins.
-//   - NEXT_PUBLIC_API_URL empty -> same-origin monolith (current default). Uses relative
-//     /api paths and relies on same-origin cookies automatically.
+//   - NEXT_PUBLIC_API_URL set (absolute) -> cross-origin (frontend/API split). Sends
+//     credentials (HttpOnly cookies) with each request so auth works across origins.
+//   - NEXT_PUBLIC_API_URL empty/relative -> same-origin. The frontend proxies /api/*
+//     to the backend via next.config rewrites, so requests still reach the API.
 //
 // All API calls from the browser/SSR should go through this client so that the
 // frontend never hardcodes deployment URLs and CORS/credentials stay consistent.
@@ -66,13 +66,45 @@ export async function apiFetch(path: string, options: ApiOptions = {}): Promise<
   return fetch(resolveUrl(path), init);
 }
 
+/**
+ * Parse a Response body as JSON without throwing the cryptic
+ * "Unexpected token '<', ... is not valid JSON" error when the API returns an
+ * HTML error/404 page instead of JSON. Returns null when the body is empty or
+ * not valid JSON.
+ */
+export async function parseApiResponse<T = any>(res: Response): Promise<T | null> {
+  const text = await res.text().catch(() => "");
+  if (!text) return null;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reason a non-JSON (usually HTML) API response was received so the UI can
+ * surface an actionable message instead of a JSON parse error.
+ */
+export function describeBadApiResponse(path: string, res: Response): string {
+  const contentType = res.headers.get("content-type") || "";
+  if (contentType.includes("text/html") || contentType.includes("text/plain")) {
+    return `The API endpoint "${path}" returned an HTML page instead of JSON (HTTP ${res.status || "unknown"}). ` +
+      `Make sure the backend server is running and that NEXT_PUBLIC_API_URL / API_INTERNAL_URL point to it.`;
+  }
+  return `The API request to "${path}" failed with an unexpected response (HTTP ${res.status || "unknown"}).`;
+}
+
 /** Fetch that throws on non-2xx responses, returning parsed JSON. */
 export async function apiFetchOrThrow<T = any>(path: string, options: ApiOptions = {}): Promise<T> {
   const res = await apiFetch(path, options);
-  const data = await res.json().catch(() => null);
+  const data = await parseApiResponse<any>(res);
   if (!res.ok) {
     const message = data?.message || data?.error || `Request failed (${res.status})`;
     throw new ApiError(message, res.status, data);
+  }
+  if (data === null) {
+    throw new ApiError(describeBadApiResponse(path, res), res.status, null);
   }
   return data as T;
 }

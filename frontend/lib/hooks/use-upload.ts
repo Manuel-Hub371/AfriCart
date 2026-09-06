@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { apiFetch } from "@/lib/api/client";
+import { apiFetch, parseApiResponse, describeBadApiResponse } from "@/lib/api/client";
 
 interface UploadResult {
   url: string;
@@ -27,10 +27,14 @@ export function useUpload(): UseUploadReturn {
         body: formData,
       });
 
-      const data = await res.json();
+      const data = await parseApiResponse<any>(res);
 
       if (!res.ok) {
-        throw new Error(data.error || "Upload failed");
+        throw new Error(data?.error || data?.message || "Upload failed");
+      }
+
+      if (data === null) {
+        throw new Error(describeBadApiResponse("/api/upload", res));
       }
 
       return (data as UploadResult).url;

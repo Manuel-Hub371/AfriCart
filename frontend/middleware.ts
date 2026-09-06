@@ -19,7 +19,10 @@ function getApiBase(): string {
     process.env.API_INTERNAL_URL?.trim() ||
     process.env.NEXT_PUBLIC_API_URL?.trim() ||
     "";
-  return /^https?:\/\//i.test(url) ? url.replace(/\/+$/, "") : "";
+  if (/^https?:\/\//i.test(url)) return url.replace(/\/+$/, "");
+  // Local dev fallback: the backend runs on port 3001 by default. This keeps
+  // route guards working even if the two env vars above are left unset.
+  return process.env.NODE_ENV === "production" ? "" : "http://localhost:3001";
 }
 
 async function getSessionUser(request: NextRequest): Promise<SessionUser | null> {
