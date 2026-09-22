@@ -31,11 +31,16 @@ export function BestSellers({ initialProducts }: { initialProducts?: any[] }) {
     <section className="py-8 sm:py-12 md:py-16 bg-white border-t">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-10 text-center md:text-left">
+          <div className="inline-block mb-2 sm:mb-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-100/80 text-amber-800 text-xs sm:text-sm font-bold">
+              Most-Loved Products
+            </span>
+          </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-1">
-            Best <span className="text-gradient">Sellers</span>
+            What Everyone Is <span className="text-gradient">Buying</span>
           </h2>
           <p className="text-xs sm:text-sm text-gray-600">
-            The most loved products by our customers across Africa
+            The most-loved products by our customers across Africa
           </p>
         </div>
 

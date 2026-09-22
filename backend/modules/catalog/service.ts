@@ -426,12 +426,12 @@ export class CatalogService {
 
     const averageRating = totalRatingsCount > 0 ? Number((totalRatingsSum / totalRatingsCount).toFixed(1)) : 5.0;
 
-    const assignedStorePolicy = (store as any).currentStorePolicy || (store as any).storePolicies?.find((p: any) => p.isDefault) || (store as any).storePolicies?.[0] || null;
-    const assignedPrivacyPolicy = (store as any).currentPrivacyPolicy || (store as any).privacyPolicies?.find((p: any) => p.isDefault) || (store as any).privacyPolicies?.[0] || null;
-    const activeShippingPolicy = (store as any).shippingPolicies?.find((p: any) => p.isDefault) || (store as any).shippingPolicies?.[0] || null;
-    const activeRefundPolicy = (store as any).refundPolicies?.find((p: any) => p.isDefault) || (store as any).refundPolicies?.[0] || null;
-    const activeReturnPolicy = (store as any).returnPolicies?.find((p: any) => p.isDefault) || (store as any).returnPolicies?.[0] || null;
-    const activeWarrantyPolicy = (store as any).warrantyPolicies?.find((p: any) => p.isDefault) || (store as any).warrantyPolicies?.[0] || null;
+    const assignedStorePolicy = (store as any).currentStorePolicy || (store as any).storePolicies?.find((p: any) => p.isActive) || (store as any).storePolicies?.[0] || null;
+    const assignedPrivacyPolicy = (store as any).currentPrivacyPolicy || (store as any).privacyPolicies?.find((p: any) => p.isActive) || (store as any).privacyPolicies?.[0] || null;
+    const activeShippingPolicy = (store as any).shippingPolicies?.find((p: any) => p.isActive) || (store as any).shippingPolicies?.[0] || null;
+    const activeRefundPolicy = (store as any).refundPolicies?.find((p: any) => p.isActive) || (store as any).refundPolicies?.[0] || null;
+    const activeReturnPolicy = (store as any).returnPolicies?.find((p: any) => p.isActive) || (store as any).returnPolicies?.[0] || null;
+    const activeWarrantyPolicy = (store as any).warrantyPolicies?.find((p: any) => p.isActive) || (store as any).warrantyPolicies?.[0] || null;
 
     return {
       id: store.id,
@@ -469,10 +469,10 @@ export class CatalogService {
       activeRefundPolicy,
       activeReturnPolicy,
       activeWarrantyPolicy,
-      shippingPolicy: activeShippingPolicy ? `${activeShippingPolicy.name}: Processing time ${activeShippingPolicy.processingTime || "1-2 days"}. ${activeShippingPolicy.domesticShipping || ""}` : (store.shippingPolicy || null),
-      returnPolicy: activeReturnPolicy ? `${activeReturnPolicy.name}: Return window is ${activeReturnPolicy.returnWindowDays || 30} days. ${activeReturnPolicy.policyDetails || ""}` : (store.returnPolicy || null),
-      refundPolicy: activeRefundPolicy ? `${activeRefundPolicy.name}: Refund method is ${activeRefundPolicy.refundMethod || "Original Payment Method"}. ${activeRefundPolicy.conditions || ""}` : (store.refundPolicy || null),
-      privacyPolicy: assignedPrivacyPolicy ? `${assignedPrivacyPolicy.name}: ${assignedPrivacyPolicy.introduction || ""} ${assignedPrivacyPolicy.infoCollected || ""}` : (store.privacyPolicy || null),
+      shippingPolicy: activeShippingPolicy ? `${activeShippingPolicy.name}: Processing time ${activeShippingPolicy.processingTime || "1-2 days"}. Delivery ${activeShippingPolicy.deliveryTime || ""}. ${activeShippingPolicy.description || ""}` : (store.shippingPolicy || null),
+      returnPolicy: activeReturnPolicy ? `${activeReturnPolicy.name}: Return window is ${activeReturnPolicy.returnWindow || "14 days"}. ${activeReturnPolicy.returnConditions || ""}` : (store.returnPolicy || null),
+      refundPolicy: activeRefundPolicy ? `${activeRefundPolicy.name}: Refund method is ${activeRefundPolicy.refundType || "FULL_REFUND"}. ${activeRefundPolicy.conditions || ""}` : (store.refundPolicy || null),
+      privacyPolicy: assignedPrivacyPolicy ? `${assignedPrivacyPolicy.name}: ${assignedPrivacyPolicy.description || ""} ${assignedPrivacyPolicy.termsConditions || ""}` : (store.privacyPolicy || null),
       termsConditions: assignedStorePolicy ? `${assignedStorePolicy.name}: ${assignedStorePolicy.description || ""} ${assignedStorePolicy.termsConditions || ""}` : (store.termsConditions || null),
       rating: averageRating,
       numReviews: totalRatingsCount,
@@ -513,6 +513,10 @@ export class CatalogService {
           isBestSeller,
           bestSellerScore: p.bestSellerScore || 0,
           bestSellerRank: isBestSeller ? index + 1 : null,
+          soldCount: p.soldCount || 0,
+          category: p.categoryName || null,
+          categoryName: p.categoryName || null,
+          brand: p.brand || null,
           images: normalizeImages(p.images),
           stock: p.stock,
           rating: p.rating,

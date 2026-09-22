@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const [totalProducts, totalStores, totalCustomers, totalReviews] = await Promise.all([
       db.product.count({ where: { deletedAt: null, status: "ACTIVE" } }),
-      db.store.count({ where: { deletedAt: null } }),
+      db.store.count({ where: { deletedAt: null, status: "ACTIVE", isPublic: true } }),
       db.customerProfile.count(),
       db.review.count(),
     ]);

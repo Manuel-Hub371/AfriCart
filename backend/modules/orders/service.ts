@@ -55,6 +55,7 @@ export class OrderService {
 
     domainEvents.emit(EVENT_TOPICS.ORDER_CREATED, {
       orderId: order.id,
+      userId,
       customerProfileId: customerProfile.id,
       totalAmount: order.totalAmount,
     });

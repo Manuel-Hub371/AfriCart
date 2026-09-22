@@ -31,11 +31,16 @@ export function NewArrivals({ initialProducts }: { initialProducts?: any[] }) {
     <section className="py-8 sm:py-12 md:py-16 bg-gray-50 border-t">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 sm:mb-10 text-center md:text-left">
+          <div className="inline-block mb-2 sm:mb-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100/80 text-green-800 text-xs sm:text-sm font-bold">
+              Just Listed
+            </span>
+          </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-1">
-            New <span className="text-gradient">Arrivals</span>
+            Fresh Finds, <span className="text-gradient">Just In</span>
           </h2>
           <p className="text-xs sm:text-sm text-gray-600">
-            Check out the latest products added to our marketplace
+            The latest products added to the marketplace by our vendors
           </p>
         </div>
 

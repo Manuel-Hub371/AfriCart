@@ -19,9 +19,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "Passwords do not match" }, { status: 400 });
     }
 
+    // Normalize email so it matches the login lookup (login lowercases input).
+    const cleanEmail = email.trim().toLowerCase();
+
     // Check duplicate email
     const existingUserByEmail = await db.user.findFirst({
-      where: { email, deletedAt: null }
+      where: { email: cleanEmail, deletedAt: null }
     });
     if (existingUserByEmail) {
       return NextResponse.json({ message: "An account with this email already exists" }, { status: 400 });
@@ -50,7 +53,7 @@ export async function POST(req: Request) {
       // Create User account
       const user = await tx.user.create({
         data: {
-          email,
+          email: cleanEmail,
           phone: phone || null,
           passwordHash,
           firstName,

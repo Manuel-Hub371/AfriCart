@@ -11,7 +11,15 @@ function getSecretKey(): Uint8Array {
   );
 }
 
-const secretKey = getSecretKey();
+// Resolved lazily on first use (not at module load) so importing this module
+// during a build/prerender without JWT_SECRET set never crashes the process.
+let cachedSecretKey: Uint8Array | null = null;
+function secretKey(): Uint8Array {
+  if (!cachedSecretKey) {
+    cachedSecretKey = getSecretKey();
+  }
+  return cachedSecretKey;
+}
 
 export interface JWTPayload {
   userId: string;
@@ -32,7 +40,7 @@ export async function generateAccessToken(payload: JWTPayload): Promise<string> 
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("15m")
-    .sign(secretKey);
+    .sign(secretKey());
 }
 
 /**
@@ -43,7 +51,7 @@ export async function generateRefreshToken(payload: Partial<JWTPayload> & { user
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(secretKey);
+    .sign(secretKey());
 }
 
 /**
@@ -51,7 +59,7 @@ export async function generateRefreshToken(payload: Partial<JWTPayload> & { user
  */
 export async function verifyToken(token: string): Promise<any> {
   try {
-    const { payload } = await jwtVerify(token, secretKey);
+    const { payload } = await jwtVerify(token, secretKey());
     return payload;
   } catch (error) {
     return null;

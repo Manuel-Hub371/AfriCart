@@ -6,14 +6,17 @@ import { ShoppingBag, Store, Sparkles, TrendingUp, Zap } from "lucide-react";
 import Link from "next/link";
 import { apiFetch } from "@/lib/api/client";
 
-export function HeroSection() {
-  const [stats, setStats] = useState<{ totalProducts: number; totalStores: number; totalCustomers: number }>({
-    totalProducts: 0,
-    totalStores: 0,
-    totalCustomers: 0,
+type HeroStats = { totalProducts: number; totalStores: number; totalCustomers: number };
+
+export function HeroSection({ initialStats }: { initialStats?: Record<string, number> | null }) {
+  const [stats, setStats] = useState<HeroStats>({
+    totalProducts: initialStats?.totalProducts || 0,
+    totalStores: initialStats?.totalStores || 0,
+    totalCustomers: initialStats?.totalCustomers || 0,
   });
 
   useEffect(() => {
+    if (initialStats) return;
     async function loadStats() {
       try {
         const res = await apiFetch("/api/marketplace/stats");
@@ -26,7 +29,7 @@ export function HeroSection() {
       }
     }
     loadStats();
-  }, []);
+  }, [initialStats]);
 
   return (
     <section className="relative bg-gradient-to-br from-green-50 via-white to-emerald-50 overflow-hidden">

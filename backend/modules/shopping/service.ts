@@ -49,7 +49,8 @@ export class ShoppingService {
           campaignName: pricing.campaignName,
           image: Array.isArray(item.product.images) && item.product.images.length > 0 ? (item.product.images[0] as string) : null,
           stock: item.product.stock,
-          storeName: item.product.store.name,
+          storeId: item.product.storeId,
+          storeName: item.product.store?.name || "AfriCart",
         },
       };
     });

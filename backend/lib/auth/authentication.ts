@@ -156,6 +156,7 @@ export function formatUserResponse(user: any, rawRoles: string[], permissions: s
     lastName: user.lastName,
     avatar: user.avatar || null,
     phone: user.phone || "",
+    emailVerified: Boolean(user.emailVerified),
     roles,
     role: legacyRole,
     permissions,

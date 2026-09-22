@@ -46,7 +46,9 @@ export async function GET(req: NextRequest) {
     });
 
     const totalOrders = orders.length;
-    const cancelledOrRefundedOrders = orders.filter((o) => o.status === "CANCELLED" || o.status === "REFUNDED").length;
+    const cancelledOrRefundedOrders = orders.filter(
+      (o) => o.status === "CANCELLED" || o.orderItems.some((item: any) => item.status === "REFUNDED" || item.status === "RETURNED")
+    ).length;
     const refundRate = totalOrders > 0 ? parseFloat(((cancelledOrRefundedOrders / totalOrders) * 100).toFixed(1)) : 0.0;
 
     let totalRevenue = 0;
@@ -55,8 +57,10 @@ export async function GET(req: NextRequest) {
     const productSalesMap = new Map<string, { id: string; name: string; category: string; units: number; revenue: number }>();
 
     orders.forEach((order) => {
-      // Calculate revenue from non-cancelled orders
-      const isPaid = order.status !== "CANCELLED";
+      // Calculate revenue from non-cancelled orders (exclude per-item refunds too)
+      const isPaid =
+        order.status !== "CANCELLED" &&
+        !order.orderItems.some((item: any) => item.status === "REFUNDED" || item.status === "RETURNED");
       order.orderItems.forEach((item: any) => {
         if (item.product) {
           unitsSold += item.quantity;

@@ -1,6 +1,19 @@
 import { notificationRepository } from "./repository";
 import { CreateNotificationInput, NotificationDTO } from "./dto";
+import { db } from "@/lib/db";
 import { domainEvents, EVENT_TOPICS } from "@/lib/events";
+
+async function resolveOrderOwnerUserId(orderId: string): Promise<string | null> {
+  try {
+    const order = await db.order.findUnique({
+      where: { id: orderId },
+      select: { customerProfile: { select: { userId: true } } },
+    });
+    return order?.customerProfile?.userId ?? null;
+  } catch {
+    return null;
+  }
+}
 
 export class NotificationService {
   constructor() {
@@ -13,9 +26,10 @@ export class NotificationService {
   private registerEventListeners() {
     domainEvents.on(EVENT_TOPICS.ORDER_CREATED, async (data: any) => {
       try {
-        if (data.userId && data.orderId) {
+        const userId = data.userId || (await resolveOrderOwnerUserId(data.orderId));
+        if (userId && data.orderId) {
           await this.createNotification({
-            userId: data.userId,
+            userId,
             title: "Order Placed Successfully",
             message: `Your order #${data.orderId.slice(0, 8)} has been received and is being processed.`,
             type: "ORDER",
@@ -29,9 +43,10 @@ export class NotificationService {
 
     domainEvents.on(EVENT_TOPICS.ORDER_STATUS_CHANGED, async (data: any) => {
       try {
-        if (data.userId && data.orderId && data.status) {
+        const userId = data.userId || (await resolveOrderOwnerUserId(data.orderId));
+        if (userId && data.orderId && data.status) {
           await this.createNotification({
-            userId: data.userId,
+            userId,
             title: "Order Status Updated",
             message: `Your order #${data.orderId.slice(0, 8)} status is now ${data.status}.`,
             type: "ORDER",

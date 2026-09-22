@@ -41,11 +41,14 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_APP_URL
-        value: https://www.africart.com
-      # Comma-separated frontend origins allowed for CORS (append the real frontend
-      # origin, e.g. https://africart.vercel.app).
+        value: https://africart-3bt5.onrender.com
+      # Comma-separated frontend origins allowed for CORS. This MUST match the real
+      # deployed frontend origin(s) or the browser blocks every cross-origin request
+      # (login/register will fail). Add each frontend URL:
+      #   - https://africart-3bt5.onrender.com   (the actual deployed frontend)
+      #   - https://www.africart.com             (future production domain)
       - key: ALLOWED_ORIGINS
-        value: https://www.africart.com
+        value: https://africart-3bt5.onrender.com,https://www.africart.com
       # Frontend and API are different sites => cross-site cookies.
       # COOKIE_SAME_SITE=none forces Secure, which requires HTTPS (provided by Render).
       - key: COOKIE_SAME_SITE

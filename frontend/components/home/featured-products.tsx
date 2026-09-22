@@ -33,14 +33,14 @@ export function FeaturedProducts({ initialProducts }: { initialProducts?: any[] 
         <div className="text-center mb-8 sm:mb-12">
           <div className="inline-block mb-2 sm:mb-3">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs sm:text-sm font-semibold">
-              ⭐ Trending Now
+              Trending Now
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
-            Featured <span className="text-gradient">Products</span>
+            Handpicked <span className="text-gradient">for You</span>
           </h2>
           <p className="text-xs sm:text-sm text-gray-600 max-w-xl mx-auto">
-            Discover our handpicked selection of amazing products from verified sellers
+            A curated selection of standout products from verified sellers on AfriCart
           </p>
         </div>
 

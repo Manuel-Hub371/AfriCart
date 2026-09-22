@@ -16,15 +16,19 @@ export interface HomepageData {
   popularStores: any[];
   bestSellers: any[];
   newArrivals: any[];
+  statistics: Record<string, number> | null;
+  recentReviews: any[];
 }
 
 export async function getHomepageData(): Promise<HomepageData> {
-  const [categories, featuredRes, storesRes, bestSellersRes, newArrivalsRes] = await Promise.all([
+  const [categories, featuredRes, storesRes, bestSellersRes, newArrivalsRes, statsRes, reviewsRes] = await Promise.all([
     serverApiFetchJson("/api/categories", { revalidate: 60 }).catch(() => []),
     serverApiFetchJson("/api/products?limit=8&isFeatured=true", { revalidate: 60 }).catch(() => ({ products: [] })),
     serverApiFetchJson("/api/stores", { revalidate: 60 }).catch(() => []),
     serverApiFetchJson("/api/products?limit=4&sortBy=best_sellers", { revalidate: 60 }).catch(() => ({ products: [] })),
     serverApiFetchJson("/api/products?limit=8&sortBy=newest", { revalidate: 60 }).catch(() => ({ products: [] })),
+    serverApiFetchJson("/api/marketplace/stats", { revalidate: 60 }).catch(() => null),
+    serverApiFetchJson("/api/marketplace/reviews?limit=6", { revalidate: 60 }).catch(() => ({ reviews: [] })),
   ]);
   return {
     categories: Array.isArray(categories) ? categories : [],
@@ -32,6 +36,8 @@ export async function getHomepageData(): Promise<HomepageData> {
     popularStores: Array.isArray(storesRes) ? (storesRes as any[]).slice(0, 4) : [],
     bestSellers: Array.isArray(bestSellersRes?.products) ? bestSellersRes.products : [],
     newArrivals: Array.isArray(newArrivalsRes?.products) ? newArrivalsRes.products : [],
+    statistics: statsRes && typeof statsRes === "object" ? (statsRes as Record<string, number>) : null,
+    recentReviews: Array.isArray(reviewsRes?.reviews) ? (reviewsRes as any).reviews : [],
   };
 }
 

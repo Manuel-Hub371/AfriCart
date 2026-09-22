@@ -121,10 +121,16 @@ export class OrderRepository {
       }
     }
 
-    // 4. Resolve campaign pricing for every item
+    // 4. Resolve campaign pricing for every item (same scope rules as catalog display)
     const pricedItems = cartItems.map((item) => {
       const campaigns = extractCampaigns((item.product as any).campaignProducts || []);
-      const pricing = resolveCampaignPricing(item.product.price, campaigns);
+      const productMeta = {
+        id: item.product.id,
+        categoryName: item.product.categoryName,
+        brand: item.product.brand,
+        storeId: item.product.storeId,
+      };
+      const pricing = resolveCampaignPricing(item.product.price, campaigns, productMeta);
       return { item, pricing };
     });
 

@@ -4,7 +4,7 @@ import { Mail, Send } from "lucide-react";
 
 export function Newsletter() {
   return (
-    <section className="py-6 sm:py-12 md:py-16 relative overflow-hidden">
+    <section id="newsletter" className="py-6 sm:py-12 md:py-16 relative overflow-hidden scroll-mt-20">
       {/* Background Gradient */}
       <div className="absolute inset-0 gradient-primary opacity-95"></div>
       <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDE2YzAtNi42MjcgNS4zNzMtMTIgMTItMTJzMTIgNS4zNzMgMTIgMTItNS4zNzMgMTIgMTItMTItNS4zNzMtMTItMTJ6bTAgMjhjMC02LjYyNyA1LjM3My0xMiAxMi0xMnMxMiA1LjM3MyAxMiAxMi01LjM3MyAxMiAxMiAxMi0xMi01LjM3My0xMi0xMnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-30"></div>
@@ -15,7 +15,7 @@ export function Newsletter() {
         </div>
 
         <h2 className="text-xl sm:text-3xl md:text-4xl font-extrabold text-white mb-2 sm:mb-4">
-          Stay in the Loop! 💌
+          Stay in the Loop
         </h2>
         <p className="text-xs sm:text-base text-white/90 mb-4 sm:mb-6 max-w-xl mx-auto leading-relaxed">
           Subscribe to our newsletter and be the first to know about new
@@ -41,23 +41,15 @@ export function Newsletter() {
         </div>
 
         <p className="text-[10px] sm:text-xs text-white/70 mt-4">
-          🔒 We respect your privacy. Unsubscribe at any time.
+          We respect your privacy. Unsubscribe at any time.
         </p>
 
-        {/* Trust Badges */}
+        {/* Privacy note */}
         <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 mt-6 sm:mt-10 pt-6 sm:pt-10 border-t border-white/20">
-          <div className="text-white/90">
-            <p className="text-xl sm:text-2xl font-extrabold">10K+</p>
-            <p className="text-[10px] sm:text-xs text-white/70">Subscribers</p>
-          </div>
-          <div className="text-white/90">
-            <p className="text-xl sm:text-2xl font-extrabold">Weekly</p>
-            <p className="text-[10px] sm:text-xs text-white/70">Updates</p>
-          </div>
-          <div className="text-white/90">
-            <p className="text-xl sm:text-2xl font-extrabold">0</p>
-            <p className="text-[10px] sm:text-xs text-white/70">Spam</p>
-          </div>
+          <p className="text-xs sm:text-sm text-white/80 font-medium max-w-lg leading-relaxed">
+            Product drops, vendor spotlights and marketplace promotions — shared
+            occasionally, never often enough to be noise.
+          </p>
         </div>
       </div>
     </section>

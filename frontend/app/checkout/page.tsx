@@ -132,7 +132,7 @@ export default function CheckoutPage() {
   // Group cart items by vendor/store
   const vendorGroups = cartItems.reduce((acc: any[], item: any) => {
     const storeId = item.storeId || item.product?.storeId || "default";
-    const storeName = item.storeName || item.product?.store?.name || "AfriCart Merchant";
+    const storeName = item.storeName || item.product?.storeName || "AfriCart Merchant";
 
     let existing = acc.find((g) => g.vendorId === storeId);
     if (!existing) {
@@ -171,7 +171,7 @@ export default function CheckoutPage() {
     existing.products.push({
       id: item.id,
       name: item.productName || item.product?.name || "Product",
-      image: item.productImage || item.product?.images?.[0] || "",
+      image: item.productImage || item.product?.image || "",
       variant: "",
       quantity: item.quantity,
       price: item.price || item.product?.price || 0,

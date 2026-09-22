@@ -38,3 +38,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# stray local test/debug artifacts (may contain tokens)
+backend/local-token.txt
+backend/tmp-token.txt
+backend/verify-temp.ts
+tmp-curlcookies.txt
+tmp-login.json

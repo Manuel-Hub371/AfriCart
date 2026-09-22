@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = validateCreateNotificationInput(body);
 
-    const notification = await notificationService.createNotification(validatedData);
+    const notification = await notificationService.createNotification({
+      ...validatedData,
+      userId,
+    });
     return NextResponse.json(notification, { status: 201 });
   } catch (error: any) {
     console.error("POST /api/notifications error:", error);

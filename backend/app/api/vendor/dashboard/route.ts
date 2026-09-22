@@ -118,7 +118,7 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const pendingOrdersCount = allOrders.filter((o) => o.status === "PENDING" || o.status === "PROCESSING").length;
+    const pendingOrdersCount = allOrders.filter((o) => o.status === "PROCESSING").length;
     const processingOrdersCount = allOrders.filter((o) => o.status === "PROCESSING").length;
     const shippedTodayCount = allOrders.filter((o) => o.status === "SHIPPED" && new Date(o.createdAt) >= startOfToday).length;
 

@@ -124,26 +124,36 @@ export default function VendorApplicationDetailPage({
       endpoint = `/api/admin/vendors/${storeId}/suspend`;
     }
 
-    const res = await fetch(endpoint, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ reason }),
-    });
+    try {
+      setProcessingAction(true);
+      setActionError(null);
+      setActionSuccess(null);
 
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || "Operation failed");
+      const res = await apiFetch(endpoint, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reason }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Operation failed");
+      }
+
+      setActionSuccess(
+        actionType === "REJECT"
+          ? "Vendor application has been REJECTED."
+          : actionType === "REQUEST_CHANGES"
+          ? "Changes have been requested from the vendor."
+          : "Vendor store has been SUSPENDED."
+      );
+
+      await fetchDetail();
+    } catch (err: any) {
+      setActionError(err?.message || "Operation failed");
+    } finally {
+      setProcessingAction(false);
     }
-
-    setActionSuccess(
-      actionType === "REJECT"
-        ? "Vendor application has been REJECTED."
-        : actionType === "REQUEST_CHANGES"
-        ? "Changes have been requested from the vendor."
-        : "Vendor store has been SUSPENDED."
-    );
-
-    await fetchDetail();
   };
 
   // REACTIVATE SUSPENDED VENDOR

@@ -34,8 +34,13 @@ export function PopularStores({ initialStores }: { initialStores?: any[] }) {
     <section className="py-8 sm:py-12 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-12">
+          <div className="inline-block mb-2 sm:mb-3">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-800 text-xs sm:text-sm font-bold">
+              Shop With Vendors
+            </span>
+          </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 mb-2">
-            Popular Stores
+            Discover Stores <span className="text-gradient">Worth Knowing</span>
           </h2>
           <p className="text-xs sm:text-sm text-gray-600">
             Shop directly from trusted and verified sellers on AfriCart
@@ -105,7 +110,7 @@ export function PopularStores({ initialStores }: { initialStores?: any[] }) {
                         <div className="flex items-center gap-1 sm:gap-3 text-[9px] sm:text-xs text-gray-600 flex-wrap">
                           <div className="flex items-center gap-0.5 font-bold text-gray-900">
                             <Star className="h-2.5 w-2.5 sm:h-4 sm:w-4 fill-yellow-400 text-yellow-400" />
-                            <span>4.9</span>
+                            <span>{store.rating ?? "5.0"}</span>
                           </div>
                           <span className="hidden sm:inline">•</span>
                           <div className="flex items-center gap-0.5">
