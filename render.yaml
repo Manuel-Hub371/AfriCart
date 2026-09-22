@@ -8,8 +8,16 @@
 #                Deployed on Vercel or Netlify (configure there, see comment below).
 #
 # Frontend hosting (Vercel/Netlify) required env vars:
-#   NEXT_PUBLIC_API_URL  = https://<this-api-service>.onrender.com  (public API base)
-#   NEXT_PUBLIC_APP_URL  = https://<frontend-domain>                (public frontend origin)
+#   RECOMMENDED (Option A - same-origin proxy): leave NEXT_PUBLIC_API_URL EMPTY and
+#   set only API_INTERNAL_URL = https://<this-api-service>.onrender.com (server-side).
+#   The browser then calls the frontend's own /api/* (first-party cookies, no CORS),
+#   and the frontend's next.config rewrites proxy those to the backend. This is the
+#   only mode where the edge route guards can see the auth cookies and where login
+#   survives third-party cookie blocking.
+#   OPTION B (direct cross-origin, fragile): NEXT_PUBLIC_API_URL = https://<this-api-service>.onrender.com
+#   With Option B every auth cookie is a cross-site third-party cookie, which many
+#   browsers block/enqueue; logins appear to "succeed" but sessions never persist.
+#   NEXT_PUBLIC_APP_URL  = https://<frontend-domain> (public frontend origin)
 #
 # IMPORTANT one-time prerequisite before the first deploy that uses migrate deploy:
 # the existing production DB was created via `prisma db push` and already has the
