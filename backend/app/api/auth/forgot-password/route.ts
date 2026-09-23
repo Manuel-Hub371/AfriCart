@@ -62,17 +62,21 @@ export async function POST(req: Request) {
     // Send reset email via email service
     await emailService.sendPasswordResetEmail(user.email, rawResetToken, user.firstName);
 
-    // Audit Log
-    await db.auditLog.create({
-      data: {
-        actorId: user.id,
-        action: "PASSWORD_RESET_REQUESTED",
-        targetResource: `User:${user.id}`,
-        metadata: {
-          ipAddress
+    // Audit Log (non-fatal)
+    try {
+      await db.auditLog.create({
+        data: {
+          actorId: user.id,
+          action: "PASSWORD_RESET_REQUESTED",
+          targetResource: `User:${user.id}`,
+          metadata: {
+            ipAddress
+          }
         }
-      }
-    });
+      });
+    } catch (err) {
+      console.error("Forgot password API — could not write audit log (non-fatal):", err);
+    }
 
     return genericSuccessResponse;
   } catch (error: any) {

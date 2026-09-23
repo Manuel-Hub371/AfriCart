@@ -38,6 +38,24 @@ function parseUserAgent(uaString: string | null) {
   return { browser, os, deviceType };
 }
 
+async function recordLoginHistory(data: {
+  userId: string;
+  ipAddress: string;
+  userAgent: string | null;
+  browser: string;
+  os: string;
+  deviceType: string;
+  country: string | null;
+  success: boolean;
+}) {
+  try {
+    await db.loginHistory.create({ data });
+  } catch (err) {
+    // Audit/history writes must never block authentication.
+    console.error("Login API — could not record login history (non-fatal):", err);
+  }
+}
+
 export async function POST(req: Request) {
   let userIdForLog: string | null = null;
   const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "127.0.0.1";
@@ -100,18 +118,16 @@ export async function POST(req: Request) {
     // Verify Password (handle copy-paste trailing space gracefully)
     const passwordMatch = await comparePassword(password.trim(), user.passwordHash) || await comparePassword(password, user.passwordHash);
     
-    // Log in LoginHistory
-    await db.loginHistory.create({
-      data: {
-        userId: user.id,
-        ipAddress,
-        userAgent,
-        browser,
-        os,
-        deviceType,
-        country,
-        success: passwordMatch
-      }
+    // Log in LoginHistory (non-fatal: must never block login)
+    await recordLoginHistory({
+      userId: user.id,
+      ipAddress,
+      userAgent,
+      browser,
+      os,
+      deviceType,
+      country,
+      success: passwordMatch
     });
 
     if (!passwordMatch) {
@@ -129,20 +145,24 @@ export async function POST(req: Request) {
     const roles = user.userRoles.map(ur => ur.role.name);
     const permissions = getPermissionsForRoles(roles);
 
-    // Write Audit Log
-    await db.auditLog.create({
-      data: {
-        actorId: user.id,
-        action: "USER_LOGIN",
-        targetResource: `User:${user.id}`,
-        metadata: {
-          browser,
-          os,
-          deviceType,
-          ipAddress
+    // Write Audit Log (non-fatal: must never block login)
+    try {
+      await db.auditLog.create({
+        data: {
+          actorId: user.id,
+          action: "USER_LOGIN",
+          targetResource: `User:${user.id}`,
+          metadata: {
+            browser,
+            os,
+            deviceType,
+            ipAddress
+          }
         }
-      }
-    });
+      });
+    } catch (err) {
+      console.error("Login API — could not write audit log (non-fatal):", err);
+    }
 
     // Create Server-Side Session in Database
     const session = await createServerSession(user.id, userAgent, ipAddress);
@@ -170,17 +190,15 @@ export async function POST(req: Request) {
     console.error("Login API error:", error);
     
     if (userIdForLog) {
-      await db.loginHistory.create({
-        data: {
-          userId: userIdForLog,
-          ipAddress,
-          userAgent,
-          browser,
-          os,
-          deviceType,
-          country,
-          success: false
-        }
+      await recordLoginHistory({
+        userId: userIdForLog,
+        ipAddress,
+        userAgent,
+        browser,
+        os,
+        deviceType,
+        country,
+        success: false
       });
     }
 

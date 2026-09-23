@@ -36,7 +36,15 @@ services:
     # errored on its very first statement, so nothing persisted) and retry once. This is
     # safe when 0_init is already applied (resolve refuses to un-apply it) and only runs
     # when the first deploy attempt failed.
-    buildCommand: npm install && (npx prisma migrate deploy || (npx prisma migrate resolve --rolled-back 0_init && npx prisma migrate deploy)) && npm run build
+    #
+    # db:reconcile replays 0_init with IF NOT EXISTS semantics so a database that was
+    # created via `prisma db push` (whose 0_init is only "resolved as applied", so
+    # migrate deploy never creates its objects) still gets any missing tables/columns/
+    # enums/indexes. Non-destructive; safe to run on every deploy.
+    #
+    # db:seed bootstraps the required roles/categories and the admin account. It is
+    # idempotent and never overwrites an existing admin password.
+    buildCommand: npm install && (npx prisma migrate deploy || (npx prisma migrate resolve --rolled-back 0_init && npx prisma migrate deploy)) && npm run db:reconcile && npm run db:seed && npm run build
     startCommand: npm run start
     healthCheckPath: /api/health
     envVars:
@@ -57,10 +65,13 @@ services:
       #   - https://www.africart.com             (future production domain)
       - key: ALLOWED_ORIGINS
         value: https://africart-3bt5.onrender.com,https://www.africart.com
-      # Frontend and API are different sites => cross-site cookies.
-      # COOKIE_SAME_SITE=none forces Secure, which requires HTTPS (provided by Render).
+      # Auth cookies are FIRST-PARTY: the browser only ever talks to the same-origin
+      # /api/* (the frontend proxies /api/* -> this backend). A cross-origin (CORS)
+      # setup is NOT used here, so SameSite=lax is correct and keeps cookies working
+      # under third-party-cookie blocking. Only switch to "none" if the frontend ever
+      # calls this backend's origin directly from a different site.
       - key: COOKIE_SAME_SITE
-        value: none
+        value: lax
       - key: LOG_LEVEL
         value: info
       # Credentials below are set in the Render dashboard (sync: false prevents this

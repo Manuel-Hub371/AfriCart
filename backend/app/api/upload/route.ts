@@ -14,7 +14,6 @@ const ALLOWED_TYPES = [
   "image/png",
   "image/webp",
   "image/gif",
-  "image/svg+xml",
   "video/mp4",
   "video/webm",
   "video/ogg",
@@ -25,7 +24,6 @@ const ALLOWED_TYPES = [
   "application/pdf",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "text/plain",
 ];
 
 export async function POST(request: NextRequest) {
@@ -39,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Only JPEG, PNG, WEBP, GIF, SVG, and PDF are allowed." },
+        { error: "Invalid file type. Only JPEG, PNG, WEBP, GIF, PDF, DOCX, and media files are allowed." },
         { status: 400 }
       );
     }

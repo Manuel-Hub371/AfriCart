@@ -3,6 +3,7 @@ import { db, withDbRetry } from "@/lib/db";
 import { hashPassword, setAuthCookies, formatUserResponse } from "@/lib/auth/authentication";
 import { ensureRole, getPermissionsForRoles } from "@/lib/auth/authorization/permissions";
 import { createEmailVerificationToken } from "@/lib/auth/email-verification";
+import { createServerSession } from "@/lib/auth/session";
 import { emailService } from "@/lib/email/email-service";
 
 export async function POST(req: Request) {
@@ -103,9 +104,20 @@ export async function POST(req: Request) {
     const roles = ["CUSTOMER"];
     const permissions = getPermissionsForRoles(roles);
 
+    // Create a server-side session so the issued tokens have full session security
+    // (matches the login flow). Non-fatal: registration must still succeed if this fails.
+    let sessionId: string | undefined;
+    try {
+      const session = await createServerSession(newUser.id, req.headers.get("user-agent"), "127.0.0.1");
+      sessionId = session.id;
+    } catch (err) {
+      console.error("Registration API — could not create server session (non-fatal):", err);
+    }
+
     // Set secure HttpOnly cookies
     await setAuthCookies({
       userId: newUser.id,
+      sessionId,
       email: newUser.email,
       firstName,
       lastName,

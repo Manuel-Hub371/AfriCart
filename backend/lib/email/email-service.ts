@@ -14,7 +14,14 @@ export const emailService = {
   async sendEmail({ to, subject, html, text }: SendEmailOptions): Promise<boolean> {
     const apiKey = process.env.RESEND_API_KEY || process.env.SENDGRID_API_KEY;
 
-    if (process.env.NODE_ENV === "production" && apiKey) {
+    if (process.env.NODE_ENV === "production") {
+      if (!apiKey) {
+        // Never fall back to the console handler in production: it would dump
+        // password-reset / verification tokens into the server logs.
+        console.warn("Transactional email skipped: no RESEND_API_KEY / SENDGRID_API_KEY configured.");
+        return false;
+      }
+
       try {
         const res = await fetch("https://api.resend.com/emails", {
           method: "POST",

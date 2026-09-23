@@ -28,19 +28,23 @@ export async function POST(req: Request) {
     // Clear session cookies
     await clearAuthCookies();
 
-    // Log the event if we could identify the user
+    // Log the event if we could identify the user (non-fatal)
     if (userId) {
-      await db.auditLog.create({
-        data: {
-          actorId: userId,
-          action: "USER_LOGOUT",
-          targetResource: `User:${userId}`,
-          metadata: {
-            timestamp: new Date().toISOString(),
-            sessionId
+      try {
+        await db.auditLog.create({
+          data: {
+            actorId: userId,
+            action: "USER_LOGOUT",
+            targetResource: `User:${userId}`,
+            metadata: {
+              timestamp: new Date().toISOString(),
+              sessionId
+            }
           }
-        }
-      });
+        });
+      } catch (err) {
+        console.error("Logout API — could not write audit log (non-fatal):", err);
+      }
     }
 
     return NextResponse.json({ success: true, message: "Logged out successfully" });
