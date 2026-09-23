@@ -64,6 +64,14 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/auth/welcome") ||
     pathname.startsWith("/auth/vendor-registration");
 
+  // Public administrator gateway pages. These must never require a session —
+  // an existing admin logs in here and a prospective admin registers here.
+  const isAdminAuthRoute =
+    pathname.startsWith("/admin/login") ||
+    pathname.startsWith("/admin/register") ||
+    pathname.startsWith("/admin/forgot-password") ||
+    pathname.startsWith("/admin/reset-password");
+
   const isCustomerRoute =
     pathname.startsWith("/profile") ||
     pathname.startsWith("/cart") ||
@@ -80,20 +88,25 @@ export async function middleware(request: NextRequest) {
     ? session!.roles!.map((r: string) => String(r).toUpperCase())
     : [];
   const singleRole = String(session?.role || "").toUpperCase();
+  const isAdminUser = roles.includes("ADMIN") || singleRole === "ADMIN";
 
   // 1. Guard customer, vendor, and admin routes
-  if (isCustomerRoute || isVendorRoute || isAdminRoute) {
+  if (isCustomerRoute || isVendorRoute || (isAdminRoute && !isAdminAuthRoute)) {
     if (!session || !userId) {
-      const loginUrl = new URL("/auth/login", request.url);
+      // Administrators are redirected to the dedicated admin gateway; everyone
+      // else goes to the customer login with the original destination preserved.
+      const loginUrl =
+        isAdminRoute && !isAdminAuthRoute
+          ? new URL("/admin/login", request.url)
+          : new URL("/auth/login", request.url);
       const safeRedirect = getSafeRedirectUrl(pathname);
       loginUrl.searchParams.set("redirect", safeRedirect);
       return NextResponse.redirect(loginUrl);
     }
 
     // 2. Guard Admin routes specifically (Requires ADMIN role)
-    if (isAdminRoute) {
-      const isAdmin = roles.includes("ADMIN") || singleRole === "ADMIN";
-      if (!isAdmin) {
+    if (isAdminRoute && !isAdminAuthRoute) {
+      if (!isAdminUser) {
         return NextResponse.redirect(new URL("/profile", request.url));
       }
     }
@@ -114,13 +127,19 @@ export async function middleware(request: NextRequest) {
 
   // 4. Redirect authenticated users away from authentication pages
   if (isAuthRoute && session && userId) {
-    if (roles.includes("ADMIN") || singleRole === "ADMIN") {
-      return NextResponse.redirect(new URL("/admin", request.url));
+    if (isAdminUser) {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     } else if (roles.includes("VENDOR") || singleRole === "VENDOR") {
       return NextResponse.redirect(new URL("/vendor", request.url));
     } else {
       return NextResponse.redirect(new URL("/profile", request.url));
     }
+  }
+
+  // 5. Signed-in administrators are sent straight to the dashboard if they
+  //    reopen an admin gateway page (login / register / forgot / reset).
+  if (isAdminAuthRoute && session && userId && isAdminUser) {
+    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
   }
 
   return NextResponse.next();

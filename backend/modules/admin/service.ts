@@ -1,4 +1,5 @@
 import { db, withDbRetry } from "@/lib/db";
+import { ensureRole } from "@/lib/auth/authorization/permissions";
 import {
   AdminMetricsDTO,
   VendorApplicationItemDTO,
@@ -612,6 +613,174 @@ export class AdminService {
         });
 
         return { success: true, status: "ACTIVE" };
+      })
+    );
+  }
+
+  /**
+   * GET Administrators waiting for approval (admin access requests).
+   */
+  async getAdminApprovalRequests() {
+    const requests = await db.adminApprovalRequest.findMany({
+      where: { status: "PENDING" },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
+            createdAt: true,
+          },
+        },
+        reviewer: {
+          select: { firstName: true, lastName: true },
+        },
+      },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return requests.map((r) => ({
+      id: r.id,
+      userId: r.userId,
+      firstName: r.user.firstName,
+      lastName: r.user.lastName,
+      email: r.user.email,
+      status: r.status,
+      createdAt: r.createdAt.toISOString(),
+      reviewedAt: r.reviewedAt ? r.reviewedAt.toISOString() : null,
+      reviewedBy: r.reviewer ? `${r.reviewer.firstName} ${r.reviewer.lastName}` : null,
+      rejectionReason: r.rejectionReason || null,
+    }));
+  }
+
+  /**
+   * APPROVE an administrator access request.
+   * Grants the ADMIN role (server-side) and activates the account. The caller
+   * must already be an authenticated administrator — enforced at the route layer.
+   */
+  async approveAdminApprovalRequest(
+    requestId: string,
+    adminUser: { id: string; firstName: string; lastName: string }
+  ) {
+    return withDbRetry(() =>
+      db.$transaction(async (tx) => {
+        const request = await tx.adminApprovalRequest.findUnique({
+          where: { id: requestId },
+          include: { user: true },
+        });
+
+        if (!request) {
+          throw { code: "NOT_FOUND", message: "Admin access request not found", status: 404 };
+        }
+        if (request.status !== "PENDING") {
+          throw { code: "ALREADY_REVIEWED", message: "This request has already been reviewed", status: 400 };
+        }
+
+        // ADMIN role is granted here (explicit administrative action) — never on registration.
+        const role = await ensureRole(tx, "ADMIN");
+
+        await tx.user.update({
+          where: { id: request.userId },
+          data: {
+            status: "ACTIVE",
+            emailVerified: true,
+            emailVerificationStatus: "VERIFIED",
+          },
+        });
+
+        await tx.userRole.upsert({
+          where: { userId_roleId: { userId: request.userId, roleId: role.id } },
+          update: {},
+          create: { userId: request.userId, roleId: role.id },
+        });
+
+        await tx.adminApprovalRequest.update({
+          where: { id: requestId },
+          data: { status: "APPROVED", reviewedAt: new Date(), reviewerId: adminUser.id },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorId: adminUser.id,
+            action: "ADMIN_APPROVE_ADMIN",
+            targetResource: `User:${request.userId}`,
+            metadata: {
+              requestId,
+              adminName: `${adminUser.firstName} ${adminUser.lastName}`,
+            },
+          },
+        });
+
+        await tx.notification.create({
+          data: {
+            userId: request.userId,
+            title: "Administrator access approved",
+            message: "Your administrator access request was approved. You can now sign in from the /admin gateway.",
+            type: "SYSTEM",
+          },
+        });
+
+        return { success: true, status: "APPROVED" };
+      })
+    );
+  }
+
+  /**
+   * REJECT an administrator access request.
+   */
+  async rejectAdminApprovalRequest(
+    requestId: string,
+    reason: string,
+    adminUser: { id: string; firstName: string; lastName: string }
+  ) {
+    return withDbRetry(() =>
+      db.$transaction(async (tx) => {
+        const request = await tx.adminApprovalRequest.findUnique({
+          where: { id: requestId },
+          include: { user: true },
+        });
+
+        if (!request) {
+          throw { code: "NOT_FOUND", message: "Admin access request not found", status: 404 };
+        }
+        if (request.status !== "PENDING") {
+          throw { code: "ALREADY_REVIEWED", message: "This request has already been reviewed", status: 400 };
+        }
+
+        await tx.adminApprovalRequest.update({
+          where: { id: requestId },
+          data: {
+            status: "REJECTED",
+            reviewedAt: new Date(),
+            reviewerId: adminUser.id,
+            rejectionReason: reason || null,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            actorId: adminUser.id,
+            action: "ADMIN_REJECT_ADMIN",
+            targetResource: `User:${request.userId}`,
+            metadata: {
+              requestId,
+              reason: reason || null,
+              adminName: `${adminUser.firstName} ${adminUser.lastName}`,
+            },
+          },
+        });
+
+        await tx.notification.create({
+          data: {
+            userId: request.userId,
+            title: "Administrator access request rejected",
+            message: reason ? `Your administrator access request was not approved. Reason: ${reason}` : "Your administrator access request was not approved.",
+            type: "SYSTEM",
+          },
+        });
+
+        return { success: true, status: "REJECTED" };
       })
     );
   }

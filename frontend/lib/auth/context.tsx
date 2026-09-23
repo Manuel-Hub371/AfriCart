@@ -223,7 +223,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 // Helper function to determine redirect path based on roles
 function getRedirectPath(roles: string[]): string {
   if (roles.includes("ADMIN")) {
-    return "/admin";
+    return "/admin/dashboard";
   }
   if (roles.includes("VENDOR")) {
     return "/vendor";

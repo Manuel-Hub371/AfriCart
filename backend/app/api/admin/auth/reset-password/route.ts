@@ -2,11 +2,20 @@ import { NextResponse } from "next/server";
 import { consumePasswordResetToken } from "@/lib/auth/password-reset";
 import { checkRateLimit } from "@/lib/security/rate-limit";
 
+/**
+ * Admin password reset confirmation.
+ *
+ * Reuses the same token-validity + atomic-update logic as the customer flow
+ * (`/api/auth/reset-password`) via consumePasswordResetToken. This endpoint is
+ * the landing target for the /admin/reset-password page.
+ */
 export async function POST(req: Request) {
-  const ipAddress = req.headers.get("x-forwarded-for")?.split(",")[0] || req.headers.get("x-real-ip") || "127.0.0.1";
+  const ipAddress =
+    req.headers.get("x-forwarded-for")?.split(",")[0] ||
+    req.headers.get("x-real-ip") ||
+    "127.0.0.1";
 
-  // Rate Limiting (5 attempts per minute per IP)
-  const rateLimit = checkRateLimit(`reset-pass:${ipAddress}`, { limit: 5, windowMs: 60 * 1000 });
+  const rateLimit = checkRateLimit(`admin-reset-pass:${ipAddress}`, { limit: 5, windowMs: 60 * 1000 });
   if (!rateLimit.success) {
     return NextResponse.json(
       { message: "Too many attempts. Please try again in 1 minute." },
@@ -32,15 +41,18 @@ export async function POST(req: Request) {
     const result = await consumePasswordResetToken({ token, newPassword: password, ipAddress });
 
     if (!result.ok) {
-      return NextResponse.json({ message: result.message }, { status: result.reason === "INVALID" ? 400 : 500 });
+      return NextResponse.json(
+        { message: result.message },
+        { status: result.reason === "INVALID" ? 400 : 500 }
+      );
     }
 
     return NextResponse.json({
       success: true,
-      message: "Password reset successful! Please log in with your new password."
+      message: "Password reset successful! Please sign in with your new password.",
     });
   } catch (error: any) {
-    console.error("Reset password API error:", error);
+    console.error("Admin reset password API error:", error);
     return NextResponse.json({ message: "An error occurred resetting your password." }, { status: 500 });
   }
 }

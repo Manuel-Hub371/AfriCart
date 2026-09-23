@@ -63,6 +63,8 @@ model User {
   sessions                Session[]
   passwordResetTokens     PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
+  adminApprovalRequest    AdminApprovalRequest?
+  reviewedAdminApprovals  AdminApprovalRequest[] @relation("ReviewedAdminApprovals")
 }
 
 model Account {
@@ -840,6 +842,22 @@ model EmailVerificationToken {
   createdAt DateTime  @default(now())
 
   @@index([userId])
+}
+
+model AdminApprovalRequest {
+  id              String    @id @default(uuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          String    @default("PENDING") // "PENDING" | "APPROVED" | "REJECTED"
+  rejectionReason String?
+  reviewedAt      DateTime?
+  reviewerId      String?
+  reviewer        User?     @relation("ReviewedAdminApprovals", fields: [reviewerId], references: [id], onDelete: SetNull)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status])
+  @@index([reviewerId])
 }
 
 

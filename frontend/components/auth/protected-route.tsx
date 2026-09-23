@@ -99,7 +99,7 @@ function getUserDashboard(role: UserRole | string): string {
     case "vendor":
       return "/vendor";
     case "admin":
-      return "/admin";
+      return "/admin/dashboard";
     default:
       return "/";
   }

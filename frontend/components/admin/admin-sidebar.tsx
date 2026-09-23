@@ -16,17 +16,36 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
+import type { LucideIcon } from "lucide-react";
+
+interface NavItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  exact?: boolean;
+  badge?: string;
+  activePaths?: string[];
+}
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const { logout, user } = useAuth();
 
-  const navItems = [
+  const navItems: NavItem[] = [
     {
       title: "Overview",
-      href: "/admin",
+      href: "/admin/dashboard",
       icon: LayoutDashboard,
       exact: true,
+      // Canonical dashboard is /admin/dashboard, but /admin still renders the
+      // same overview for backwards compatibility.
+      activePaths: ["/admin/dashboard", "/admin"],
+    },
+    {
+      title: "Admin Access",
+      href: "/admin/access",
+      icon: ShieldCheck,
+      badge: "Approvals",
     },
     {
       title: "Vendor Applications",
@@ -76,7 +95,7 @@ export function AdminSidebar() {
       <div>
         {/* Header / Brand */}
         <div className="p-6 border-b border-slate-800 flex items-center justify-between">
-          <Link href="/admin" className="flex items-center gap-3">
+          <Link href="/admin/dashboard" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20">
               A
             </div>
@@ -94,7 +113,9 @@ export function AdminSidebar() {
         {/* Navigation Items */}
         <nav className="p-4 space-y-1.5">
           {navItems.map((item) => {
-            const isActive = item.exact
+            const isActive = item.activePaths
+              ? item.activePaths.includes(pathname)
+              : item.exact
               ? pathname === item.href
               : pathname.startsWith(item.href);
 

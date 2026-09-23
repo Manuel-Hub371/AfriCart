@@ -83,6 +83,33 @@ export const emailService = {
     });
   },
 
+  /**
+   * Admin password reset — links back to the /admin/reset-password gateway page.
+   * Uses the same token mechanism as the customer flow, only the landing page differs.
+   */
+  async sendAdminPasswordResetEmail(email: string, resetToken: string, firstName: string) {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const resetUrl = `${appUrl}/admin/reset-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(email)}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; rounded: 12px;">
+        <h2 style="color: #059669;">AfriCart Admin Password Reset Request</h2>
+        <p>Hello ${firstName},</p>
+        <p>We received a request to reset the password for your AfriCart administrator account. Click the button below to reset your password. This link is valid for 1 hour.</p>
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${resetUrl}" style="background-color: #059669; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">Reset Admin Password</a>
+        </div>
+        <p style="color: #666; font-size: 14px;">If you did not request a password reset, please ignore this email.</p>
+      </div>
+    `;
+
+    return this.sendEmail({
+      to: email,
+      subject: "Reset your AfriCart administrator password",
+      html,
+    });
+  },
+
   async sendEmailVerificationEmail(email: string, verificationToken: string, firstName: string) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const verifyUrl = `${appUrl}/auth/verify-email?token=${encodeURIComponent(verificationToken)}&email=${encodeURIComponent(email)}`;
