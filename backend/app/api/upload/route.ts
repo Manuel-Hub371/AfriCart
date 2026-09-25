@@ -60,11 +60,20 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ url: result.secureUrl }, { status: 201 });
       } catch (cloudErr: any) {
         // No silent fallback in production — surface the failure.
+        const raw = String(cloudErr?.message || "");
+        const isCredentialError =
+          /invalid|unauthori|api key|secret|signature|forbidden|not allowed|cloud name/i.test(raw) &&
+          !/ECONN|EAI_AGAIN|network|timeout|fetch failed/i.test(raw);
         logger.error("Cloudinary upload failed; rejecting instead of falling back to base64", {
-          error: cloudErr?.message,
+          error: raw,
+          credentialError: isCredentialError,
         });
         return NextResponse.json(
-          { error: "Media upload failed. Please try again." },
+          {
+            error: isCredentialError
+              ? "Media upload was rejected by Cloudinary. Check the Cloudinary API key, API secret, and cloud name on this server."
+              : "Media upload failed. Please try again.",
+          },
           { status: 500 }
         );
       }
