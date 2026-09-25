@@ -60,6 +60,23 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // The admin area (gateway pages + dashboard) must never be held by a browser
+  // or shared cache. Next.js serves statically prerendered pages with
+  // `Cache-Control: s-maxage=31536000` (a 1-year shared-cache lifetime); if an
+  // intermediary cached a stale admin response or redirect once, users would be
+  // stuck with it until the TTL expires. Force revalidation on every request.
+  async headers() {
+    return [
+      {
+        source: "/admin/:path*",
+        headers: [
+          { key: "Cache-Control", value: "no-store, no-cache, must-revalidate, proxy-revalidate" },
+          { key: "Pragma", value: "no-cache" },
+          { key: "Expires", value: "0" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -53,6 +53,23 @@ function getSafeRedirectUrl(redirectParam: string | null): string {
   return "/profile";
 }
 
+/**
+ * Redirect response that can never be cached by a browser OR a shared cache/CDN.
+ *
+ * The previous middleware build served plain 307 responses that intermediaries
+ * could hold onto (some browsers/proxies cache 307s heuristically). Once cached,
+ * a stale redirect keeps sending users to /auth/login even after the code is
+ * fixed. Every middleware redirect now carries explicit no-store headers so a
+ * stale redirect can never be stored again.
+ */
+function redirectNoStore(url: URL | string, request: NextRequest): NextResponse {
+  const response = NextResponse.redirect(new URL(url, request.url));
+  response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  response.headers.set("Pragma", "no-cache");
+  response.headers.set("Expires", "0");
+  return response;
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -101,13 +118,13 @@ export async function middleware(request: NextRequest) {
           : new URL("/auth/login", request.url);
       const safeRedirect = getSafeRedirectUrl(pathname);
       loginUrl.searchParams.set("redirect", safeRedirect);
-      return NextResponse.redirect(loginUrl);
+      return redirectNoStore(loginUrl, request);
     }
 
     // 2. Guard Admin routes specifically (Requires ADMIN role)
     if (isAdminRoute && !isAdminAuthRoute) {
       if (!isAdminUser) {
-        return NextResponse.redirect(new URL("/profile", request.url));
+        return redirectNoStore("/profile", request);
       }
     }
 
@@ -120,7 +137,7 @@ export async function middleware(request: NextRequest) {
         singleRole === "ADMIN";
 
       if (roles.length > 0 && !isVendorOrAdmin && singleRole === "CUSTOMER") {
-        return NextResponse.redirect(new URL("/profile", request.url));
+        return redirectNoStore("/profile", request);
       }
     }
   }
@@ -128,18 +145,18 @@ export async function middleware(request: NextRequest) {
   // 4. Redirect authenticated users away from authentication pages
   if (isAuthRoute && session && userId) {
     if (isAdminUser) {
-      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+      return redirectNoStore("/admin/dashboard", request);
     } else if (roles.includes("VENDOR") || singleRole === "VENDOR") {
-      return NextResponse.redirect(new URL("/vendor", request.url));
+      return redirectNoStore("/vendor", request);
     } else {
-      return NextResponse.redirect(new URL("/profile", request.url));
+      return redirectNoStore("/profile", request);
     }
   }
 
   // 5. Signed-in administrators are sent straight to the dashboard if they
   //    reopen an admin gateway page (login / register / forgot / reset).
   if (isAdminAuthRoute && session && userId && isAdminUser) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    return redirectNoStore("/admin/dashboard", request);
   }
 
   return NextResponse.next();
