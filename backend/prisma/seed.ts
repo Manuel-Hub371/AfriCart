@@ -137,9 +137,25 @@ async function seedAdmin(adminRole: { id: string }) {
  * discovery pages render actual data. Never runs unless explicitly enabled.
  */
 async function seedDemoData() {
-  if (process.env.SEED_DEMO_DATA !== "true") {
-    console.log("Demo data skipped (set SEED_DEMO_DATA=true to enable).");
+  const explicit = (process.env.SEED_DEMO_DATA || "").trim().toLowerCase();
+
+  if (explicit === "false") {
+    console.log("Demo data disabled (SEED_DEMO_DATA=false).");
     return;
+  }
+
+  if (explicit !== "true") {
+    // Auto-bootstrap the marketplace: if the database has no stores yet (e.g. a
+    // fresh production deployment), seed the demo vendor + store + products so
+    // the live discovery pages never render an empty catalog by default. This is
+    // additive and idempotent — it only creates records that do not exist yet.
+    // Set SEED_DEMO_DATA=true to force it, or =false to skip demo data entirely.
+    const storeCount = await prisma.store.count({ where: { deletedAt: null } });
+    if (storeCount > 0) {
+      console.log("Demo data skipped (marketplace already has stores).");
+      return;
+    }
+    console.log("Auto-seeding demo marketplace (no stores exist yet).");
   }
 
   const email = (process.env.DEMO_VENDOR_EMAIL || "demo@africart.com").trim().toLowerCase();
