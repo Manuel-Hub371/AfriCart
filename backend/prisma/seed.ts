@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { readFileSync, existsSync } from "fs";
 import path from "path";
+import { ensureDemoMarketplace, ensureDemoMarketplaceIfEmpty } from "../lib/db/marketplace-bootstrap";
 
 const prisma = new PrismaClient();
 
@@ -144,128 +145,20 @@ async function seedDemoData() {
     return;
   }
 
-  if (explicit !== "true") {
-    // Auto-bootstrap the marketplace: if the database has no stores yet (e.g. a
-    // fresh production deployment), seed the demo vendor + store + products so
-    // the live discovery pages never render an empty catalog by default. This is
-    // additive and idempotent — it only creates records that do not exist yet.
-    // Set SEED_DEMO_DATA=true to force it, or =false to skip demo data entirely.
-    const storeCount = await prisma.store.count({ where: { deletedAt: null } });
-    if (storeCount > 0) {
-      console.log("Demo data skipped (marketplace already has stores).");
-      return;
-    }
-    console.log("Auto-seeding demo marketplace (no stores exist yet).");
+  if (explicit === "true") {
+    await ensureDemoMarketplace(prisma);
+    console.log("Demo marketplace seeded (SEED_DEMO_DATA=true).");
+    return;
   }
 
-  const email = (process.env.DEMO_VENDOR_EMAIL || "demo@africart.com").trim().toLowerCase();
-  const password = process.env.DEMO_VENDOR_PASSWORD || "AfriCart123!";
-  const storeSlug = process.env.DEMO_STORE_SLUG || "africart-demo-store";
-
-  const passwordHash = await bcrypt.hash(password, 10);
-
-  const customerRole = await prisma.role.findUnique({ where: { name: "CUSTOMER" } });
-  const vendorRole = await prisma.role.findUnique({ where: { name: "VENDOR" } });
-  if (!customerRole || !vendorRole) throw new Error("Roles must be seeded before demo data.");
-
-  let user = await prisma.user.findUnique({ where: { email } });
-  if (!user) {
-    user = await prisma.user.create({
-      data: {
-        email,
-        firstName: "AfriCart",
-        lastName: "Demo Vendor",
-        phone: "+233000000000",
-        passwordHash,
-        status: "ACTIVE",
-        emailVerified: true,
-        emailVerificationStatus: "VERIFIED",
-      },
-    });
-    await prisma.userRole.createMany({
-      data: [
-        { userId: user.id, roleId: customerRole.id },
-        { userId: user.id, roleId: vendorRole.id },
-      ],
-    });
-    await prisma.customerProfile.create({ data: { userId: user.id } });
-  }
-
-  let vendorProfile = await prisma.vendorProfile.findUnique({ where: { userId: user.id } });
-  if (!vendorProfile) {
-    vendorProfile = await prisma.vendorProfile.create({
-      data: {
-        userId: user.id,
-        businessName: "AfriCart Demo Ltd",
-        businessCategory: "electronics-gadget",
-        businessType: "company",
-        country: "Ghana",
-        region: "Greater Accra",
-        city: "Accra",
-        businessAddress: "12 Independence Avenue, Accra",
-        identityVerified: true,
-        identityVerificationStatus: "VERIFIED",
-        businessVerified: true,
-        businessVerificationStatus: "VERIFIED",
-      },
-    });
-  }
-
-  let store = await prisma.store.findUnique({ where: { slug: storeSlug } });
-  if (!store) {
-    store = await prisma.store.create({
-      data: {
-        vendorProfileId: vendorProfile.id,
-        name: "AfriCart Demo Store",
-        slug: storeSlug,
-        description: "A demo marketplace store showcasing the AfriCart catalog, powered by regional vendors.",
-        category: "Electronics & Gadget",
-        businessType: "company",
-        email,
-        phone: "+233000000000",
-        city: "Accra",
-        region: "Greater Accra",
-        country: "Ghana",
-        isPublic: true,
-        acceptingOrders: true,
-        vacationMode: false,
-        status: "ACTIVE",
-      },
-    });
-
-    const electronics = await prisma.storeCategory.findUnique({ where: { slug: "electronics-gadget" } });
-    if (electronics) {
-      await prisma.storeCategoryAssignment.create({
-        data: { storeId: store.id, storeCategoryId: electronics.id },
-      }).catch(() => {});
-    }
-  }
-
-  const demoProducts = [
-    { name: "Premium Bluetooth Headphones Pro", slug: "premium-bluetooth-headphones-pro", price: 449.99, description: "Over-ear wireless headphones with active noise cancellation and 40h battery life.", stock: 25 },
-    { name: "Smart Fitness Watch X2", slug: "smart-fitness-watch-x2", price: 299.99, description: "Heart-rate tracking, GPS, and water resistance up to 50m.", stock: 40 },
-    { name: "4K Ultra HD Action Camera", slug: "4k-ultra-hd-action-camera", price: 189.99, description: "Waterproof 4K action camera with image stabilization.", stock: 15 },
-    { name: "Wireless Charging Pad Trio", slug: "wireless-charging-pad-trio", price: 59.99, description: "Charge phone, earbuds, and smartwatch simultaneously.", stock: 60 },
-  ];
-
-  for (const p of demoProducts) {
-    const existing = await prisma.product.findUnique({ where: { slug: p.slug } });
-    if (existing) continue;
-    await prisma.product.create({
-      data: {
-        storeId: store.id,
-        name: p.name,
-        slug: p.slug,
-        description: p.description,
-        price: p.price,
-        stock: p.stock,
-        isFeatured: true,
-        status: "ACTIVE",
-      },
-    });
-  }
-
-  console.log(`Demo store ready: ${store.name} (${storeSlug})`);
+  // Auto-bootstrap: only seed when the marketplace has no publicly visible store
+  // yet (fresh deployments). Additive and idempotent.
+  const result = await ensureDemoMarketplaceIfEmpty(prisma);
+  console.log(
+    result.seeded
+      ? "Auto-seeded demo marketplace (marketplace was empty)."
+      : `Demo data skipped (${result.reason || "marketplace already has stores"}).`
+  );
 }
 
 async function main() {

@@ -21,6 +21,24 @@ export async function register() {
 
     process.on("SIGTERM", () => shutdown("SIGTERM"));
     process.on("SIGINT", () => shutdown("SIGINT"));
+
+    // Marketplace self-heal: if the database has no publicly visible store yet
+    // (e.g. a fresh or legacy-empty production DB), seed the demo vendor + store
+    // + products so the live discovery pages never render an empty catalog. This
+    // is additive/idempotent and never touches existing records. Runs on EVERY
+    // server start, so an empty marketplace repairs itself after any redeploy or
+    // restart — independent of the build-time db:seed step.
+    try {
+      const { ensureDemoMarketplaceIfEmpty } = await import("@/lib/db/marketplace-bootstrap");
+      const result = await ensureDemoMarketplaceIfEmpty(db);
+      if (result.seeded) {
+        logger.info("Marketplace bootstrap: seeded demo marketplace (database had no public stores).");
+      }
+    } catch (bootstrapErr) {
+      logger.warn("Marketplace bootstrap skipped (non-fatal)", {
+        error: bootstrapErr instanceof Error ? bootstrapErr.message : String(bootstrapErr),
+      });
+    }
   }
 }
 
