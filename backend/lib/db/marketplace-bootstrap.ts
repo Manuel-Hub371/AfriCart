@@ -127,10 +127,19 @@ export async function ensureDemoMarketplace(prisma: PrismaClient): Promise<Marke
         price: p.price,
         stock: p.stock,
         isFeatured: true,
+        categoryName: "Electronics & Gadget",
         status: "ACTIVE",
       },
     });
   }
+
+  // Repair pass: ensure every product on the demo store carries the canonical
+  // category name so the live category filter (GET /api/products?category=...)
+  // matches them even if they were created before this field was set.
+  await prisma.product.updateMany({
+    where: { storeId: store.id, categoryName: null },
+    data: { categoryName: "Electronics & Gadget" },
+  });
 
   return { seeded: true };
 }
