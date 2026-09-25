@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <linearGradient id="africart" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#10b981"/>
+      <stop offset="1" stop-color="#2dd4bf"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#africart)"/>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="none" stroke="rgba(255,255,255,0.28)" stroke-width="1.5"/>
+  <!-- Marketplace "A": the AfriCart brand glyph -->
+  <path d="M32 14 L17 50 L24 50 L27.5 41 L36.5 41 L40 50 L47 50 Z" fill="#ffffff"/>
+  <rect x="28" y="35" width="8" height="6" fill="#ffffff"/>
+  <!-- Cart hint: wheel + tray under the crossbar -->
+  <circle cx="18" cy="55" r="2.4" fill="#ffffff"/>
+  <circle cx="46" cy="55" r="2.4" fill="#ffffff"/>
+  <path d="M22 49 L42 49 L40 55 L24 55 Z" fill="rgba(255,255,255,0.75)"/>
+</svg>

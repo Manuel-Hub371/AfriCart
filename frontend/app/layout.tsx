@@ -6,6 +6,10 @@ import { BottomNav } from "@/components/navigation/bottom-nav";
 export const metadata: Metadata = {
   title: "AfriCart - Discover Everything You Need",
   description: "Shop from trusted sellers, explore thousands of products, and enjoy a seamless shopping experience.",
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
