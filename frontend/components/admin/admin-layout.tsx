@@ -11,7 +11,7 @@ interface AdminLayoutProps {
 
 export function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <ProtectedRoute allowedRoles={["admin"]} redirectTo="/admin/login">
       <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans antialiased">
         {/* Admin Sidebar */}
         <AdminSidebar />

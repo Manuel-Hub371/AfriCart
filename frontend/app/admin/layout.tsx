@@ -1,4 +1,4 @@
-import { AdminLayout } from "@/components/admin/admin-layout";
+import { AdminShell } from "@/components/admin/admin-shell";
 
 export const metadata = {
   title: "Admin Dashboard | AfriCart",
@@ -6,5 +6,5 @@ export const metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return <AdminLayout>{children}</AdminLayout>;
+  return <AdminShell>{children}</AdminShell>;
 }
