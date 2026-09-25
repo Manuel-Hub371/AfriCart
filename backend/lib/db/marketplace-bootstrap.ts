@@ -145,6 +145,21 @@ export async function ensureDemoMarketplace(prisma: PrismaClient): Promise<Marke
 }
 
 /**
+ * Repair the demo store's products without creating anything new. Runs on
+ * EVERY server start even when the marketplace is already populated, so a
+ * category-name gap introduced in an older seed heals on the next deploy.
+ */
+export async function repairDemoMarketplace(prisma: PrismaClient): Promise<void> {
+  const storeSlug = process.env.DEMO_STORE_SLUG || "africart-demo-store";
+  const store = await prisma.store.findUnique({ where: { slug: storeSlug } });
+  if (!store) return;
+  await prisma.product.updateMany({
+    where: { storeId: store.id, categoryName: null },
+    data: { categoryName: "Electronics & Gadget" },
+  });
+}
+
+/**
  * Seed the demo marketplace only when the database has no publicly visible
  * store yet (deleted = false + ACTIVE + isPublic). Legacy PENDING_APPROVAL /
  * suspended stores do NOT count as "marketplace populated".
@@ -156,6 +171,9 @@ export async function ensureDemoMarketplaceIfEmpty(
     where: { deletedAt: null, status: "ACTIVE", isPublic: true },
   });
   if (publicStoreCount > 0) {
+    // Marketplace exists — still repair the demo store's products so a category
+    // gap from an older seed does not hide the catalog behind category filters.
+    await repairDemoMarketplace(prisma);
     return { seeded: false, reason: "marketplace_already_populated" };
   }
   return ensureDemoMarketplace(prisma);
