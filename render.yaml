@@ -74,6 +74,13 @@ services:
         value: lax
       - key: LOG_LEVEL
         value: info
+      # Seed the demo marketplace (vendor + ACTIVE/public store + ACTIVE products)
+      # so the live discovery pages render real data. The seed is additive and
+      # idempotent: it only creates records that do not exist yet, never touches
+      # existing users/stores/products, and never writes to Cloudinary. Real
+      # vendors can be onboarded later and appear alongside the demo store.
+      - key: SEED_DEMO_DATA
+        value: "true"
       # Credentials below are set in the Render dashboard (sync: false prevents this
       # file from overriding them / forcing values into the diff).
       - key: CLOUDINARY_CLOUD_NAME
